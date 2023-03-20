@@ -107,6 +107,8 @@ module.exports = {
 **/*.sh
 
 /public/*
+/src/fonts/*
+/src/styles/*
 ```
 
 关于命名规范和技术使用规范，请参考[Here](https://zhuanlan.zhihu.com/p/92784968)。
