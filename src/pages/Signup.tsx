@@ -3,12 +3,23 @@ import { NavLink } from 'react-router-dom'
 import '../styles/style.min.css'
 import '../styles/material-design-iconic-font.min.css'
 
-function Login() {
+// 校验两次输入的密码是否相同
+function passVerification(password1: string, password2: string): boolean {
+    return password1 === password2
+}
+
+function Signup() {
     const [user, setUser] = useState<string>('')
     const [password, setPassword] = useState<string>('')
+    const [cpassword, setCPassword] = useState<string>('') // 再次输入密码
 
     // TODO 关于网络通信部分
-    // TODO 关于密码加密即身份验证部分
+    
+    // TODO 关于向后端发送注册请求部分
+    const handleSubmit = (e: any) => {
+        e.preventDefault()
+        // TODO
+    }
 
     return (
         <div id="layout" className="theme-cyan">
@@ -18,9 +29,9 @@ function Login() {
                         <div className="col-12 col-md-7 col-lg-5 col-xl-4 py-md-11">
                             <div className="card border-0 shadow-sm">
                                 <div className="card-body">
-                                    <h3 className="text-center">登录</h3>
-                                    <p className="text-center mb-6">欢迎来到dMail</p>
-                                    <form className="mb-4 mt-5">
+                                    <h3 className="text-center">注册</h3>
+                                    <p className="text-center mb-6">欢迎使用dMail</p>
+                                    <form className="mb-4 mt-5" onSubmit={handleSubmit}>
                                         <div className="input-group mb-2">
                                             <input
                                                 type="text"
@@ -32,7 +43,13 @@ function Login() {
                                                 }}
                                             />
                                         </div>
-                                        <div className="input-group mb-4">
+                                        <div className="input-group mb-2">
+                                            <input
+                                                type="email"
+                                                className="form-control form-control-lg"
+                                                placeholder="请输入邮箱" />
+                                        </div>
+                                        <div className="input-group mb-2">
                                             <input
                                                 type="password"
                                                 className="form-control form-control-lg"
@@ -43,29 +60,27 @@ function Login() {
                                                 }}
                                             />
                                         </div>
-                                        <div className="form-group d-flex justify-content-between">
-                                            <label className="c_checkbox">
-                                                <input type="checkbox" />
-                                                <span className="ms-2 todo_name">记住我</span>
-                                                <span className="checkmark"></span>
-                                            </label>
-                                            <NavLink to="/password-reset" className="link">
-                                                重置密码
-                                            </NavLink>
+                                        <div className="input-group mb-4">
+                                            <input
+                                                type="password"
+                                                className="form-control form-control-lg"
+                                                placeholder="请再次输入密码"
+                                                value={cpassword}
+                                                onChange={(e) => {
+                                                    setCPassword(e.target.value)
+                                                }}
+                                            />
                                         </div>
                                         <div className="text-center mt-5">
-                                            <NavLink
-                                                to="/"
-                                                className="btn btn-lg btn-primary"
-                                                title="">
-                                                登录
-                                            </NavLink>
+                                            <button className="btn btn-lg btn-primary" title="">
+                                                注册
+                                            </button>
                                         </div>
                                     </form>
                                     <p className="text-center mb-0">
-                                        还没有账户?
-                                        <NavLink to="/signup" className="link">
-                                            注册
+                                        已经拥有账户?
+                                        <NavLink to="/login" className="link">
+                                            登录
                                         </NavLink>
                                     </p>
                                 </div>
@@ -78,4 +93,4 @@ function Login() {
     )
 }
 
-export default Login
+export default Signup
