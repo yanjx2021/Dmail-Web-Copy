@@ -7,7 +7,7 @@ import {
     DataType,
 } from './message'
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket'
-import { filter, Observable, Subject, map } from 'rxjs'
+import { filter, Observable, Subject, map, Subscription, catchError, of } from 'rxjs'
 
 export type Callback = (e: Event) => void
 export type MessageCallback = (msg: DataType<Receive>) => void
@@ -37,13 +37,16 @@ export class Heart {
             }, this.timeout)
         }, this.timeout)
     }
+    
 }
 
 export default class MessageServer extends Heart {
     ws!: WebSocketSubject<MessageBody<Receive | Send>>
     received$ = new Subject<MessageBody<Receive>>()
+    subscriptions: Subscription = new Subscription()
     url: string = ""
-
+    isConnect: boolean = false
+    
     constructor(_url: string) {
         super()
         this.url = _url
@@ -52,14 +55,24 @@ export default class MessageServer extends Heart {
         if (!this.url) {
             throw new Error('地址不存在，无法建立通道')
         }
-        this.ws = webSocket({
-            url: this.url,
-        })
+        if (this.isConnect === false) {
+            this.ws = webSocket({
+                url: this.url,
+            })
+            this.ws.pipe(
+                catchError((error) => {
+                    this.isConnect = false
+                    return of(null)
+                })
+            ).subscribe((data) => {
+                this.received$.next(data as MessageBody<Receive>)
+            })
+            this.isConnect = true
+        }
+    }
+    setHeart(): void {
         super.reset().start(() => {
             this.send<Send.Ping>(Send.Ping)
-        })
-        this.ws.subscribe((data) => {
-            this.received$.next(data as MessageBody<Receive>)
         })
     }
 
@@ -72,12 +85,19 @@ export default class MessageServer extends Heart {
 
     send<T extends Send>(...args: SendArgumentsType<T>) {
         const [command, data]: [T, MessageSendData[T]] | [T] = args
-        
         this.ws.next({
             command,
             data
         })
         console.log({command, data})
     }
+
+    addSubscription(subscription: Subscription): void {
+        this.subscriptions.add(subscription)
+    }
+    unSubscribe(): void {  
+        this.subscriptions.unsubscribe()
+    }
 }
 
+export const ms = new MessageServer("ws://127.0.0.1:8080/ws")

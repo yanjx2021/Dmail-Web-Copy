@@ -51,7 +51,7 @@ export enum Send {
     Ping = 'Ping', // 心跳包
     Pong = 'Pong',
     Close = 'Close',
-    SetConnectSymKey = 'SetConnectSymKey', // 发送密钥
+    SetConnectSymKey = 'SetConnectionSymKey', // 发送密钥
     Register = 'Register', // 发送注册信息
     Login = 'Login', // 发送登录请求
     SendMessage = 'SendMessage',
