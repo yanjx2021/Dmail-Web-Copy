@@ -3,15 +3,28 @@ import { NavLink } from 'react-router-dom'
 import '../styles/style.min.css'
 import '../styles/material-design-iconic-font.min.css'
 
-function Login() {
-    const [user, setUser] = useState<string>('')
-    const [password, setPassword] = useState<string>('')
 
-    // TODO 关于网络通信部分
-    // TODO 关于密码加密即身份验证部分
+interface StateType {
+    user: string,
+    password: string,
 
-    return (
-        <div id="layout" className="theme-cyan">
+}
+
+class Login extends React.Component<any, StateType> {
+
+    constructor(props: any) {
+        super(props)
+        this.state = {
+            user: "",
+            password: "",
+        }
+    }
+
+
+
+    render(): React.ReactNode {
+        return (
+            <div id="layout" className="theme-cyan">
             <div className="authentication">
                 <div className="container d-flex flex-column">
                     <div className="row align-items-center justify-content-center no-gutters min-vh-100">
@@ -26,9 +39,9 @@ function Login() {
                                                 type="text"
                                                 className="form-control form-control-lg"
                                                 placeholder="请输入账号"
-                                                value={user}
+                                                value={this.state.user}
                                                 onChange={(e) => {
-                                                    setUser(e.target.value)
+                                                    this.setState({user: e.target.value})
                                                 }}
                                             />
                                         </div>
@@ -37,9 +50,9 @@ function Login() {
                                                 type="password"
                                                 className="form-control form-control-lg"
                                                 placeholder="请输入密码"
-                                                value={password}
+                                                value={this.state.password}
                                                 onChange={(e) => {
-                                                    setPassword(e.target.value)
+                                                    this.setState({password: e.target.value})
                                                 }}
                                             />
                                         </div>
@@ -75,7 +88,8 @@ function Login() {
                 </div>
             </div>
         </div>
-    )
+        )
+    }
 }
 
 export default Login

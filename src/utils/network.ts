@@ -8,6 +8,8 @@ import {
 } from './message'
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket'
 import { filter, Observable, Subject, map, Subscription, catchError, of } from 'rxjs'
+// import { cryptionRSA } from './cipher'
+
 
 export type Callback = (e: Event) => void
 export type MessageCallback = (msg: DataType<Receive>) => void
@@ -41,7 +43,7 @@ export class Heart {
 }
 
 export default class MessageServer extends Heart {
-    ws!: WebSocketSubject<MessageBody<Receive | Send>>
+    ws!: WebSocketSubject<any>
     received$ = new Subject<MessageBody<Receive>>()
     subscriptions: Subscription = new Subscription()
     url: string = ""
@@ -50,6 +52,7 @@ export default class MessageServer extends Heart {
     constructor(_url: string) {
         super()
         this.url = _url
+        this.connect()
     }
     connect(): void {
         if (!this.url) {
@@ -68,6 +71,8 @@ export default class MessageServer extends Heart {
                 this.received$.next(data as MessageBody<Receive>)
             })
             this.isConnect = true
+        } else {
+            console.log("Has Connected")
         }
     }
     setHeart(): void {
@@ -100,4 +105,4 @@ export default class MessageServer extends Heart {
     }
 }
 
-export const ms = new MessageServer("ws://127.0.0.1:8080/ws")
+export const messageServer = new MessageServer("ws://127.0.0.1:8080/ws")

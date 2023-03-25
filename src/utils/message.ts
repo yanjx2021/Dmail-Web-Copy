@@ -1,6 +1,6 @@
 
 /*--------------------Receive数据类型----------------------*/
-export type ReceiveSetConnectionPubKeyData = string
+export type ReceiveSetConnectionPubKeyResponseData = string
 export interface ReceiveLoginResponseData {
     state: string,
     userId?: number
@@ -23,14 +23,14 @@ export enum Receive {
     Ping = 'Ping',
     Pong = 'Pong',
     Close = 'Close',
-    SetConnectionPubKey = 'SetConnectionPubKey', 
+    SetConnectionPubKeyResponse = 'SetConnectionPubKeyResponse', 
     LoginResponse = 'LoginResponse',
     RegisterResponse = 'RegisterResponse', 
     Messages = 'Messages',
 }
 
 /*--------------------Send数据类型----------------------*/
-export type SendSetConnectSymKeyData = string
+export type SendSetConnectPubKeyData = string
 export interface SendRegisterData {
     userName: string,
     password: string,
@@ -51,7 +51,7 @@ export enum Send {
     Ping = 'Ping', // 心跳包
     Pong = 'Pong',
     Close = 'Close',
-    SetConnectSymKey = 'SetConnectionSymKey', // 发送密钥
+    SetConnectPubKey = 'SetConnectionPubKey', // 发送密钥
     Register = 'Register', // 发送注册信息
     Login = 'Login', // 发送登录请求
     SendMessage = 'SendMessage',
@@ -62,7 +62,7 @@ export interface MessageReceiveData {
     [Receive.Ping]: never,
     [Receive.Pong]: never,
     [Receive.Close]: never,
-    [Receive.SetConnectionPubKey]: ReceiveSetConnectionPubKeyData,
+    [Receive.SetConnectionPubKeyResponse]: ReceiveSetConnectionPubKeyResponseData,
     [Receive.LoginResponse]: ReceiveLoginResponseData,
     [Receive.RegisterResponse]: ReceiveRegisterResponseData,
     [Receive.Messages]: ChatMessage[],
@@ -72,7 +72,7 @@ export interface MessageSendData {
     [Send.Ping]: never,
     [Send.Pong]: never,
     [Send.Close]: never,
-    [Send.SetConnectSymKey]: SendSetConnectSymKeyData,
+    [Send.SetConnectPubKey]: SendSetConnectPubKeyData,
     [Send.Register]: SendRegisterData,
     [Send.Login]: SendLoginData,
     [Send.SendMessage]: SendSendMessageData,

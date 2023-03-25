@@ -3,26 +3,38 @@ import { NavLink } from 'react-router-dom'
 import '../styles/style.min.css'
 import '../styles/material-design-iconic-font.min.css'
 
+interface StateType {
+    user: string,
+    password: string,
+    cpassword: string,
+}
+
+
+
 // 校验两次输入的密码是否相同
 function passVerification(password1: string, password2: string): boolean {
     return password1 === password2
 }
 
-function Signup() {
-    const [user, setUser] = useState<string>('')
-    const [password, setPassword] = useState<string>('')
-    const [cpassword, setCPassword] = useState<string>('') // 再次输入密码
+class Signup extends React.Component<any, StateType> {
+    constructor(props: any) {
+        super(props)
+        this.state = {
+            user: "",
+            password: "",
+            cpassword: "",
+        }
+    }
 
-    // TODO 关于网络通信部分
-    
     // TODO 关于向后端发送注册请求部分
-    const handleSubmit = (e: any) => {
+    handleSubmit = (e: any) => {
         e.preventDefault()
         // TODO
     }
 
-    return (
-        <div id="layout" className="theme-cyan">
+    render() {
+        return (
+            <div id="layout" className="theme-cyan">
             <div className="authentication">
                 <div className="container d-flex flex-column">
                     <div className="row align-items-center justify-content-center no-gutters min-vh-100">
@@ -31,15 +43,15 @@ function Signup() {
                                 <div className="card-body">
                                     <h3 className="text-center">注册</h3>
                                     <p className="text-center mb-6">欢迎使用dMail</p>
-                                    <form className="mb-4 mt-5" onSubmit={handleSubmit}>
+                                    <form className="mb-4 mt-5" onSubmit={this.handleSubmit}>
                                         <div className="input-group mb-2">
                                             <input
                                                 type="text"
                                                 className="form-control form-control-lg"
                                                 placeholder="请输入账号"
-                                                value={user}
+                                                value={this.state.user}
                                                 onChange={(e) => {
-                                                    setUser(e.target.value)
+                                                    this.setState({user: e.target.value})
                                                 }}
                                             />
                                         </div>
@@ -54,9 +66,9 @@ function Signup() {
                                                 type="password"
                                                 className="form-control form-control-lg"
                                                 placeholder="请输入密码"
-                                                value={password}
+                                                value={this.state.password}
                                                 onChange={(e) => {
-                                                    setPassword(e.target.value)
+                                                    this.setState({password: e.target.value})
                                                 }}
                                             />
                                         </div>
@@ -65,9 +77,9 @@ function Signup() {
                                                 type="password"
                                                 className="form-control form-control-lg"
                                                 placeholder="请再次输入密码"
-                                                value={cpassword}
+                                                value={this.state.cpassword}
                                                 onChange={(e) => {
-                                                    setCPassword(e.target.value)
+                                                    this.setState({cpassword: e.target.value})
                                                 }}
                                             />
                                         </div>
@@ -90,7 +102,9 @@ function Signup() {
                 </div>
             </div>
         </div>
-    )
+        )
+    }
 }
+
 
 export default Signup
