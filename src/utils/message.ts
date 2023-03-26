@@ -1,6 +1,7 @@
 
 /*--------------------Receive数据类型----------------------*/
 export type ReceiveSetConnectionPubKeyResponseData = string
+export type ReceiveSetConnectionSymKeyData = string
 export interface ReceiveLoginResponseData {
     state: string,
     userId?: number
@@ -24,9 +25,11 @@ export enum Receive {
     Pong = 'Pong',
     Close = 'Close',
     SetConnectionPubKeyResponse = 'SetConnectionPubKeyResponse', 
+    SetConnectionSymKey = 'SetConnectionSymKey',
     LoginResponse = 'LoginResponse',
     RegisterResponse = 'RegisterResponse', 
     Messages = 'Messages',
+
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -66,6 +69,7 @@ export interface MessageReceiveData {
     [Receive.LoginResponse]: ReceiveLoginResponseData,
     [Receive.RegisterResponse]: ReceiveRegisterResponseData,
     [Receive.Messages]: ChatMessage[],
+    [Receive.SetConnectionSymKey] : ReceiveSetConnectionSymKeyData,
 }
 
 export interface MessageSendData {

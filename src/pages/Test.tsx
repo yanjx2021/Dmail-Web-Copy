@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 // import { cryptionRSA } from '../utils/cipher'
-import { Send, SendLoginData, SendRegisterData } from '../utils/message'
+import { Receive, Send, SendLoginData, SendRegisterData } from '../utils/message'
 import MessageServer, {messageServer} from '../utils/network'
 import Login from './Login'
 import {crypto} from '../utils/cipher'
@@ -25,12 +25,15 @@ class Test extends React.Component<any, StateType> {
         })
         messageServer.ws.next({
             command: Send.SetConnectPubKey,
-            data: crypto.pubKey.slice(31, -30).replace('\n', '')
+            data: crypto.pubKey.slice(31, -30).replace(/[\r\n]/g, '')
+        })
+        messageServer.receive(Receive.SetConnectionSymKey).subscribe((data) => {
+            console.log("解码对称密钥", crypto.decryptRSA(data))
         })
         console.log(
             {
                 command: Send.SetConnectPubKey,
-                data: crypto.pubKey.slice(31, -30).replace('\n', '')
+                data: crypto.pubKey.slice(31, -30).replace(/[\r\n]/g, '')
             }
         )
         messageServer.addSubscription(sub)
