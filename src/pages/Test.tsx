@@ -3,9 +3,16 @@ import React, { useEffect, useState } from 'react'
 import { Receive, Send, SendLoginData, SendRegisterData } from '../utils/message'
 import MessageServer, {messageServer} from '../utils/network'
 import Login from './Login'
-import {crypto} from '../utils/cipher'
+import {myCrypto} from '../utils/cipher'
 
 // 此文件仅用于测试路由切换是否成功
+
+function testAES(data: any) {
+    const e = myCrypto.encryptAES(data)
+    console.log(e)
+    const n = myCrypto.decryptAES(e)
+    console.log(n)
+}
 
 
 interface StateType {
@@ -20,23 +27,19 @@ class Test extends React.Component<any, StateType> {
             login: { userId: 0, password: '' },
             register: { userName: '', password: '', email: '' },
         }
-        const sub = messageServer.received$.subscribe((data) => {
-            console.log(data)
-        })
+        testAES({command: "SetKey", data: "hahaha"})
+        testAES("this is a string")
         messageServer.ws.next({
             command: Send.SetConnectPubKey,
-            data: crypto.pubKey.slice(31, -30).replace(/[\r\n]/g, '')
+            data: myCrypto.pubKey.slice(31, -30).replace(/[\r\n]/g, '')
         })
-        messageServer.receive(Receive.SetConnectionSymKey).subscribe((data) => {
-            console.log("解码对称密钥", crypto.decryptRSA(data))
-        })
+        
         console.log(
             {
                 command: Send.SetConnectPubKey,
-                data: crypto.pubKey.slice(31, -30).replace(/[\r\n]/g, '')
+                data: myCrypto.pubKey.slice(31, -30).replace(/[\r\n]/g, '')
             }
         )
-        messageServer.addSubscription(sub)
     }
     componentWillUnmount(): void {
         messageServer.unSubscribe()
