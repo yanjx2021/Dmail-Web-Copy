@@ -5,17 +5,16 @@ import '../styles/material-design-iconic-font.min.css'
 
 
 interface StateType {
-    user: string,
+    email: string,
     password: string,
 
 }
 
 class Login extends React.Component<any, StateType> {
-
     constructor(props: any) {
         super(props)
         this.state = {
-            user: "",
+            email: "",
             password: "",
         }
     }
@@ -38,10 +37,10 @@ class Login extends React.Component<any, StateType> {
                                             <input
                                                 type="text"
                                                 className="form-control form-control-lg"
-                                                placeholder="请输入账号"
-                                                value={this.state.user}
+                                                placeholder="请输入邮箱"
+                                                value={this.state.email}
                                                 onChange={(e) => {
-                                                    this.setState({user: e.target.value})
+                                                    this.setState({email: e.target.value})
                                                 }}
                                             />
                                         </div>
