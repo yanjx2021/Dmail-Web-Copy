@@ -1,50 +1,42 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 // import { cryptionRSA } from '../utils/cipher'
 import { Receive, Send, SendLoginData, SendRegisterData } from '../utils/message'
-import MessageServer, { messageServer } from '../utils/network'
-import Login from './Login'
+import { messageServer } from '../utils/network'
 import { myCrypto } from '../utils/cipher'
-import { Buffer } from 'buffer'
-import { createSemanticDiagnosticsBuilderProgram } from 'typescript'
 
 // 此文件仅用于测试路由切换是否成功
 
 function testAES(data: any) {
     console.log('-----------------')
-    const m = myCrypto.encryptRSA(data)
+    const m = myCrypto.encryptAES(data)
     console.log(m)
-    console.log(myCrypto.decryptRSA(m))
+    console.log(myCrypto.decryptAES(m))
     console.log('-----------------')
 }
 
 interface StateType {
     login: SendLoginData
     register: SendRegisterData
-    other: any
+    other: {
+        command: string,
+        data: string,
+        aes_password?: string | never
+    }
 }
 
 class Test extends React.Component<any, StateType> {
     constructor(props: any) {
+        console.log(props)
         super(props)
         this.state = {
             login: { email: '', password: '' },
             register: { userName: '', password: '', email: '' },
             other: { command: '', data: '', aes_password: '' },
         }
-        // testAES({ command: 'SetKey', data: 'hahaha' })
-        testAES('this is a string')
-        // messageServer.ws.next({
-        //     command: Send.SetConnectPubKey,
-        //     data: myCrypto.pubKey.slice(31, -30).replace(/[\r\n]/g, '')
-        // })
-        // messageServer.send<Send.SetConnectionPubKey>(Send.SetConnectionPubKey, messageServer.cipher.sendKey)
-        messageServer.addSubscription(messageServer.ws.subscribe((data) => {
-            console.log('receive data')
+        messageServer.on(Receive.LoginResponse, (data: any) => {
             console.log(data)
-        }))
-    }
-    componentWillUnmount(): void {
-        messageServer.unSubscribe()
+        })
+        messageServer.off(Receive.LoginResponse)
     }
     render(): React.ReactNode {
         return (
@@ -135,24 +127,16 @@ class Test extends React.Component<any, StateType> {
                         }}></input>
                     <button
                         onClick={() => {
-                            if (this.state.other.aes_password != "") {
-                                let content = {
-                                    command: this.state.other.command,
-                                    data: this.state.other.data,
-                                };
-                                messageServer.cipher.secretKey = Buffer.from(this.state.other.aes_password, 'ascii').toString('base64')
-                                let packAge = messageServer.cipher.encryptAES(content);
-                                messageServer.ws.next(packAge)
-                            } else {
-                                let data = messageServer.cipher.encryptRSA(this.state.other.data)
-                                messageServer.ws.next({
-                                    command: this.state.other.command,
-                                    data: this.state.other.data,
-                                })
+                            let content = {
+                                command: this.state.other.command,
+                                data: JSON.parse(this.state.other.data),
                             }
-                            
+                            console.log(content)
+                            let packAge = messageServer.cipher.encryptAES(content)
+                            console.log(packAge)
+                            // messageServer.ws.next(packAge)
                         }}>
-                        Send Login
+                        Send All
                     </button>
                 </div>
             </div>

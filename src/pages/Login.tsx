@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, HistoryRouterProps } from 'react-router-dom'
 import '../styles/style.min.css'
 import '../styles/material-design-iconic-font.min.css'
-
+import { messageServer } from '../utils/network'
+import { Receive, ReceiveLoginResponseData, Send } from '../utils/message'
 
 interface StateType {
     email: string,
@@ -11,6 +12,7 @@ interface StateType {
 }
 
 class Login extends React.Component<any, StateType> {
+    loginResponse?: ReceiveLoginResponseData
     constructor(props: any) {
         super(props)
         this.state = {
@@ -18,9 +20,6 @@ class Login extends React.Component<any, StateType> {
             password: "",
         }
     }
-
-
-
     render(): React.ReactNode {
         return (
             <div id="layout" className="theme-cyan">
@@ -32,7 +31,7 @@ class Login extends React.Component<any, StateType> {
                                 <div className="card-body">
                                     <h3 className="text-center">登录</h3>
                                     <p className="text-center mb-6">欢迎来到dMail</p>
-                                    <form className="mb-4 mt-5">
+                                    <div className="mb-4 mt-5">
                                         <div className="input-group mb-2">
                                             <input
                                                 type="text"
@@ -66,14 +65,18 @@ class Login extends React.Component<any, StateType> {
                                             </NavLink>
                                         </div>
                                         <div className="text-center mt-5">
-                                            <NavLink
-                                                to="/"
+                                            <button
                                                 className="btn btn-lg btn-primary"
-                                                title="">
+                                                onClick={() => {
+                                                    messageServer.send<Send.Login>(Send.Login, {
+                                                        email: this.state.email,
+                                                        password: this.state.password,
+                                                    })
+                                                }}>
                                                 登录
-                                            </NavLink>
+                                            </button>
                                         </div>
-                                    </form>
+                                    </div>
                                     <p className="text-center mb-0">
                                         还没有账户?
                                         <NavLink to="/signup" className="link">

@@ -1,6 +1,7 @@
 import JSEncrypt from 'jsencrypt'
 import { Buffer } from 'buffer'
 import crypto from 'crypto'
+import { buffer } from 'stream/consumers'
 const keypair = require('keypair')
 
 export default class Crypto {
@@ -9,7 +10,7 @@ export default class Crypto {
     priKey: any
     sendKey: any
     hasAES = false
-    secretKey: any = '37MmOADe+OYXuMSy'
+    secretKey: Uint8Array = new Buffer([])
     iv = Buffer.from('dMailBackend')
     constructor() {
         this.key = keypair(1024)
@@ -29,9 +30,14 @@ export default class Crypto {
         return decrypt.decrypt(data)
     }
     setSerectKey(key: any) {
-        this.secretKey = Buffer.from(this.decryptRSA(key), 'utf-8')
-        
+        let array = []
+        let buffer = Buffer.from(this.decryptRSA(key), 'base64')
+        for (let i = 0; i < buffer.length; i++) {
+            array[i] = buffer[i]
+        }
+        this.secretKey = Buffer.from(this.decryptRSA(key), 'base64')
         this.hasAES = true
+        console.log("成功设置AES密钥")
     }
     encryptAES(word: any) {
         if (typeof word !== 'string') {

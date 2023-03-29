@@ -7,6 +7,11 @@ import Signup from './Signup'
 
 // 该组件用于切换路由，当然现在只是naive的测试版本
 class App extends React.Component {
+    constructor(props: any) {
+        super(props)
+        console.log(props)
+    }
+    
     render() {
         return (
             <main>
