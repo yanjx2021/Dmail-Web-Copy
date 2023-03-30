@@ -29,7 +29,7 @@ export default class Crypto {
         return decrypt.decrypt(data)
     }
     setSerectKey(key: any) {
-        let array = []
+        let array: any = []
         let buffer = Buffer.from(this.decryptRSA(key), 'base64')
         for (let i = 0; i < buffer.length; i++) {
             array[i] = buffer[i]
