@@ -148,10 +148,12 @@ export interface SendRegisterData {
     userName: string,
     password: string,
     email: string,
+    emailCode: number,
 }
 export interface SendLoginData {
     email: string,
-    password: string,
+    password?: string,
+    emailCode?: number,
 }
 export interface SendSendMessageData {
     clientId: number,

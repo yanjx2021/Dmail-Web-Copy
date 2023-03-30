@@ -1,8 +1,9 @@
 import React from 'react'
 // import { cryptionRSA } from '../utils/cipher'
 import { Receive, Send, SendLoginData, SendRegisterData } from '../utils/message'
-import { messageServer } from '../utils/network'
+import { messageServer } from '../utils/networkWs'
 import { myCrypto } from '../utils/cipher'
+import axios from 'axios'
 
 // 此文件仅用于测试路由切换是否成功
 
@@ -30,13 +31,13 @@ class Test extends React.Component<any, StateType> {
         super(props)
         this.state = {
             login: { email: '', password: '' },
-            register: { userName: '', password: '', email: '' },
+            register: { userName: '', password: '', email: '', emailCode: 0 },
             other: { command: '', data: '', aes_password: '' },
         }
+        
         messageServer.on(Receive.LoginResponse, (data: any) => {
             console.log(data)
         })
-        messageServer.off(Receive.LoginResponse)
     }
     render(): React.ReactNode {
         return (
@@ -60,6 +61,7 @@ class Test extends React.Component<any, StateType> {
                         }}></input>
                     <button
                         onClick={() => {
+                            axios.post("/api/email/code", {email : "1005637045@qq.com"})
                             messageServer.send<Send.Login>(Send.Login, {
                                 email: this.state.login.email,
                                 password: this.state.login.password,

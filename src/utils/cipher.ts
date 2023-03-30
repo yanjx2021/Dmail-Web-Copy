@@ -1,7 +1,6 @@
 import JSEncrypt from 'jsencrypt'
 import { Buffer } from 'buffer'
 import crypto from 'crypto'
-import { buffer } from 'stream/consumers'
 const keypair = require('keypair')
 
 export default class Crypto {
