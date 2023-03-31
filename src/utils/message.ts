@@ -159,6 +159,7 @@ export interface SendSendMessageData {
     clientId: number,
     chatId: number,
     text: string,
+    timestamp: number,
 }
 /*--------------------Send数据类型----------------------*/
 

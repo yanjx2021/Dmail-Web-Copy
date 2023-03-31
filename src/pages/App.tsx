@@ -20,6 +20,7 @@ class App extends React.Component {
                 <Route path="/login" element={<Login />} />
                 <Route path="/password-reset" element={<Home />} /> {/*TODO 重置密码界面 */}
                 <Route path="/signup" element={<Signup />} /> {/*TODO 注册界面 */}
+                <Route path='*' element={<Navigate to={'/login'} />} />
             </Routes>
         </main>
         )

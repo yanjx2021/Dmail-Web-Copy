@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import '../styles/style.min.css'
-import '../styles/material-design-iconic-font.min.css'
 import { messageServer } from '../utils/networkWs'
 import { Receive, ReceiveLoginResponseData, Send } from '../utils/message'
 import withRouter from '../components/WithRouter'
@@ -170,7 +168,7 @@ class Login extends React.Component<any, StateType> {
                                                         </span>
                                                         <span className="checkmark"></span>
                                                     </label>
-                                                    <NavLink to="/" className="link">
+                                                    <NavLink to="/test" className="link">
                                                         重置密码
                                                     </NavLink>
                                                 </div>

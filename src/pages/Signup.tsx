@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import '../styles/style.min.css'
-import '../styles/material-design-iconic-font.min.css'
 import axios from 'axios'
 import { messageServer } from '../utils/networkWs'
 import { Receive, Send } from '../utils/message'
