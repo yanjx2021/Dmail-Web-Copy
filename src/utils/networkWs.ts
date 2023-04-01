@@ -14,6 +14,7 @@ type SendArgumentsType<T extends keyof MessageSendData> = MessageSendData[T] ext
     ? ArgumentsType<(command: T) => void>
     : ArgumentsType<(command: T, data: MessageSendData[T]) => void>
 
+
 export interface Distributer {
     [Receive.Ping]: Function
     [Receive.Pong]: Function
@@ -66,7 +67,11 @@ export class MessageServer extends Heart {
             if (this.cipher.hasAES) {
                 console.log('Receive', this.cipher.decryptAES(event.data))
                 const data = JSON.parse(this.cipher.decryptAES(event.data))
-                this.events[data.command as Receive](data.data)
+                try {
+                    this.events[data.command as Receive](data.data)
+                } catch(error) {
+                    console.log(error)
+                }
             } else {
                 const data = JSON.parse(event.data)
                 this.cipher.setSerectKey(data.data)

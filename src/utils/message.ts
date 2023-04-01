@@ -93,7 +93,7 @@ export interface ChatMessage {
     senderId: number,
     inChatId: number,
     text: string,
-    timeStamp: number
+    timestamp: number
 }
 
 export enum UserRequestState {
