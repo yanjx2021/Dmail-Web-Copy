@@ -1,6 +1,7 @@
 import JSEncrypt from 'jsencrypt'
 import { Buffer } from 'buffer'
 import crypto from 'crypto'
+import { SHA256 } from 'crypto-js'
 const keypair = require('keypair')
 
 export default class Crypto {
@@ -9,7 +10,7 @@ export default class Crypto {
     priKey: any
     sendKey: any
     hasAES = false
-    secretKey: Uint8Array = new Buffer([])
+    secretKey: Uint8Array = Buffer.from('')
     iv = Buffer.from('dMailBackend')
     constructor() {
         this.key = keypair(1024)

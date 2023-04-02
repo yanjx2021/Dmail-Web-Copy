@@ -13,7 +13,7 @@ const MessageContent = (props: {messages: Message[]}) => {
             <div className="container-xxl">
                 <ul className="list-unstyled py-4">
                     {messages.map((message) => (
-                        <MessageItem {...message} key={message.inChatId}/>
+                        <MessageItem {...message} key={message.timestamp}/>
                     ))}
                 </ul>
             </div>

@@ -1,9 +1,13 @@
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { messageServer } from '../utils/networkWs'
-import { Receive, ReceiveLoginResponseData, Send } from '../utils/message'
+import { LoginResponseState, Receive, ReceiveLoginResponseData, Send } from '../utils/message'
 import withRouter from '../components/WithRouter'
 import axios from 'axios'
+import { SHA256 } from 'crypto-js'
+import { passwordTester } from '../constants/passwordFormat'
+import { emailTest } from '../constants/passwordFormat'
+
 
 interface StateType {
     email: string
@@ -12,9 +16,10 @@ interface StateType {
     disabled: boolean
     emailCode: string
     cooldown: number
+    showEmailTip: boolean
 }
 
-let hasLogged = false
+export let hasLogged = false
 
 class Login extends React.Component<any, StateType> {
     loginResponse?: ReceiveLoginResponseData
@@ -27,17 +32,73 @@ class Login extends React.Component<any, StateType> {
             type: false,
             disabled: false,
             emailCode: '',
-            cooldown: 60
+            cooldown: 60,
+            showEmailTip: false,
         }
         messageServer.on(Receive.LoginResponse, (data: any) => {
-            if (data.state !== 'Success') {
-                alert('登陆失败')
-                props.navigate('/login')
+            if (data.state !== LoginResponseState.Success) {
+                switch (data.state) {
+                    case LoginResponseState.PasswordError:
+                        alert('密码错误，请重新输入')
+                        this.setState({ ...this.state, password: '' })
+                        break
+                    case LoginResponseState.UserNotFound:
+                        alert('用户不存在')
+                        this.setState({ ...this.state, email: '', password: '' })
+                        break
+                    case LoginResponseState.UserLogged:
+                        alert('该用户已在其他地方登录')
+                        this.setState({
+                            email: '',
+                            password: '',
+                            type: false,
+                            disabled: false,
+                            emailCode: '',
+                            cooldown: 60,
+                        })
+                        break
+                    default:
+                        alert('请重新登录')
+                }
             } else {
                 hasLogged = true
                 props.navigate('/home')
             }
         })
+    }
+
+    componentDidMount(): void {
+        document.addEventListener('keydown', this.onKeyDown)
+    }
+    componentWillUnmount(): void {
+        document.removeEventListener('keydown', this.onKeyDown)
+    }
+    onKeyDown = (e: any) => {
+        if (e.key === 'Enter') {
+            if (this.state.type) {
+                this.handleEmailLogin()
+            } else {
+                this.handlePasswordLogin()
+            }
+        }
+    }
+
+    handleEmailLogin = () => {
+        messageServer.send<Send.Login>(Send.Login, {
+            email: this.state.email,
+            emailCode: parseInt(this.state.emailCode),
+        })
+    }
+    handlePasswordLogin = () => {
+        if (!passwordTester.test(this.state.password)) {
+            alert('密码格式错误: 请输入长度为8-20, 包含数字和字母的密码')
+            this.setState({...this.state, password: ''})
+        } else {
+            messageServer.send<Send.Login>(Send.Login, {
+                email: this.state.email,
+                password: SHA256(this.state.password).toString()
+            })
+        }
     }
     render(): React.ReactNode {
         return (
@@ -54,7 +115,11 @@ class Login extends React.Component<any, StateType> {
                                             <a
                                                 className="link"
                                                 onClick={() => {
-                                                    this.setState({ type: !this.state.type, password: '', emailCode: '' })
+                                                    this.setState({
+                                                        type: !this.state.type,
+                                                        password: '',
+                                                        emailCode: '',
+                                                    })
                                                 }}>
                                                 {' '}
                                                 {this.state.type ? '密码登录?' : '验证码登录?'}
@@ -64,15 +129,18 @@ class Login extends React.Component<any, StateType> {
                                             <div className="mb-4 mt-5">
                                                 <div className="input-group mb-2">
                                                     <input
-                                                        type="text"
+                                                        type="email"
                                                         className="form-control form-control-lg"
                                                         placeholder="请输入邮箱"
                                                         value={this.state.email}
+                                                        onBlur={() => this.setState({...this.state, showEmailTip: true})}
+                                                        onFocus={() => this.setState({...this.state, showEmailTip: false})}
                                                         onChange={(e) => {
                                                             this.setState({ email: e.target.value })
                                                         }}
                                                     />
                                                 </div>
+                                                {this.state.showEmailTip ? emailTest(this.state.email) : <div></div>}
                                                 <div className="input-group mb-4">
                                                     <input
                                                         type="text"
@@ -92,17 +160,26 @@ class Login extends React.Component<any, StateType> {
                                                             axios.post('/api/email/code', {
                                                                 email: this.state.email,
                                                             })
-                                                            this.setState({disabled: !this.state.disabled})
+                                                            this.setState({
+                                                                disabled: !this.state.disabled,
+                                                            })
                                                             const timer = setInterval(() => {
-                                                                this.setState({cooldown: this.state.cooldown - 1})
+                                                                this.setState({
+                                                                    cooldown:
+                                                                        this.state.cooldown - 1,
+                                                                })
                                                             }, 1000)
                                                             setTimeout(() => {
-                                                                this.setState({disabled: !this.state.disabled})
+                                                                this.setState({
+                                                                    disabled: !this.state.disabled,
+                                                                })
                                                                 clearInterval(timer)
-                                                                this.setState({cooldown: 60})
+                                                                this.setState({ cooldown: 60 })
                                                             }, 60000)
                                                         }}>
-                                                        {this.state.disabled === false ? '发送验证码' : this.state.cooldown + 's'}
+                                                        {this.state.disabled === false
+                                                            ? '发送验证码'
+                                                            : this.state.cooldown + 's'}
                                                     </button>
                                                 </div>
                                                 <div className="form-group d-flex justify-content-between">
@@ -118,18 +195,9 @@ class Login extends React.Component<any, StateType> {
                                                     <button
                                                         className="btn btn-lg btn-primary"
                                                         onClick={() => {
-                                                            if (hasLogged) {
-                                                                this.props.navigate('/home')
-                                                            } else {
-                                                                messageServer.send<Send.Login>(
-                                                                    Send.Login,
-                                                                    {
-                                                                        email: this.state.email,
-                                                                        emailCode: parseInt(this.state.emailCode),
-                                                                    }
-                                                                )
-                                                            }
-                                                        }}>
+                                                            this.handleEmailLogin()
+                                                        }}
+                                                        onKeyDown={this.onKeyDown}>
                                                         登录
                                                     </button>
                                                 </div>
@@ -138,15 +206,18 @@ class Login extends React.Component<any, StateType> {
                                             <div className="mb-4 mt-5">
                                                 <div className="input-group mb-2">
                                                     <input
-                                                        type="text"
+                                                        type="email"
                                                         className="form-control form-control-lg"
                                                         placeholder="请输入邮箱"
                                                         value={this.state.email}
+                                                        onBlur={() => this.setState({...this.state, showEmailTip: true})}
+                                                        onFocus={() => this.setState({...this.state, showEmailTip: false})}
                                                         onChange={(e) => {
                                                             this.setState({ email: e.target.value })
                                                         }}
                                                     />
                                                 </div>
+                                                {this.state.showEmailTip ? emailTest(this.state.email) : <div></div>}
                                                 <div className="input-group mb-4">
                                                     <input
                                                         type="password"
@@ -176,18 +247,9 @@ class Login extends React.Component<any, StateType> {
                                                     <button
                                                         className="btn btn-lg btn-primary"
                                                         onClick={() => {
-                                                            if (hasLogged) {
-                                                                this.props.navigate('/home')
-                                                            } else {
-                                                                messageServer.send<Send.Login>(
-                                                                    Send.Login,
-                                                                    {
-                                                                        email: this.state.email,
-                                                                        password: this.state.password,
-                                                                    }
-                                                                )
-                                                            }
-                                                        }}>
+                                                            this.handlePasswordLogin()
+                                                        }}
+                                                        onKeyDown={this.onKeyDown}>
                                                         登录
                                                     </button>
                                                 </div>

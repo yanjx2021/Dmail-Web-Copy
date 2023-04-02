@@ -1,10 +1,27 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Message, Chat, ChatList } from '../utils/messagePage'
 
 const MessageFooter = (props: {handleSend: Function}) => { // 消息发送在父组件处理
     // 接受ChatId
     const [text, setText] = useState<string>('')
     
+    const handleSend = () => {
+        const timestamp = Date.parse(new Date().toString())
+        props.handleSend(text, timestamp)
+        setText('')
+    }
+    const onKeyDown = (e: any) => {
+        if (e.key === 'Enter') {
+            handleSend()
+        }
+    }
+    useEffect(() => {
+        window.addEventListener('keydown', onKeyDown)
+        return () => {
+            window.removeEventListener('keydown', onKeyDown)
+        }
+    })
+
     return (
         <div className="chat-footer border-top py-xl-4 py-lg-2 py-2">
             <div className="container-xxl">
@@ -62,11 +79,8 @@ const MessageFooter = (props: {handleSend: Function}) => { // 消息发送在父
                                     <button
                                         type="submit"
                                         className="btn btn-primary"
-                                        onClick={() => {
-                                            const timestamp = Date.parse(new Date().toString())
-                                            props.handleSend(text, timestamp)
-                                            setText('')
-                                        }}>
+                                        onKeyDown={onKeyDown}
+                                        onClick={handleSend}>
                                         <span className="d-none d-md-inline-block me-2">发送</span>
                                         <i className="zmdi zmdi-mail-send"></i>
                                     </button>

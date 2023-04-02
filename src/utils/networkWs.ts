@@ -58,7 +58,7 @@ export class Heart {
 }
 
 export class MessageServer extends Heart {
-    socket = new WebSocket('ws://127.0.0.1:8080/ws')
+    socket = new WebSocket('ws://43.143.134.180:8080/ws')
     cipher = new Crypto()
     events: any = {}
     constructor() {
@@ -113,6 +113,10 @@ export class MessageServer extends Heart {
         this.events[command] = () => {
             console.log('handle of ' + command + 'has been off')
         }
+    }
+    resetSocket() {
+        this.socket.close()
+        this.socket = new WebSocket('ws://43.143.134.180:8080/ws')
     }
 }
 
