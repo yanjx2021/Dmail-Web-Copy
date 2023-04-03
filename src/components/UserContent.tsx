@@ -1,0 +1,41 @@
+import { UserList } from '../utils/userListPage'
+import UserItem from './UserItem'
+
+const UserContent = (props: { userList: UserList; handleClick: Function }) => {
+    const users: any = []
+    props.userList.forEach((user, userId) => {
+        users.push(
+            <UserItem
+                user={user}
+                handleClick={props.handleClick}
+                timestamp={Date.parse(new Date().toString())}
+                key={userId}
+            />
+        )
+    })
+
+    return (
+        <div className='sidebar border-end py-xl-4 py-3 px-xl-4 px-3'>
+            <div className='tab-content'>
+                <div className="tab-pane fade show active" id="nav-tab-chat" role="tabpanel">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h3 className="mb-0 text-primary">聊天</h3>
+                    </div>
+                    <div className="form-group input-group-lg search mb-3">
+                        <i className="zmdi zmdi-search"></i>
+                        <i className="zmdi zmdi-dialpad"></i>
+                        <input className="form-control" type="text" placeholder="搜索..."></input>
+                    </div>
+                    <ul className="chat-list">
+                        <li className="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                            <span>最近的对话</span>
+                        </li>
+                        {users}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default UserContent

@@ -16,7 +16,7 @@ const MessageItem = (props: Message) => {
                 </div>
             </div>) : ''}
             <div className="message-body">
-                <span className="date-time text-muted">{(message.senderId ? (message.senderId + ', ') : '') +  new Date(message.timestamp)}</span>
+                <span className="date-time text-muted">{(message.senderId ? (message.senderId + ', ') : '') +  new Date(message.timestamp).toLocaleString()}</span>
                 <div
                     className={
                         'message-row d-flex align-items-center' + (message.isRight

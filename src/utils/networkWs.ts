@@ -77,7 +77,12 @@ export class MessageServer extends Heart {
                 }
             }
             this.instance.onopen = () => {
-                this.send<Send.SetConnectionPubKey>(Send.SetConnectionPubKey, this.cipher.sendKey)
+                this.instance?.send(
+                    JSON.stringify({
+                        command: Send.SetConnectionPubKey,
+                        data: this.cipher.sendKey,
+                    })
+                )
             }
             this.instance.onerror = (ev) => {
                 this.cipher = new Crypto()
@@ -91,38 +96,22 @@ export class MessageServer extends Heart {
         return this
     }
     send<T extends Send>(...args: SendArgumentsType<T>) {
-        if (this.instance?.readyState !== this.instance?.OPEN) {
+        if (this.instance?.readyState !== this.instance?.OPEN || !this.cipher.hasAES) {
             setTimeout(() => {
                 this.send<T>(...args)
-            }, 100)
+            }, 50)
         } else {
             const [command, data]: [T, MessageSendData[T]] | [T] = args
-            if (this.cipher.hasAES) {
-                console.log('Send', {
+            console.log('Send', {
+                command,
+                data,
+            })
+            this.instance?.send(
+                this.cipher.encryptAES({
                     command,
                     data,
                 })
-                this.instance?.send(
-                    this.cipher.encryptAES({
-                        command,
-                        data,
-                    })
-                )
-            } else {
-                console.log(
-                    'Send',
-                    JSON.stringify({
-                        command,
-                        data,
-                    })
-                )
-                this.instance?.send(
-                    JSON.stringify({
-                        command,
-                        data,
-                    })
-                )
-            }
+            )
         }
     }
     on(command: Receive, callback: Function) {

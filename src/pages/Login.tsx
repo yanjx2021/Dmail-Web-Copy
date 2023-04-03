@@ -8,7 +8,6 @@ import { SHA256 } from 'crypto-js'
 import { passwordTester } from '../constants/passwordFormat'
 import { emailTest } from '../constants/passwordFormat'
 
-
 interface StateType {
     email: string
     password: string
@@ -90,13 +89,15 @@ class Login extends React.Component<any, StateType> {
         })
     }
     handlePasswordLogin = () => {
-        if (!passwordTester.test(this.state.password)) {
+        if (this.state.password === '') {
+            alert('密码不能为空')
+        } else if (!passwordTester.test(this.state.password)) {
             alert('密码格式错误: 请输入长度为8-20, 包含数字和字母的密码')
-            this.setState({...this.state, password: ''})
+            this.setState({ ...this.state, password: '' })
         } else {
             messageServer.getInstance().send<Send.Login>(Send.Login, {
                 email: this.state.email,
-                password: SHA256(this.state.password).toString()
+                password: SHA256(this.state.password).toString(),
             })
         }
     }
@@ -133,14 +134,28 @@ class Login extends React.Component<any, StateType> {
                                                         className="form-control form-control-lg"
                                                         placeholder="请输入邮箱"
                                                         value={this.state.email}
-                                                        onBlur={() => this.setState({...this.state, showEmailTip: true})}
-                                                        onFocus={() => this.setState({...this.state, showEmailTip: false})}
+                                                        onBlur={() =>
+                                                            this.setState({
+                                                                ...this.state,
+                                                                showEmailTip: true,
+                                                            })
+                                                        }
+                                                        onFocus={() =>
+                                                            this.setState({
+                                                                ...this.state,
+                                                                showEmailTip: false,
+                                                            })
+                                                        }
                                                         onChange={(e) => {
                                                             this.setState({ email: e.target.value })
                                                         }}
                                                     />
                                                 </div>
-                                                {this.state.showEmailTip ? emailTest(this.state.email) : <div></div>}
+                                                {this.state.showEmailTip ? (
+                                                    emailTest(this.state.email)
+                                                ) : (
+                                                    <div></div>
+                                                )}
                                                 <div className="input-group mb-4">
                                                     <input
                                                         type="text"
@@ -210,14 +225,28 @@ class Login extends React.Component<any, StateType> {
                                                         className="form-control form-control-lg"
                                                         placeholder="请输入邮箱"
                                                         value={this.state.email}
-                                                        onBlur={() => this.setState({...this.state, showEmailTip: true})}
-                                                        onFocus={() => this.setState({...this.state, showEmailTip: false})}
+                                                        onBlur={() =>
+                                                            this.setState({
+                                                                ...this.state,
+                                                                showEmailTip: true,
+                                                            })
+                                                        }
+                                                        onFocus={() =>
+                                                            this.setState({
+                                                                ...this.state,
+                                                                showEmailTip: false,
+                                                            })
+                                                        }
                                                         onChange={(e) => {
                                                             this.setState({ email: e.target.value })
                                                         }}
                                                     />
                                                 </div>
-                                                {this.state.showEmailTip ? emailTest(this.state.email) : <div></div>}
+                                                {this.state.showEmailTip ? (
+                                                    emailTest(this.state.email)
+                                                ) : (
+                                                    <div></div>
+                                                )}
                                                 <div className="input-group mb-4">
                                                     <input
                                                         type="password"

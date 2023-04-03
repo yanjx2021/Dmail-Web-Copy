@@ -6,10 +6,13 @@ import ChatBody from '../components/ChatBody'
 import { Send } from '../utils/message'
 import { hasLogged } from './Login'
 import { useNavigate } from 'react-router-dom'
+import UserContent from '../components/UserContent'
+import { UserInfo, UserList } from '../utils/userListPage'
 
 const Home = () => {
     const [chatList, setChatList] = useState<ChatList>(new Map<number, Chat>())
-    const [onWhichChat, setOnWhichChat] = useState<number>(0) // -1表示主页
+    const [userList, setUserList] = useState<UserList>(new Map<number, UserInfo>())
+    const [onActivateChat, setOnActivateChat] = useState<number>(0) // -1表示主页
     const [firstMount, setFirstMount] = useState<boolean>(true)
     const navigate = useNavigate()
 
@@ -26,13 +29,24 @@ const Home = () => {
             return temp
         })
     }
-
+    const addUser = (userId: number, userName: string) => {
+        if (!userList.has(userId)) {
+            userList.set(userId, {userId: userId, userName: userName})
+        } else {
+            console.log('修改用户信息')
+            userList.set(userId, {userId: userId, userName: userName})
+        }
+    }
     useEffect(() => {
         if (!hasLogged) {
             setTimeout(() => {
                 navigate('/login')
             }, 1000)
         } else if (firstMount === true) {
+            addUser(0, '测试聊天室')
+            messageServer.start(() => {
+                messageServer.getInstance().send<Send.Ping>(Send.Ping)
+            })
             messageServer.on(Receive.PullResponse, (data: any) => {
                 console.log(data)
             })
@@ -66,7 +80,8 @@ const Home = () => {
     }
     return hasLogged ? (
         <div id='layout' className='theme-cyan'>
-            <ChatBody chat={chatList.get(0) as Chat} updateChat={updateChat} />
+            <UserContent userList={userList} handleClick={(e: number) => console.log(e)}/>
+            <ChatBody chat={chatList.get(onActivateChat) as Chat} updateChat={updateChat} />
         </div>
     ) : (
         <div>没有权限访问，请登录</div>
