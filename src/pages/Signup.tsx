@@ -5,7 +5,7 @@ import { messageServer } from '../utils/networkWs'
 import { Receive, Send } from '../utils/message'
 import withRouter from '../components/WithRouter'
 import { SHA256 } from 'crypto-js'
-import { emailTest, strengthTest } from '../constants/passwordFormat'
+import { emailTest, emailTester, strengthTest } from '../constants/passwordFormat'
 
 interface StateType {
     email: string
@@ -100,18 +100,22 @@ class Signup extends React.Component<any, StateType> {
                                             {this.state.showEmailTip ? emailTest(this.state.email) : <div></div>}
                                             <div className="input-group mb-2">
                                                 <input
-                                                    type="text"
+                                                    type="number"
                                                     className="form-control form-control-lg"
                                                     placeholder="请输入验证码"
                                                     value={this.state.emailCode}
                                                     onChange={(e) => {
-                                                        this.setState({ emailCode: e.target.value })
+                                                        const emailCode = e.target.value.replace(/[^\d]/, '')
+                                                        this.setState({ emailCode: emailCode })
                                                     }}
                                                 />
                                                 <button
                                                     className="btn btn-lg btn-primary"
                                                     disabled={this.state.disabled}
                                                     onClick={() => {
+                                                        if (!emailTester.test(this.state.email)) {
+                                                            return
+                                                        }
                                                         axios.post('/api/email/code', {
                                                             email: this.state.email,
                                                         })
@@ -201,7 +205,7 @@ class Signup extends React.Component<any, StateType> {
                                                                 ),
                                                                 userName: this.state.userName,
                                                             }
-                                                            messageServer.send<Send.Register>(
+                                                            messageServer.getInstance().send<Send.Register>(
                                                                 Send.Register,
                                                                 data
                                                             )

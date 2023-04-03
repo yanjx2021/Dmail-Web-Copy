@@ -44,7 +44,7 @@ class Login extends React.Component<any, StateType> {
                         break
                     case LoginResponseState.UserNotFound:
                         alert('用户不存在')
-                        this.setState({ ...this.state, email: '', password: '' })
+                        this.setState({ ...this.state, password: '' })
                         break
                     case LoginResponseState.UserLogged:
                         alert('该用户已在其他地方登录')
@@ -84,7 +84,7 @@ class Login extends React.Component<any, StateType> {
     }
 
     handleEmailLogin = () => {
-        messageServer.send<Send.Login>(Send.Login, {
+        messageServer.getInstance().send<Send.Login>(Send.Login, {
             email: this.state.email,
             emailCode: parseInt(this.state.emailCode),
         })
@@ -94,7 +94,7 @@ class Login extends React.Component<any, StateType> {
             alert('密码格式错误: 请输入长度为8-20, 包含数字和字母的密码')
             this.setState({...this.state, password: ''})
         } else {
-            messageServer.send<Send.Login>(Send.Login, {
+            messageServer.getInstance().send<Send.Login>(Send.Login, {
                 email: this.state.email,
                 password: SHA256(this.state.password).toString()
             })

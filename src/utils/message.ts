@@ -161,6 +161,12 @@ export interface SendSendMessageData {
     text: string,
     timestamp: number,
 }
+
+export interface SendPullData {
+    lastChatId: number,
+    lastMessageId: number,
+    lastRequestId: number
+}
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -171,6 +177,7 @@ export enum Send {
     Register = 'Register', // 发送注册信息
     Login = 'Login', // 发送登录请求
     SendMessage = 'SendMessage',
+    Pull = 'Pull',
 }
 
 // COMMAND和DATA类型捆绑
@@ -204,6 +211,7 @@ export interface MessageSendData {
     [Send.Register]: SendRegisterData,
     [Send.Login]: SendLoginData,
     [Send.SendMessage]: SendSendMessageData,
+    [Send.Pull]: SendPullData,
 }
 
 // 封装消息包

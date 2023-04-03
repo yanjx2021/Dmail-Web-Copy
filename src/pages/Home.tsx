@@ -7,13 +7,10 @@ import { Send } from '../utils/message'
 import { hasLogged } from './Login'
 import { useNavigate } from 'react-router-dom'
 
-
-
-
-
 const Home = () => {
     const [chatList, setChatList] = useState<ChatList>(new Map<number, Chat>())
     const [onWhichChat, setOnWhichChat] = useState<number>(0) // -1表示主页
+    const [firstMount, setFirstMount] = useState<boolean>(true)
     const navigate = useNavigate()
 
     const addMessage = (chatId: number, message: Message) => {
@@ -29,12 +26,22 @@ const Home = () => {
             return temp
         })
     }
-    
+
     useEffect(() => {
         if (!hasLogged) {
             setTimeout(() => {
                 navigate('/login')
             }, 1000)
+        } else if (firstMount === true) {
+            messageServer.on(Receive.PullResponse, (data: any) => {
+                console.log(data)
+            })
+            messageServer.getInstance().send<Send.Pull>(Send.Pull, {
+                lastChatId: 0,
+                lastMessageId: 0,
+                lastRequestId: 0,
+            })
+            setFirstMount(false)
         }
         messageServer.on(Receive.Message, (data: ChatMessage) => {
             //TODO-接受到消息
@@ -47,6 +54,7 @@ const Home = () => {
             })
         })
     })
+
     const updateChat = (chatId: number, text: string, timestamp: number) => {
         addMessage(chatId, {
             isRight: true,
@@ -57,10 +65,8 @@ const Home = () => {
         })
     }
     return hasLogged ? (
-        <div>
-            <div>
-                <ChatBody chat={chatList.get(0) as Chat} updateChat={updateChat} />
-            </div>
+        <div id='layout' className='theme-cyan'>
+            <ChatBody chat={chatList.get(0) as Chat} updateChat={updateChat} />
         </div>
     ) : (
         <div>没有权限访问，请登录</div>
