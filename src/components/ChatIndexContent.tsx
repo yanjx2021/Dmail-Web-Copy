@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChatIndexList } from '../utils/chatListPage'
 import ChatIndexItem from './ChatIndexItem'
 
-const ChatIndexContent = (props: { chatIndexList: ChatIndexList, handleClick: Function }) => {
+const ChatIndexContent = (props: { chatIndexList: ChatIndexList, handleClick: Function,activeId:number}) => {
     const [chats, setChats] = useState()
     useEffect(() => {
         const tempChats: any = []
@@ -12,13 +12,13 @@ const ChatIndexContent = (props: { chatIndexList: ChatIndexList, handleClick: Fu
                     chat={chat}
                     handleClick={props.handleClick}
                     timestamp={Date.parse(new Date().toString())}
+                    active={props.activeId}
                     key={chatId}
                 />
             )
         })
         setChats(tempChats)
-    }, [props.chatIndexList])
-    
+    }, [props.chatIndexList,props.activeId])
 
     return (
         <div className='sidebar border-end py-xl-4 py-3 px-xl-4 px-3'>

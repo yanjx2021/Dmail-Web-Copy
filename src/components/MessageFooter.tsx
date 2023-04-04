@@ -1,19 +1,25 @@
 import { useState, useEffect } from 'react'
 import { Message, Chat, ChatList } from '../utils/messagePage'
 
-const MessageFooter = (props: {handleSend: Function}) => { // 消息发送在父组件处理
+const MessageFooter = (props: { handleSend: Function }) => {
+    // 消息发送在父组件处理
     // 接受ChatId
     const [text, setText] = useState<string>('')
-    
+
     const handleSend = () => {
         const timestamp = Date.parse(new Date().toString())
         props.handleSend(text, timestamp)
         setText('')
     }
     const onKeyDown = (e: any) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !checktext()) {
             handleSend()
         }
+    }
+    const checktext = () => {
+        var reg = /^\s*$/g
+        if (reg.test(text) || text.length > 500) return true
+        return false
     }
     useEffect(() => {
         window.addEventListener('keydown', onKeyDown)
@@ -80,7 +86,9 @@ const MessageFooter = (props: {handleSend: Function}) => { // 消息发送在父
                                         type="submit"
                                         className="btn btn-primary"
                                         onKeyDown={onKeyDown}
-                                        onClick={handleSend}>
+                                        onClick={handleSend}
+                                        //不能发空格串，最大长度500字
+                                        disabled={checktext() ? true : false}>
                                         <span className="d-none d-md-inline-block me-2">发送</span>
                                         <i className="zmdi zmdi-mail-send"></i>
                                     </button>

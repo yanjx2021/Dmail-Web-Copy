@@ -27,10 +27,10 @@ const MessageContent = (props: { messages: Message[] }) => {
                         {messages.map((message) => (
                             <MessageItem {...message} key={message.timestamp} />
                         ))}
+                        <div
+                            style={{ clear: 'both', height: '1px', width: '100%' }}
+                            ref={messagesEnd}></div>
                     </ul>
-                    <div
-                        style={{ clear: 'both', height: '1px', width: '100%' }}
-                        ref={messagesEnd}></div>
                 </div>
             </div>
         </>
