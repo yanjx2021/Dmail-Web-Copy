@@ -2,7 +2,7 @@ import { Message, Chat, ChatList } from '../utils/messagePage'
 
 
 
-const MessageHeader = (props: {chatId: number}) => {
+const MessageHeader = (props: {chatId: number, chatName?: string}) => {
 
 
     return (
@@ -16,12 +16,14 @@ const MessageHeader = (props: {chatId: number}) => {
                                     <div
                                         // 添加颜色  
                                         className={'avatar rounded-circle no-image ' + ''}> 
-                                        <span>TODO-昵称缩写:{props.chatId}</span>
+                                        {/* TODO-昵称缩写 */}
+                                        <span>{props.chatId}</span>
                                     </div>
                                 </div>
                                 <div className="media-body overflow-hidden">
                                     <div className="d-flex align-items-center mb-1">
-                                        <h6 className="text-truncate mb-0 me-auto">TODO-昵称</h6>
+                                        {/* TODO-昵称缩写 */}
+                                        <h6 className="text-truncate mb-0 me-auto">{props.chatName ? props.chatName : '未命名'}</h6>
                                     </div>
                                     <div className="text-truncate">TODO-登录状态</div>
                                 </div>

@@ -9,6 +9,7 @@ export interface Message {
 
 export interface Chat {
     chatId: number,
+    chatName?: string
     messages: Message[],
 }
 

@@ -11,11 +11,12 @@ const ChatBody = (props: { chat: Chat; updateChat: Function }) => {
     useEffect(() => {
         setChat(props.chat)
     }, [props.chat])
+    console.log(chat)
     return (
         <div className="main px-xl-5 px-lg-4 px-3">
             <div className="chat-body">
-                <MessageHeader chatId={chat ? chat.chatId : 0} />
-                <MessageContent messages={chat ? chat.messages : []} />
+                <MessageHeader chatId={chat.chatId} chatName={chat.chatName} />
+                <MessageContent messages={chat.messages} />
                 <MessageFooter
                     handleSend={(text: string, timestamp: number) => {
                         messageServer.getInstance().send<Send.SendMessage>(Send.SendMessage, {
@@ -24,7 +25,7 @@ const ChatBody = (props: { chat: Chat; updateChat: Function }) => {
                             timestamp: timestamp,
                             clientId: 0,
                         })
-                        props.updateChat(chat ? chat.chatId : 0, text, timestamp)
+                        props.updateChat(chat.chatId, text, timestamp)
                     }}
                 />
             </div>

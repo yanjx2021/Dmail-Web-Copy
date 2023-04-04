@@ -1,18 +1,24 @@
-import { UserList } from '../utils/userListPage'
-import UserItem from './UserItem'
+import { useEffect, useState } from 'react';
+import { ChatIndexList } from '../utils/chatListPage'
+import ChatIndexItem from './ChatIndexItem'
 
-const UserContent = (props: { userList: UserList; handleClick: Function }) => {
-    const users: any = []
-    props.userList.forEach((user, userId) => {
-        users.push(
-            <UserItem
-                user={user}
-                handleClick={props.handleClick}
-                timestamp={Date.parse(new Date().toString())}
-                key={userId}
-            />
-        )
-    })
+const ChatIndexContent = (props: { chatIndexList: ChatIndexList, handleClick: Function }) => {
+    const [chats, setChats] = useState()
+    useEffect(() => {
+        const tempChats: any = []
+        props.chatIndexList.forEach((chat, chatId) => {
+            tempChats.push(
+                <ChatIndexItem
+                    chat={chat}
+                    handleClick={props.handleClick}
+                    timestamp={Date.parse(new Date().toString())}
+                    key={chatId}
+                />
+            )
+        })
+        setChats(tempChats)
+    }, [props.chatIndexList])
+    
 
     return (
         <div className='sidebar border-end py-xl-4 py-3 px-xl-4 px-3'>
@@ -30,7 +36,7 @@ const UserContent = (props: { userList: UserList; handleClick: Function }) => {
                         <li className="header d-flex justify-content-between ps-3 pe-3 mb-1">
                             <span>最近的对话</span>
                         </li>
-                        {users}
+                        {chats}
                     </ul>
                 </div>
             </div>
@@ -38,4 +44,4 @@ const UserContent = (props: { userList: UserList; handleClick: Function }) => {
     )
 }
 
-export default UserContent
+export default ChatIndexContent

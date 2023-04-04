@@ -6,47 +6,89 @@ import ChatBody from '../components/ChatBody'
 import { Send } from '../utils/message'
 import { hasLogged } from './Login'
 import { useNavigate } from 'react-router-dom'
-import UserContent from '../components/UserContent'
-import { UserInfo, UserList } from '../utils/userListPage'
+import ChatIndexContent from '../components/ChatIndexContent'
+import { ChatInfo, ChatIndexList } from '../utils/chatListPage'
+import ConstChatbody from '../components/ConstChatBody'
 
 const Home = () => {
     const [chatList, setChatList] = useState<ChatList>(new Map<number, Chat>())
-    const [userList, setUserList] = useState<UserList>(new Map<number, UserInfo>())
-    const [onActivateChat, setOnActivateChat] = useState<number>(0) // -1表示主页
+    const [chatIndexList, setChatIndexList] = useState<ChatIndexList>(new Map<number, ChatInfo>())
+    const [onActivateChat, setOnActivateChat] = useState<number>(-1) // -1表示尚未选择聊天
     const [firstMount, setFirstMount] = useState<boolean>(true)
     const navigate = useNavigate()
+
+    const updateChatList = () => {
+        const temp = new Map()
+        chatList.forEach((value, key) => {
+            temp.set(key, value)
+        })
+        setChatList(temp)
+    }
+    const updateChatIndexList = () => {
+        const temp = new Map()
+        chatIndexList.forEach((value, key) => {
+            temp.set(key, value)
+        })
+        setChatIndexList(temp)
+    }
+    
+    const activateChat = (chatId: number) => {
+        if (!chatList.has(chatId)) {
+            chatList.set(chatId, {
+                chatId: chatId,
+                chatName: chatIndexList.get(chatId)?.chatName,
+                messages: [],
+            })
+            updateChatList()
+            console.log(chatList)
+            // TODO-拉取消息-START
+            //TODO-END
+        }
+        setOnActivateChat(chatId)
+    }
 
     const addMessage = (chatId: number, message: Message) => {
         if (!chatList.has(chatId)) {
             chatList.set(chatId, { chatId: chatId, messages: [] })
         }
         chatList.get(chatId)?.messages.push(message)
-        setChatList((chatList) => {
-            const temp = new Map()
-            chatList.forEach((value, key) => {
-                temp.set(key, value)
-            })
-            return temp
-        })
+        updateChatList()
     }
-    const addUser = (userId: number, userName: string) => {
-        if (!userList.has(userId)) {
-            userList.set(userId, {userId: userId, userName: userName})
+    const addChat = (chatId: number, chatName: string) => {
+        if (!chatIndexList.has(chatId)) {
+            chatIndexList.set(chatId, { chatId: chatId, chatName: chatName })
         } else {
             console.log('修改用户信息')
-            userList.set(userId, {userId: userId, userName: userName})
+            chatIndexList.set(chatId, { chatId: chatId, chatName: chatName })
         }
+        updateChatIndexList()
     }
+
+    const updateChat = (chatId: number, text: string, timestamp: number) => {
+        addMessage(chatId, {
+            isRight: true,
+            text: text,
+            timestamp: timestamp,
+            inChatId: 0,
+            senderId: -1,
+        })
+    }
+
     useEffect(() => {
         if (!hasLogged) {
             setTimeout(() => {
                 navigate('/login')
             }, 1000)
         } else if (firstMount === true) {
-            addUser(0, '测试聊天室')
-            messageServer.start(() => {
-                messageServer.getInstance().send<Send.Ping>(Send.Ping)
-            })
+            // 测试用户列表功能
+            addChat(0, '测试1')
+            addChat(1, '测试2')
+            setTimeout(() => {
+                addChat(2, '测试3')
+            }, 3000)
+            // messageServer.start(() => {
+            //     messageServer.getInstance().send<Send.Ping>(Send.Ping)
+            // })
             messageServer.on(Receive.PullResponse, (data: any) => {
                 console.log(data)
             })
@@ -58,7 +100,6 @@ const Home = () => {
             setFirstMount(false)
         }
         messageServer.on(Receive.Message, (data: ChatMessage) => {
-            //TODO-接受到消息
             addMessage(data.chatId, {
                 isRight: false,
                 text: data.text,
@@ -69,19 +110,19 @@ const Home = () => {
         })
     })
 
-    const updateChat = (chatId: number, text: string, timestamp: number) => {
-        addMessage(chatId, {
-            isRight: true,
-            text: text,
-            timestamp: timestamp,
-            inChatId: 0,
-            senderId: -1,
-        })
-    }
     return hasLogged ? (
-        <div id='layout' className='theme-cyan'>
-            <UserContent userList={userList} handleClick={(e: number) => console.log(e)}/>
-            <ChatBody chat={chatList.get(onActivateChat) as Chat} updateChat={updateChat} />
+        <div id="layout" className="theme-cyan">
+            <ChatIndexContent
+                chatIndexList={chatIndexList}
+                handleClick={(chatId: number) => {
+                    activateChat(chatId)
+                }}
+            />
+            {onActivateChat === -1 ? (
+                <ConstChatbody />
+            ) : (
+                <ChatBody chat={chatList.get(onActivateChat) as Chat} updateChat={updateChat} />
+            )}
         </div>
     ) : (
         <div>没有权限访问，请登录</div>

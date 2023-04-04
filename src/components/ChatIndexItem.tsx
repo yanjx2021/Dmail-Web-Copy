@@ -1,20 +1,25 @@
-import { UserInfo } from "../utils/userListPage";
+import { ChatInfo } from "../utils/chatListPage";
 
 
-const UserItem = (props: {user: UserInfo, handleClick: Function, timestamp: number}) => {
+const ChatIndexItem = (props: {chat: ChatInfo, handleClick: Function, timestamp: number}) => {
 
     return (<li className="online active">
-        <div className="card" onClick={props.handleClick(props.user.userId)}>
+        {/* <div className="hover_action">
+            <button type="button" className="btn btn-link text-info">
+                <i className="zmdi zmdi-eye"></i>
+            </button>
+        </div> */}
+        <a className="card" onClick={() => props.handleClick(props.chat.chatId)}>
             <div className="card-body">
                 <div className="media">
                     <div className="avatar me-3">
                         <div className="avatar rounded-circle no-image timber">
-                            <span>{props.user.userName.slice(0, Math.min(2, props.user.userName.length))}</span>
+                            <span>{props.chat.chatName.slice(0, Math.min(2, props.chat.chatName.length))}</span>
                         </div>
                     </div>
                     <div className="media-body overflow-hidden">
                         <div className="d-flex align-items-center mb-1">
-                            <h6 className="text-truncate mb-0 me-auto">{props.user.userName}</h6>
+                            <h6 className="text-truncate mb-0 me-auto">{props.chat.chatName}</h6>
                             <p className="small text-muted text-nowrap ms-4 mb-0">{new Date(props.timestamp).toLocaleString()}</p>
                         </div>
                         <div className="text-truncate">
@@ -23,8 +28,8 @@ const UserItem = (props: {user: UserInfo, handleClick: Function, timestamp: numb
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </li>)
 }
 
-export default UserItem
+export default ChatIndexItem
