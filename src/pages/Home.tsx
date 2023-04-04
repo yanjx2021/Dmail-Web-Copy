@@ -117,6 +117,7 @@ const Home = () => {
                 handleClick={(chatId: number) => {
                     activateChat(chatId)
                 }}
+                activeId={onActivateChat}
             />
             {onActivateChat === -1 ? (
                 <ConstChatbody />
