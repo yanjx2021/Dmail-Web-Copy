@@ -6980,7 +6980,7 @@ fieldset:disabled .btn {
 }
 
 .d-flex {
-    display: flex !important
+    display: flex !important;
 }
 
 .d-inline-flex {
@@ -7670,7 +7670,7 @@ fieldset:disabled .btn {
 }
 
 .p-3 {
-    padding: 1rem !important
+    padding: 1rem !important;
 }
 
 .p-4 {
@@ -12740,6 +12740,7 @@ body.admin .main-body .body-page::-webkit-scrollbar-thumb {
 }
 
 .main .chat-body .chat-content .message .message-body {
+    width: 0;
     flex: 1
 }
 
@@ -12750,9 +12751,11 @@ body.admin .main-body .body-page::-webkit-scrollbar-thumb {
 .main .chat-body .chat-content .message .message-content {
     background-color: var(--border-color);
     max-width: 60%;
-    min-width: 10%;
+    min-width: 6%;
     border-radius: 0 15px 15px 15px;
-    font-size: 16px
+    font-size: 16px; 
+    white-space: pre-wrap;
+    word-wrap:break-word;
 }
 
 @media screen and (max-width: 992px) {
@@ -12781,7 +12784,8 @@ body.admin .main-body .body-page::-webkit-scrollbar-thumb {
 .main .chat-body .chat-content .message.right .message-content {
     background-color: transparent;
     text-align: left;
-    border-radius: 15px 0 15px 15px
+    border-radius: 15px 0 15px 15px;
+    
 }
 
 .main .chat-body .chat-content .message.divider {
