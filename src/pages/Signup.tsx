@@ -6,6 +6,7 @@ import { Receive, Send } from '../utils/message'
 import withRouter from '../components/WithRouter'
 import { SHA256 } from 'crypto-js'
 import { emailTest, emailTester, strengthTest } from '../constants/passwordFormat'
+import { passwordTester } from '../constants/passwordFormat'
 
 interface StateType {
     email: string
@@ -189,6 +190,8 @@ class Signup extends React.Component<any, StateType> {
                                                             alert('验证码不能为空')
                                                         } else if (this.state.password === '') {
                                                             alert('密码不能为空')
+                                                        } else if (!passwordTester.test(this.state.password)) {
+                                                            alert('请使用8-20位,至少包含数字和字母的密码')
                                                         } else if (
                                                             passVerification(
                                                                 this.state.password,
