@@ -13233,6 +13233,10 @@ p {
     color: var(--text-muted) !important
 }
 
+.text-muted .zmdi-alert-circle {
+  color: var(--bs-red) !important
+}
+
 .dropdown .dropdown-toggle::after {
     display: none
 }

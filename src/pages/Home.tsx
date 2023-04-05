@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import ChatIndexContent from '../components/ChatIndexContent'
 import { ChatInfo, ChatIndexList } from '../utils/chatListPage'
 import ConstChatbody from '../components/ConstChatBody'
+import Menu from '../components/Menu'
 
 const Home = () => {
     const [chatList, setChatList] = useState<ChatList>(new Map<number, Chat>())
@@ -31,7 +32,7 @@ const Home = () => {
         })
         setChatIndexList(temp)
     }
-    
+
     const activateChat = (chatId: number) => {
         if (!chatList.has(chatId)) {
             chatList.set(chatId, {
@@ -112,6 +113,7 @@ const Home = () => {
 
     return hasLogged ? (
         <div id="layout" className="theme-cyan">
+            <Menu></Menu>
             <ChatIndexContent
                 chatIndexList={chatIndexList}
                 handleClick={(chatId: number) => {
