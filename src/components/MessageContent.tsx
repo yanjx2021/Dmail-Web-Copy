@@ -8,7 +8,7 @@ const MessageContent = (props: { messages: Message[] }) => {
 
     const scrollToBottom = () => {
         if (messagesEnd && messagesEnd.current) {
-            messagesEnd.current.scrollIntoView({ behavior: 'smooth' })
+            messagesEnd.current.scrollIntoView()
         }
     }
     useEffect(() => {

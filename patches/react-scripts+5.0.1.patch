@@ -42,7 +42,7 @@ index 522a81b..21f4d4e 100644
 -    proxy,
 +    proxy: {
 +      "/api": {
-+        target: "http://43.143.134.180:8080",
++        target: "http://127.0.0.1:8080",
 +        /* 路径重写(代理时发送到target的请求去掉/api前缀) */
 +        pathRewrite: {
 +            "^/api": ""
