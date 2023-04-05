@@ -118,6 +118,18 @@ export interface UserRequest {
     content: UserRequsetContent,
     state: UserRequestState,
 }
+
+export enum ReceiveGetUserInfoResponseState {
+    Success = 'Success',
+    UserNotFound = 'UserNotFound',
+    ServerError = 'ServerError',
+}
+
+export interface ReceiveGetUserInfoResponseData { // TODO
+    state: ReceiveGetUserInfoResponseState,
+
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -130,6 +142,7 @@ export enum Receive {
     RegisterResponse = 'RegisterResponse',
     SendMessageResponse = 'SendMessageResponse',
     SendRequestResponse = 'SendRequestResponse',
+    GetUserInfoResponse = 'GetUserInfoResponse', // TODO
     SolveRequestResponse = 'SolveRequestResponse',
     PullResponse = 'PullResponse',
     Chat = 'Chat',
@@ -178,6 +191,7 @@ export enum Send {
     Login = 'Login', // 发送登录请求
     SendMessage = 'SendMessage',
     Pull = 'Pull',
+    GetUserInfo = 'GetUserInfo',
 }
 
 // COMMAND和DATA类型捆绑
@@ -200,7 +214,8 @@ export interface MessageReceiveData {
     [Receive.Request]: UserRequest,
     [Receive.Requests]: UserRequest[],
     [Receive.UpdateRequest]: UserRequest,
-    [Receive.UpdateMessage]: ChatMessage
+    [Receive.UpdateMessage]: ChatMessage,
+    [Receive.GetUserInfoResponse]: ReceiveGetUserInfoResponseData,
 }
 
 export interface MessageSendData {
@@ -212,6 +227,7 @@ export interface MessageSendData {
     [Send.Login]: SendLoginData,
     [Send.SendMessage]: SendSendMessageData,
     [Send.Pull]: SendPullData,
+    [Send.GetUserInfo]: number,
 }
 
 // 封装消息包

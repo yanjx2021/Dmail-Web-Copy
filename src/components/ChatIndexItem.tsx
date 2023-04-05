@@ -19,6 +19,7 @@ const ChatIndexItem = (props: { chat: ChatInfo; handleClick: Function; timestamp
                 <div className="card-body">
                     <div className="media">
                         <div className="avatar me-3">
+                            <span className='rounded-circle'></span>
                             <div className="avatar rounded-circle no-image timber">
                                 <span>
                                     {props.chat.chatName.slice(
@@ -37,7 +38,7 @@ const ChatIndexItem = (props: { chat: ChatInfo; handleClick: Function; timestamp
                                     {new Date(props.timestamp).toLocaleString()}
                                 </p>
                             </div>
-                            <div className="text-truncate">TODO-最新的一条消息的节选</div>
+                            <div className="text-truncate">{props.chat.lastMessage ? props.chat.lastMessage : ''}</div>
                         </div>
                     </div>
                 </div>

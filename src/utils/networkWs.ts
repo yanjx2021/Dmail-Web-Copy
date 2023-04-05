@@ -60,7 +60,7 @@ export class MessageServer extends Heart {
     }
     getInstance() {
         if (this.instance === null || this.instance.readyState === this.instance.CLOSED) {
-            this.instance = new WebSocket('ws://127.0.0.1:8080/ws')
+            this.instance = new WebSocket('ws://43.143.134.180:8080/ws')
             this.instance.onmessage = (event) => {
                 if (this.cipher.hasAES) {
                     console.log('Receive', this.cipher.decryptAES(event.data))
@@ -95,6 +95,18 @@ export class MessageServer extends Heart {
         }
         return this
     }
+    sendAny(command: string, data: any) {
+        console.log({
+            command: command,
+            data: data,
+        })
+        this.instance?.send(
+            this.cipher.encryptAES({
+                command: command,
+                data: data,
+            })
+        )
+    }
     send<T extends Send>(...args: SendArgumentsType<T>) {
         if (this.instance?.readyState !== this.instance?.OPEN || !this.cipher.hasAES) {
             setTimeout(() => {
@@ -120,6 +132,14 @@ export class MessageServer extends Heart {
     off(command: Receive) {
         this.events[command] = () => {
             console.log('handle of ' + command + 'has been off')
+        }
+    }
+    reSet() {
+        this.reset()
+        this.instance?.close()
+        this.instance = null
+        if (this.cipher.hasAES) {
+            this.cipher = new Crypto()
         }
     }
     resetSocket() {

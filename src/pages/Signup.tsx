@@ -101,12 +101,12 @@ class Signup extends React.Component<any, StateType> {
                                             {this.state.showEmailTip ? emailTest(this.state.email) : <div></div>}
                                             <div className="input-group mb-2">
                                                 <input
-                                                    type="number"
+                                                    type="text"
                                                     className="form-control form-control-lg"
                                                     placeholder="请输入验证码"
                                                     value={this.state.emailCode}
                                                     onChange={(e) => {
-                                                        const emailCode = e.target.value.replace(/[^\d]/, '')
+                                                        const emailCode = e.target.value.replace(/[^0-9]/g, '')
                                                         this.setState({ emailCode: emailCode })
                                                     }}
                                                 />

@@ -16,9 +16,12 @@ interface StateType {
     emailCode: string
     cooldown: number
     showEmailTip: boolean
+    loading: boolean
 }
 
 export let hasLogged = false
+export let ownerUserId: number = -1 // 当前登录用户的userId
+let hasSend = false
 
 class Login extends React.Component<any, StateType> {
     loginResponse?: ReceiveLoginResponseData
@@ -33,20 +36,20 @@ class Login extends React.Component<any, StateType> {
             emailCode: '',
             cooldown: 60,
             showEmailTip: false,
+            loading: false,
         }
-        messageServer.on(Receive.LoginResponse, (data: any) => {
+        messageServer.on(Receive.LoginResponse, (data: ReceiveLoginResponseData) => {
             if (data.state !== LoginResponseState.Success) {
                 switch (data.state) {
                     case LoginResponseState.PasswordError:
+                        this.setState({ ...this.state, password: '', loading: false })
                         alert('密码错误，请重新输入')
-                        this.setState({ ...this.state, password: '' })
                         break
                     case LoginResponseState.UserNotFound:
+                        this.setState({ ...this.state, password: '', loading: false })
                         alert('用户不存在')
-                        this.setState({ ...this.state, password: '' })
                         break
                     case LoginResponseState.UserLogged:
-                        alert('该用户已在其他地方登录')
                         this.setState({
                             email: '',
                             password: '',
@@ -54,19 +57,36 @@ class Login extends React.Component<any, StateType> {
                             disabled: false,
                             emailCode: '',
                             cooldown: 60,
+                            loading: false
                         })
+                        alert('该用户已在其他地方登录')
                         break
                     default:
+                        this.setState({
+                            email: '',
+                            password: '',
+                            type: false,
+                            disabled: false,
+                            emailCode: '',
+                            cooldown: 60,
+                            loading: false
+                        })
                         alert('请重新登录')
                 }
+                hasSend = false
             } else {
                 hasLogged = true
+                this.setState({...this.state, loading: false})
+                ownerUserId = data.userId as number
                 props.navigate('/home')
             }
         })
     }
 
     componentDidMount(): void {
+        hasLogged = false
+        hasSend = false
+        messageServer.reSet()
         document.addEventListener('keydown', this.onKeyDown)
     }
     componentWillUnmount(): void {
@@ -83,10 +103,14 @@ class Login extends React.Component<any, StateType> {
     }
 
     handleEmailLogin = () => {
-        messageServer.getInstance().send<Send.Login>(Send.Login, {
-            email: this.state.email,
-            emailCode: parseInt(this.state.emailCode),
-        })
+        if (!hasSend) {
+            messageServer.getInstance().send<Send.Login>(Send.Login, {
+                email: this.state.email,
+                emailCode: parseInt(this.state.emailCode),
+            })
+            hasSend = true
+            this.setState({...this.state, loading: true})
+        }
     }
     handlePasswordLogin = () => {
         if (this.state.password === '') {
@@ -94,11 +118,13 @@ class Login extends React.Component<any, StateType> {
         } else if (!passwordTester.test(this.state.password)) {
             alert('密码格式错误: 请输入长度为8-20, 包含数字和字母的密码')
             this.setState({ ...this.state, password: '' })
-        } else {
+        } else if (!hasSend) {
             messageServer.getInstance().send<Send.Login>(Send.Login, {
                 email: this.state.email,
                 password: SHA256(this.state.password).toString(),
             })
+            hasSend = true
+            this.setState({...this.state, loading: true})
         }
     }
     render(): React.ReactNode {
@@ -163,8 +189,13 @@ class Login extends React.Component<any, StateType> {
                                                         placeholder="请输入验证码"
                                                         value={this.state.emailCode}
                                                         onChange={(e) => {
+                                                            const emailCode =
+                                                                e.target.value.replace(
+                                                                    /[^0-9]/g,
+                                                                    ''
+                                                                )
                                                             this.setState({
-                                                                emailCode: e.target.value,
+                                                                emailCode: emailCode,
                                                             })
                                                         }}
                                                     />
@@ -208,12 +239,13 @@ class Login extends React.Component<any, StateType> {
                                                 </div>
                                                 <div className="text-center mt-5">
                                                     <button
+                                                        disabled={this.state.loading}
                                                         className="btn btn-lg btn-primary"
                                                         onClick={() => {
                                                             this.handleEmailLogin()
                                                         }}
                                                         onKeyDown={this.onKeyDown}>
-                                                        登录
+                                                        {this.state.loading ? '正在登录...' : '登录'}
                                                     </button>
                                                 </div>
                                             </div>
@@ -274,17 +306,17 @@ class Login extends React.Component<any, StateType> {
                                                 </div>
                                                 <div className="text-center mt-5">
                                                     <button
+                                                        disabled={this.state.loading}
                                                         className="btn btn-lg btn-primary"
                                                         onClick={() => {
                                                             this.handlePasswordLogin()
                                                         }}
                                                         onKeyDown={this.onKeyDown}>
-                                                        登录
+                                                        {this.state.loading ? '正在登录...' : '登录'}
                                                     </button>
                                                 </div>
                                             </div>
                                         )}
-
                                         <p className="text-center mb-0">
                                             还没有账户?
                                             <NavLink to="/signup" className="link">

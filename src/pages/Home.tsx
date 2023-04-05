@@ -4,12 +4,14 @@ import { messageServer } from '../utils/networkWs'
 import { ChatMessage, Receive } from '../utils/message'
 import ChatBody from '../components/ChatBody'
 import { Send } from '../utils/message'
-import { hasLogged } from './Login'
+import { hasLogged, ownerUserId } from './Login'
 import { useNavigate } from 'react-router-dom'
 import ChatIndexContent from '../components/ChatIndexContent'
 import { ChatInfo, ChatIndexList } from '../utils/chatListPage'
 import ConstChatbody from '../components/ConstChatBody'
 import Menu from '../components/Menu'
+
+let n = 3
 
 const Home = () => {
     const [chatList, setChatList] = useState<ChatList>(new Map<number, Chat>())
@@ -41,9 +43,12 @@ const Home = () => {
                 messages: [],
             })
             updateChatList()
-            console.log(chatList)
             // TODO-拉取消息-START
             //TODO-END
+        }
+        if (chatIndexList.get(chatId)?.lastMessage !== '') {
+            chatIndexList.get(chatId)!.lastMessage = ''
+            updateChatIndexList()
         }
         setOnActivateChat(chatId)
     }
@@ -54,6 +59,10 @@ const Home = () => {
         }
         chatList.get(chatId)?.messages.push(message)
         updateChatList()
+        if (onActivateChat !== chatId) {
+            chatIndexList.get(chatId)!.lastMessage = message.text
+            updateChatIndexList()
+        }
     }
     const addChat = (chatId: number, chatName: string) => {
         if (!chatIndexList.has(chatId)) {
@@ -74,7 +83,13 @@ const Home = () => {
             senderId: -1,
         })
     }
-
+    const test = () => {
+        setTimeout(() => {
+            addChat(n, '测试' + n)
+            n = n + 1
+            test()
+        }, 500)
+    }
     useEffect(() => {
         if (!hasLogged) {
             setTimeout(() => {
@@ -84,20 +99,27 @@ const Home = () => {
             // 测试用户列表功能
             addChat(0, '测试1')
             addChat(1, '测试2')
-            setTimeout(() => {
-                addChat(2, '测试3')
-            }, 3000)
-            // messageServer.start(() => {
-            //     messageServer.getInstance().send<Send.Ping>(Send.Ping)
+            // test()
+            // console.log('ownerUserId', ownerUserId)
+            // messageServer.sendAny('SendRequest', {
+            //     message: 'what',
+            //     content: {
+            //         type: 'makeFriend',
+            //         receiver_id: 1
+            //     },
+            //     clientId: 0
             // })
+            messageServer.start(() => {
+                messageServer.getInstance().send<Send.Ping>(Send.Ping)
+            })
             messageServer.on(Receive.PullResponse, (data: any) => {
                 console.log(data)
             })
-            messageServer.getInstance().send<Send.Pull>(Send.Pull, {
-                lastChatId: 0,
-                lastMessageId: 0,
-                lastRequestId: 0,
-            })
+            // messageServer.getInstance().send<Send.Pull>(Send.Pull, {
+            //     lastChatId: 0,
+            //     lastMessageId: 0,
+            //     lastRequestId: 0,
+            // })
             setFirstMount(false)
         }
         messageServer.on(Receive.Message, (data: ChatMessage) => {
