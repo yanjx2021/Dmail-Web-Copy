@@ -1,4 +1,4 @@
-const MailList = (props: {}) => {
+const UserList = (props: {}) => {
     return (
         <>
             <div className="tab-pane fade" id="nav-tab-contact" role="tabpanel">
@@ -79,4 +79,4 @@ const MailList = (props: {}) => {
     )
 }
 
-export default MailList
+export default UserList

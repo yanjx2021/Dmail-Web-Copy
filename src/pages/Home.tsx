@@ -7,15 +7,18 @@ import { Send } from '../utils/message'
 import { hasLogged, ownerUserId } from './Login'
 import { useNavigate } from 'react-router-dom'
 import ChatIndexContent from '../components/ChatIndexContent'
-import { ChatInfo, ChatIndexList } from '../utils/chatListPage'
+import { ChatInfo, ChatIndexList } from '../utils/chatIndexListPage'
 import ConstChatbody from '../components/ConstChatBody'
 import Menu from '../components/Menu'
+import TabContent from '../components/TabContent'
+import { UserList } from '../utils/userListPage'
 
 let n = 3
 
 const Home = () => {
     const [chatList, setChatList] = useState<ChatList>(new Map<number, Chat>())
     const [chatIndexList, setChatIndexList] = useState<ChatIndexList>(new Map<number, ChatInfo>())
+    const [userList, setUserList] = useState<UserList>([])
     const [onActivateChat, setOnActivateChat] = useState<number>(-1) // -1表示尚未选择聊天
     const [firstMount, setFirstMount] = useState<boolean>(true)
     const navigate = useNavigate()
@@ -80,15 +83,8 @@ const Home = () => {
             text: text,
             timestamp: timestamp,
             inChatId: 0,
-            senderId: -1,
+            senderId: ownerUserId,
         })
-    }
-    const test = () => {
-        setTimeout(() => {
-            addChat(n, '测试' + n)
-            n = n + 1
-            test()
-        }, 500)
     }
     useEffect(() => {
         if (!hasLogged) {
@@ -99,27 +95,9 @@ const Home = () => {
             // 测试用户列表功能
             addChat(0, '测试1')
             addChat(1, '测试2')
-            // test()
-            // console.log('ownerUserId', ownerUserId)
-            // messageServer.sendAny('SendRequest', {
-            //     message: 'what',
-            //     content: {
-            //         type: 'makeFriend',
-            //         receiver_id: 1
-            //     },
-            //     clientId: 0
-            // })
-            messageServer.start(() => {
-                messageServer.getInstance().send<Send.Ping>(Send.Ping)
-            })
             messageServer.on(Receive.PullResponse, (data: any) => {
                 console.log(data)
             })
-            // messageServer.getInstance().send<Send.Pull>(Send.Pull, {
-            //     lastChatId: 0,
-            //     lastMessageId: 0,
-            //     lastRequestId: 0,
-            // })
             setFirstMount(false)
         }
         messageServer.on(Receive.Message, (data: ChatMessage) => {
@@ -135,8 +113,8 @@ const Home = () => {
 
     return hasLogged ? (
         <div id="layout" className="theme-cyan">
-            <Menu></Menu>
-            <ChatIndexContent
+            <Menu />
+            <TabContent
                 chatIndexList={chatIndexList}
                 handleClick={(chatId: number) => {
                     activateChat(chatId)

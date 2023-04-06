@@ -1,16 +1,21 @@
 import { useEffect } from 'react'
 import { useState } from 'react'
-import { ChatInfo } from '../utils/chatListPage'
+import { ChatInfo } from '../utils/chatIndexListPage'
 
 const ChatIndexItem = (props: { chat: ChatInfo; handleClick: Function; timestamp: number;active:number}) => {
     return (
         <li className={props.active===props.chat.chatId ? 'online active' : ''}>
-            {/* <div className="hover_action">
-
+            <div className="hover_action">
             <button type="button" className="btn btn-link text-info">
                 <i className="zmdi zmdi-eye"></i>
             </button>
-        </div> */}
+            <button type="button" className="btn btn-link text-warning">
+                <i className="zmdi zmdi-star"></i>
+            </button>
+            <button type="button" className="btn btn-link text-danger">
+                <i className="zmdi zmdi-delete"></i>
+            </button>
+        </div>
             <a
                 className="card"
                 onClick={() => {

@@ -1,4 +1,3 @@
-
 /*--------------------Receive数据类型----------------------*/
 export enum SetConnectionPubKeyState {
     NeedSetPubKey = 'NeedSetPubKey',
@@ -6,8 +5,9 @@ export enum SetConnectionPubKeyState {
     HasApproved = 'HasApproved',
     Success = 'Success',
 }
-export interface ReceiveSetConnectionPubKeyResponseData { // Something to do 
-    state: SetConnectionPubKeyState,
+export interface ReceiveSetConnectionPubKeyResponseData {
+    // Something to do
+    state: SetConnectionPubKeyState
     pubKey?: string
 }
 
@@ -23,7 +23,7 @@ export enum LoginResponseState {
     NeedLogin = 'NeedLogin',
 }
 export interface ReceiveLoginResponseData {
-    state: LoginResponseState,
+    state: LoginResponseState
     userId?: number
 }
 
@@ -32,10 +32,10 @@ export enum RegisterResponseState {
     UserNameFormatError = 'UserNameFormatError',
     PasswordFormatError = 'PasswordFormatError',
     EmailRegistered = 'EmailRegistered',
-    ServerError = 'ServerError'
+    ServerError = 'ServerError',
 }
 export interface ReceiveRegisterResponseData {
-    state: RegisterResponseState,
+    state: RegisterResponseState
     userId?: number
 }
 
@@ -49,18 +49,18 @@ export enum SendMessageResponseState {
     Success = 'Success',
 }
 export interface ReceiveSendMessageResponseData {
-    state: SendMessageResponseState,
-    clientId: number,
-    serverId: number,
+    state: SendMessageResponseState
+    clientId: number
+    serverId: number
 }
 
 export enum SendRequestResponseState {
     Error = 'Error',
-    Success = 'Success'
+    Success = 'Success',
 }
 export interface ReceiveSendRequestResponseData {
-    state: SendRequestResponseState,
-    reqId: number,
+    state: SendRequestResponseState
+    reqId: number
     clientId: number
 }
 
@@ -75,24 +75,25 @@ export enum PullResponseState {
     DatabaseError = 'DatabaseError',
     Success = 'Success',
 }
-export interface ReceivePullResponseData { // TODO
-    state: PullResponseState,
-    chats?: ChatInfo[],
-    messages: ChatMessage[],
+export interface ReceivePullResponseData {
+    // TODO
+    state: PullResponseState
+    chats?: ChatInfo[]
+    messages: ChatMessage[]
 }
 
 export interface ChatInfo {
-    id: number,
-    name: string,
-    avater: string,
+    id: number
+    name: string
+    avater: string
 }
 
 export interface ChatMessage {
-    serverId: number,
-    chatId: number,
-    senderId: number,
-    inChatId: number,
-    text: string,
+    serverId: number
+    chatId: number
+    senderId: number
+    inChatId: number
+    text: string
     timestamp: number
 }
 
@@ -106,17 +107,17 @@ export enum UserRequestContentType {
     JoinGroup = 'JoinGroup',
 }
 export interface UserRequsetContent {
-    type: UserRequestContentType,
-    userId?: number,
-    chatId?: number,
-    message: string,
+    type: UserRequestContentType
+    userId?: number
+    chatId?: number
+    message: string
 }
 export interface UserRequest {
-    reqId: number,
-    senderId: number,
-    message: string,
-    content: UserRequsetContent,
-    state: UserRequestState,
+    reqId: number
+    senderId: number
+    message: string
+    content: UserRequsetContent
+    state: UserRequestState
 }
 
 export enum ReceiveGetUserInfoResponseState {
@@ -125,9 +126,9 @@ export enum ReceiveGetUserInfoResponseState {
     ServerError = 'ServerError',
 }
 
-export interface ReceiveGetUserInfoResponseData { // TODO
-    state: ReceiveGetUserInfoResponseState,
-
+export interface ReceiveGetUserInfoResponseData {
+    // TODO
+    state: ReceiveGetUserInfoResponseState
 }
 
 /*--------------------Receive数据类型----------------------*/
@@ -137,7 +138,7 @@ export enum Receive {
     Pong = 'Pong',
     Close = 'Close',
     SetConnectionSymKey = 'SetConnectionSymKey',
-    SetConnectionPubKeyResponse = 'SetConnectionPubKeyResponse', 
+    SetConnectionPubKeyResponse = 'SetConnectionPubKeyResponse',
     LoginResponse = 'LoginResponse',
     RegisterResponse = 'RegisterResponse',
     SendMessageResponse = 'SendMessageResponse',
@@ -158,28 +159,41 @@ export enum Receive {
 /*--------------------Send数据类型----------------------*/
 export type SendSetConnectionPubKeyData = string
 export interface SendRegisterData {
-    userName: string,
-    password: string,
-    email: string,
-    emailCode: number,
+    userName: string
+    password: string
+    email: string
+    emailCode: number
 }
 export interface SendLoginData {
-    email: string,
-    password?: string,
-    emailCode?: number,
+    email: string
+    password?: string
+    emailCode?: number
 }
 export interface SendSendMessageData {
-    clientId: number,
-    chatId: number,
-    text: string,
-    timestamp: number,
+    clientId: number
+    chatId: number
+    text: string
+    timestamp: number
 }
 
 export interface SendPullData {
-    lastChatId: number,
-    lastMessageId: number,
+    lastChatId: number
+    lastMessageId: number
     lastRequestId: number
 }
+
+export interface UserRequestContent {
+    type: 'MakeFriend' | 'JoinGroup'
+    receiverId?: number
+    chatId?: number
+}
+
+export interface SendUserSendRequestData {
+    message: string
+    content: UserRequestContent
+    clientId: number
+}
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -192,42 +206,44 @@ export enum Send {
     SendMessage = 'SendMessage',
     Pull = 'Pull',
     GetUserInfo = 'GetUserInfo',
+    SendRequest = 'SendRequest',
 }
 
 // COMMAND和DATA类型捆绑
 export interface MessageReceiveData {
-    [Receive.Ping]: never,
-    [Receive.Pong]: never,
-    [Receive.Close]: never,
-    [Receive.SetConnectionSymKey] : ReceiveSetConnectionSymKeyData,
-    [Receive.SetConnectionPubKeyResponse]: ReceiveSetConnectionPubKeyResponseData,
-    [Receive.LoginResponse]: ReceiveLoginResponseData,
-    [Receive.RegisterResponse]: ReceiveRegisterResponseData,
-    [Receive.SendMessageResponse]: ReceiveSendMessageResponseData,
-    [Receive.SendRequestResponse]: ReceiveSendRequestResponseData,
-    [Receive.SolveRequestResponse]: ReceiveSolveRequestResponseData,
-    [Receive.PullResponse]: ReceivePullResponseData,
-    [Receive.Chat]: ChatInfo,
-    [Receive.Chats]: ChatInfo[],
-    [Receive.Messages]: ChatMessage[],
-    [Receive.Message]: ChatMessage,
-    [Receive.Request]: UserRequest,
-    [Receive.Requests]: UserRequest[],
-    [Receive.UpdateRequest]: UserRequest,
-    [Receive.UpdateMessage]: ChatMessage,
-    [Receive.GetUserInfoResponse]: ReceiveGetUserInfoResponseData,
+    [Receive.Ping]: never
+    [Receive.Pong]: never
+    [Receive.Close]: never
+    [Receive.SetConnectionSymKey]: ReceiveSetConnectionSymKeyData
+    [Receive.SetConnectionPubKeyResponse]: ReceiveSetConnectionPubKeyResponseData
+    [Receive.LoginResponse]: ReceiveLoginResponseData
+    [Receive.RegisterResponse]: ReceiveRegisterResponseData
+    [Receive.SendMessageResponse]: ReceiveSendMessageResponseData
+    [Receive.SendRequestResponse]: ReceiveSendRequestResponseData
+    [Receive.SolveRequestResponse]: ReceiveSolveRequestResponseData
+    [Receive.PullResponse]: ReceivePullResponseData
+    [Receive.Chat]: ChatInfo
+    [Receive.Chats]: ChatInfo[]
+    [Receive.Messages]: ChatMessage[]
+    [Receive.Message]: ChatMessage
+    [Receive.Request]: UserRequest
+    [Receive.Requests]: UserRequest[]
+    [Receive.UpdateRequest]: UserRequest
+    [Receive.UpdateMessage]: ChatMessage
+    [Receive.GetUserInfoResponse]: ReceiveGetUserInfoResponseData
 }
 
 export interface MessageSendData {
-    [Send.Ping]: never,
-    [Send.Pong]: never,
-    [Send.Close]: never,
-    [Send.SetConnectionPubKey]: SendSetConnectionPubKeyData,
-    [Send.Register]: SendRegisterData,
-    [Send.Login]: SendLoginData,
-    [Send.SendMessage]: SendSendMessageData,
-    [Send.Pull]: SendPullData,
-    [Send.GetUserInfo]: number,
+    [Send.Ping]: never
+    [Send.Pong]: never
+    [Send.Close]: never
+    [Send.SetConnectionPubKey]: SendSetConnectionPubKeyData
+    [Send.Register]: SendRegisterData
+    [Send.Login]: SendLoginData
+    [Send.SendMessage]: SendSendMessageData
+    [Send.Pull]: SendPullData
+    [Send.GetUserInfo]: number
+    [Send.SendRequest]: SendUserSendRequestData
 }
 
 // 封装消息包
@@ -239,4 +255,3 @@ export interface MessageBody<T extends Send | Receive> {
     command: T
     data?: DataType<T>
 }
-

@@ -25,7 +25,8 @@ const MessageHeader = (props: {chatId: number, chatName?: string}) => {
                                         {/* TODO-昵称缩写 */}
                                         <h6 className="text-truncate mb-0 me-auto">{props.chatName ? props.chatName : '未命名'}</h6>
                                     </div>
-                                    <div className="text-truncate">TODO-登录状态</div>
+                                    {/* TODO-登录状态 */}
+                                    <div className="text-truncate"></div>
                                 </div>
                             </div>
                         </div>
