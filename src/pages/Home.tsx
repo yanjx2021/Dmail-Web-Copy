@@ -64,7 +64,7 @@ const Home = () => {
         }
         chatList.get(chatId)?.messages.push(message)
         updateChatList()
-        if (onActivateChat !== chatId) {
+        if (onActivateChat !== chatId && !message.isRight) {
             chatIndexList.get(chatId)!.lastMessage = message.text
             updateChatIndexList()
         }
@@ -106,6 +106,7 @@ const Home = () => {
                 chats.forEach(([chatID, lastUnreadMessageId], index) => {
                     addChat(chatID, '测试' + chatID)
                 })
+                messages.sort((a, b) => a.timestamp - b.timestamp)
                 messages.forEach((message, index) => {
                     addMessage(message.chatId, {
                         isRight: message.senderId === ownerUserId,
