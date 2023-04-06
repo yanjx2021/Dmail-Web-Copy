@@ -58,9 +58,9 @@ const Home = () => {
         setOnActivateChat(chatId)
     }
 
-    const addMessage = (chatId: number, message: Message) => {
+    const addMessage = (chatId: number, message: Message, chatName?: string) => {
         if (!chatList.has(chatId)) {
-            chatList.set(chatId, { chatId: chatId, messages: [] })
+            chatList.set(chatId, { chatId: chatId, messages: [], chatName: chatName })
         }
         chatList.get(chatId)?.messages.push(message)
         updateChatList()
@@ -114,7 +114,7 @@ const Home = () => {
                         timestamp: message.timestamp,
                         inChatId: message.inChatId,
                         senderId: message.senderId,
-                    })
+                    }, chatIndexList.get(message.chatId)?.chatName)
                 })
                 console.log(messages)
             })
