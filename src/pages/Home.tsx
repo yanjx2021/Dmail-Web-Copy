@@ -49,6 +49,7 @@ const Home = () => {
             })
             updateChatList()
             // TODO-拉取消息-START
+
             //TODO-END
         }
         if (chatIndexList.get(chatId)?.lastMessage !== '') {
@@ -99,10 +100,12 @@ const Home = () => {
                 console.log('Pull', data)
                 const chats: [number, number][] = data.chats
                 console.log(chats)
+                
                 const messages: any[] = data.messages.map((serializedMessage) => {
                     // console.log(serializedMessage)
                     return JSON.parse(serializedMessage)
                 })
+                // " => \\"
                 chats.forEach(([chatID, lastUnreadMessageId], index) => {
                     addChat(chatID, '测试' + chatID)
                 })

@@ -69,6 +69,7 @@ export class MessageServer extends Heart {
                         this.events[data.command as Receive](data.data)
                     } catch (error) {
                         console.log(data.command + ' Not defined')
+                        console.log(error)
                     }
                 } else {
                     console.log('Receive', JSON.parse(event.data))
