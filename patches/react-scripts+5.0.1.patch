@@ -32,23 +32,22 @@ index e465d8e..8961d20 100644
      module: {
        strictExportPresence: true,
 diff --git a/node_modules/react-scripts/config/webpackDevServer.config.js b/node_modules/react-scripts/config/webpackDevServer.config.js
-index 522a81b..21f4d4e 100644
+index 522a81b..c8a40b9 100644
 --- a/node_modules/react-scripts/config/webpackDevServer.config.js
 +++ b/node_modules/react-scripts/config/webpackDevServer.config.js
-@@ -108,7 +108,15 @@ module.exports = function (proxy, allowedHost) {
-       index: paths.publicUrlOrPath,
+@@ -109,6 +109,15 @@ module.exports = function (proxy, allowedHost) {
      },
      // `proxy` is run between `before` and `after` `webpack-dev-server` hooks
--    proxy,
-+    proxy: {
-+      "/api": {
-+        target: "http://127.0.0.1:8080",
-+        /* 路径重写(代理时发送到target的请求去掉/api前缀) */
-+        pathRewrite: {
-+            "^/api": ""
-+        }
-+    }
-+    },
+     proxy,
++    // proxy: {
++    //   "/api": {
++    //     target: "http://43.143.134.180:8080",
++    //     /* 路径重写(代理时发送到target的请求去掉/api前缀) */
++    //     pathRewrite: {
++    //         "^/api": ""
++    //     }
++    // }
++    // },
      onBeforeSetupMiddleware(devServer) {
        // Keep `evalSourceMapMiddleware`
        // middlewares before `redirectServedPath` otherwise will not have any effect
