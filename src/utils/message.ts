@@ -78,8 +78,9 @@ export enum PullResponseState {
 export interface ReceivePullResponseData {
     // TODO
     state: PullResponseState
-    chats?: ChatInfo[]
-    messages: ChatMessage[]
+    chats: [number, number][]
+    messages: string[]
+    requests: Request[]
 }
 
 export interface ChatInfo {

@@ -57,7 +57,7 @@ const MessageItem = (props: Message) => {
             <div className="message-body">
                 <span className="date-time text-muted">
                     {(message.senderId ? message.senderId + ', ' : '') +
-                        new Date(message.timestamp).toLocaleString()}
+                        new Date(message.timestamp * 1000).toLocaleString()}
                 </span>
                 <div
                     className={

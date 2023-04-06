@@ -12,6 +12,8 @@ import ConstChatbody from '../components/ConstChatBody'
 import Menu from '../components/Menu'
 import TabContent from '../components/TabContent'
 import { UserList } from '../utils/userListPage'
+import { ReceivePullResponseData } from '../utils/message'
+import { serialize } from 'v8'
 
 let n = 3
 
@@ -93,14 +95,37 @@ const Home = () => {
             }, 1000)
         } else if (firstMount === true) {
             // 测试用户列表功能
-            addChat(0, '测试1')
-            addChat(1, '测试2')
-            messageServer.on(Receive.PullResponse, (data: any) => {
-                console.log(data)
+            messageServer.on(Receive.PullResponse, (data: ReceivePullResponseData) => {
+                console.log('Pull', data)
+                const chats: [number, number][] = data.chats
+                console.log(chats)
+                const messages: any[] = data.messages.map((serializedMessage) => {
+                    // console.log(serializedMessage)
+                    return JSON.parse(serializedMessage)
+                })
+                chats.forEach(([chatID, lastUnreadMessageId], index) => {
+                    addChat(chatID, '测试' + chatID)
+                })
+                messages.forEach((message, index) => {
+                    addMessage(message.chatId, {
+                        isRight: message.senderId === ownerUserId,
+                        text: message.text,
+                        timestamp: message.timestamp,
+                        inChatId: message.inChatId,
+                        senderId: message.senderId,
+                    })
+                })
+                console.log(messages)
+            })
+            messageServer.getInstance().send<Send.Pull>(Send.Pull, {
+                lastChatId: 0,
+                lastMessageId: 0,
+                lastRequestId: 0
             })
             setFirstMount(false)
         }
-        messageServer.on(Receive.Message, (data: ChatMessage) => {
+        messageServer.on(Receive.Message, (serializedData: string) => {
+            const data: ChatMessage = JSON.parse(serializedData)
             addMessage(data.chatId, {
                 isRight: false,
                 text: data.text,

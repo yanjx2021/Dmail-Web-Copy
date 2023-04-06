@@ -7,7 +7,7 @@ const MessageFooter = (props: { handleSend: Function }) => {
     const [text, setText] = useState<string>('')
 
     const handleSend = () => {
-        const timestamp = Date.parse(new Date().toString())
+        const timestamp = Date.parse(new Date().toString()) / 1000
         props.handleSend(text, timestamp)
         setText('')
     }

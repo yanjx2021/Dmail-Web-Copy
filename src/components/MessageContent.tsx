@@ -3,7 +3,7 @@ import { Message, Chat, ChatList } from '../utils/messagePage'
 import MessageItem from './MessageItem'
 
 const MessageContent = (props: { messages: Message[] }) => {
-    const [messages, setMessages] = useState<Message[]>(props.messages)
+    const [messages, setMessages] = useState<Message[]>(props.messages.sort((a, b) => a.timestamp - b.timestamp))
     const messagesEnd = useRef<HTMLDivElement>(null)
 
     const scrollToBottom = () => {
@@ -12,7 +12,7 @@ const MessageContent = (props: { messages: Message[] }) => {
         }
     }
     useEffect(() => {
-        setMessages(props.messages)
+        setMessages(props.messages.sort((a, b) => a.timestamp - b.timestamp))
         scrollToBottom()
     }, [props.messages])
     useEffect(() => {
