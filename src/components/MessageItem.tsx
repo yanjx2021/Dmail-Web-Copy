@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Message, Chat, ChatList } from '../utils/messagePage'
+import { useImmer } from 'use-immer'
 
 const MessageAlert = () => {
     return (
@@ -36,19 +37,14 @@ const MessageTool = () => {
     )
 }
 const MessageItem = (props: Message) => {
-    const [message, setMessage] = useState<Message>(props)
-    useEffect(() => {
-        setMessage(props)
-    }, [props])
-
     return (
-        <li className={'d-flex message' + (message.isRight ? ' right' : '')}>
-            {!message.isRight ? (
+        <li className={'d-flex message' + (props.isRight ? ' right' : '')}>
+            {!props.isRight ? (
                 <div className="avatar mr-lg-3 me-2">
                     <div
                         //添加颜色
                         className={'avatar rounded-circle no-image ' + ''}>
-                        <span>{message.senderId}</span>
+                        <span>{props.senderId}</span>
                     </div>
                 </div>
             ) : (
@@ -56,16 +52,16 @@ const MessageItem = (props: Message) => {
             )}
             <div className="message-body">
                 <span className="date-time text-muted">
-                    {(message.senderId ? message.senderId + ', ' : '') +
-                        new Date(message.timestamp * 1000).toLocaleString()}
+                    {(props.senderId ? props.senderId + ', ' : '') +
+                        new Date(props.timestamp * 1000).toLocaleString()}
                 </span>
                 <div
                     className={
                         'message-row d-flex align-items-center' +
-                        (message.isRight ? ' justify-content-end' : '')
+                        (props.isRight ? ' justify-content-end' : '')
                     }>
-                    <div className={'message-content p-3' + (message.isRight ? ' border' : '')}>
-                        {message.text}
+                    <div className={'message-content p-3' + (props.isRight ? ' border' : '')}>
+                        {props.text}
                     </div>
                 </div>
             </div>

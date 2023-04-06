@@ -16,7 +16,7 @@ const ChatIndexContent = (props: {
                 <ChatIndexItem
                     chat={chat}
                     handleClick={props.handleClick}
-                    timestamp={Date.parse(new Date().toString())}
+                    timestamp={chat.lastMessageTimeStamp ? chat.ChatTimeStamp! * 1000 : 0}
                     active={props.activeId}
                     key={chatId}
                 />

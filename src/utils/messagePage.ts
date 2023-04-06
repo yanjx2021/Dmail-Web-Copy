@@ -5,6 +5,8 @@ export interface Message {
     timestamp: number,
     inChatId: number,
     senderId: number,
+    hasSend?: boolean,
+    
 }
 
 export interface Chat {

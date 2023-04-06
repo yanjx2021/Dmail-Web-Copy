@@ -3,7 +3,6 @@ import { Message, Chat, ChatList } from '../utils/messagePage'
 import MessageItem from './MessageItem'
 
 const MessageContent = (props: { messages: Message[] }) => {
-    const [messages, setMessages] = useState<Message[]>(props.messages.sort((a, b) => a.timestamp - b.timestamp))
     const messagesEnd = useRef<HTMLDivElement>(null)
 
     const scrollToBottom = () => {
@@ -11,10 +10,6 @@ const MessageContent = (props: { messages: Message[] }) => {
             messagesEnd.current.scrollIntoView()
         }
     }
-    useEffect(() => {
-        setMessages(props.messages.sort((a, b) => a.timestamp - b.timestamp))
-        scrollToBottom()
-    }, [props.messages])
     useEffect(() => {
         scrollToBottom()
     })
@@ -24,8 +19,8 @@ const MessageContent = (props: { messages: Message[] }) => {
             <div className="chat-content">
                 <div className="container-xxl">
                     <ul className="list-unstyled py-4">
-                        {messages.map((message) => (
-                            <MessageItem {...message} key={message.timestamp} />
+                        {[...props.messages].map((message) => (
+                            <MessageItem {...message} key={message.inChatId} />
                         ))}
                         <div
                             style={{ clear: 'both', height: '1px', width: '100%' }}

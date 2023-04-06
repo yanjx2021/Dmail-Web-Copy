@@ -14,72 +14,87 @@ import TabContent from '../components/TabContent'
 import { UserList } from '../utils/userListPage'
 import { ReceivePullResponseData } from '../utils/message'
 import { serialize } from 'v8'
+import { useImmer } from 'use-immer'
+import { enableMapSet } from 'immer'
 
-let n = 3
+enableMapSet()
 
 const Home = () => {
-    const [chatList, setChatList] = useState<ChatList>(new Map<number, Chat>())
-    const [chatIndexList, setChatIndexList] = useState<ChatIndexList>(new Map<number, ChatInfo>())
-    const [userList, setUserList] = useState<UserList>([])
+    const [chatList, setChatList] = useImmer<ChatList>(new Map<number, Chat>())
+    const [chatIndexList, setChatIndexList] = useImmer<ChatIndexList>(new Map<number, ChatInfo>())
     const [onActivateChat, setOnActivateChat] = useState<number>(-1) // -1表示尚未选择聊天
     const [firstMount, setFirstMount] = useState<boolean>(true)
     const navigate = useNavigate()
 
-    const updateChatList = () => {
-        const temp = new Map()
-        chatList.forEach((value, key) => {
-            temp.set(key, value)
-        })
-        setChatList(temp)
-    }
-    const updateChatIndexList = () => {
-        const temp = new Map()
-        chatIndexList.forEach((value, key) => {
-            temp.set(key, value)
-        })
-        setChatIndexList(temp)
-    }
-
     const activateChat = (chatId: number) => {
         if (!chatList.has(chatId)) {
-            chatList.set(chatId, {
-                chatId: chatId,
-                chatName: chatIndexList.get(chatId)?.chatName,
-                messages: [],
+            setChatList((draft) => {
+                draft.set(chatId, {
+                    chatId: chatId,
+                    chatName: chatIndexList.get(chatId)?.chatName,
+                    messages: [],
+                })
             })
-            updateChatList()
             // TODO-拉取消息-START
-
+            messageServer.getInstance().send(Send.Pull, {
+                lastChatId: chatId,
+                lastMessageId: 0,
+                lastRequestId: 0
+            })
             //TODO-END
         }
         if (chatIndexList.get(chatId)?.lastMessage !== '') {
-            chatIndexList.get(chatId)!.lastMessage = ''
-            updateChatIndexList()
+            setChatIndexList((draft) => {
+                draft.get(chatId)!.lastMessage = ''
+            })
         }
+        sortMessage(chatId)
         setOnActivateChat(chatId)
     }
-
-    const addMessage = (chatId: number, message: Message, chatName?: string) => {
-        if (!chatList.has(chatId)) {
-            chatList.set(chatId, { chatId: chatId, messages: [], chatName: chatName })
+    const sortMessage = (sortChatId: number) => {
+        // 按时间戳排序对应chatId的消息
+        if (chatIndexList.has(sortChatId)) {
+            setChatList((draft) => {
+                draft.get(sortChatId)!.messages = draft
+                    .get(sortChatId)!
+                    .messages.sort((a, b) => a.inChatId - b.inChatId)
+            })
+        } else {
+            console.log('Error: Cannot sort the undefined chat ', sortChatId)
         }
-        chatList.get(chatId)?.messages.push(message)
-        updateChatList()
+    }
+    const addMessage = (chatId: number, message: Message) => {
+        setChatList((draft) => {
+            if (!draft.has(chatId)) {
+                draft.set(chatId, { chatId: chatId, messages: [] })
+            }
+            //TODO-有序数组维护
+            draft.get(chatId)?.messages.push(message)
+        })
+        setChatIndexList((draft) => {
+            if (
+                !draft.get(chatId)?.ChatTimeStamp ||
+                message.timestamp > draft.get(chatId)?.ChatTimeStamp!
+            )
+                draft.get(chatId)!.ChatTimeStamp = message.timestamp
+        })
         if (onActivateChat !== chatId && !message.isRight) {
-            chatIndexList.get(chatId)!.lastMessage = message.text
-            updateChatIndexList()
+            setChatIndexList((draft) => {
+                if (
+                    !draft.get(chatId)?.lastMessageTimeStamp ||
+                    message.timestamp > draft.get(chatId)?.lastMessageTimeStamp!
+                ) {
+                    draft.get(chatId)!.lastMessage = message.text
+                    draft.get(chatId)!.lastMessageTimeStamp = message.timestamp
+                }
+            })
         }
     }
     const addChat = (chatId: number, chatName: string) => {
-        if (!chatIndexList.has(chatId)) {
-            chatIndexList.set(chatId, { chatId: chatId, chatName: chatName })
-        } else {
-            console.log('修改用户信息')
-            chatIndexList.set(chatId, { chatId: chatId, chatName: chatName })
-        }
-        updateChatIndexList()
+        setChatIndexList((draft) => {
+            draft.set(chatId, { chatId: chatId, chatName: chatName })
+        })
     }
-
     const updateChat = (chatId: number, text: string, timestamp: number) => {
         addMessage(chatId, {
             isRight: true,
@@ -100,16 +115,14 @@ const Home = () => {
                 console.log('Pull', data)
                 const chats: [number, number][] = data.chats
                 console.log(chats)
-                
-                const messages: any[] = data.messages.map((serializedMessage) => {
-                    // console.log(serializedMessage)
+
+                let messages: any[] = data.messages.map((serializedMessage) => {
                     return JSON.parse(serializedMessage)
                 })
-                // " => \\"
+                console.log(messages)
                 chats.forEach(([chatID, lastUnreadMessageId], index) => {
                     addChat(chatID, '测试' + chatID)
                 })
-                messages.sort((a, b) => a.timestamp - b.timestamp)
                 messages.forEach((message, index) => {
                     addMessage(message.chatId, {
                         isRight: message.senderId === ownerUserId,
@@ -117,27 +130,30 @@ const Home = () => {
                         timestamp: message.timestamp,
                         inChatId: message.inChatId,
                         senderId: message.senderId,
-                    }, chatIndexList.get(message.chatId)?.chatName)
+                    })
                 })
-                console.log(messages)
+                console.log(chatList)
+            })
+            messageServer.on(Receive.Message, (serializedData: string) => {
+                const data: ChatMessage = JSON.parse(serializedData)
+                addMessage(data.chatId, {
+                    isRight: false,
+                    text: data.text,
+                    timestamp: data.timestamp,
+                    inChatId: data.inChatId,
+                    senderId: data.senderId,
+                })
+            })
+            messageServer.on(Receive.SendMessageResponse, (data: any) => {
+                console.log(Receive.SendMessageResponse, data)
             })
             messageServer.getInstance().send<Send.Pull>(Send.Pull, {
                 lastChatId: 0,
                 lastMessageId: 0,
-                lastRequestId: 0
+                lastRequestId: 0,
             })
             setFirstMount(false)
         }
-        messageServer.on(Receive.Message, (serializedData: string) => {
-            const data: ChatMessage = JSON.parse(serializedData)
-            addMessage(data.chatId, {
-                isRight: false,
-                text: data.text,
-                timestamp: data.timestamp,
-                inChatId: data.inChatId,
-                senderId: data.senderId,
-            })
-        })
     })
 
     return hasLogged ? (
