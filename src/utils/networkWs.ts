@@ -1,9 +1,4 @@
-import {
-    MessageSendData,
-    Send,
-    Receive,
-    DataType,
-} from './message'
+import { MessageSendData, Send, Receive, DataType } from './message'
 import Crypto from './cipher'
 
 export type Callback = (e: Event) => void
@@ -57,44 +52,74 @@ export class Heart {
 }
 
 export class MessageServer extends Heart {
-    socket = new WebSocket('ws://127.0.0.1:8080/ws')
+    instance: null | WebSocket = null
     cipher = new Crypto()
     events: any = {}
     constructor() {
         super()
-        this.socket.onmessage = (event) => {
-            if (this.cipher.hasAES) {
-                console.log('Receive', this.cipher.decryptAES(event.data))
-                const data = JSON.parse(this.cipher.decryptAES(event.data))
-                this.events[data.command as Receive](data.data)
-            } else {
-                const data = JSON.parse(event.data)
-                this.cipher.setSerectKey(data.data)
+    }
+    getInstance() {
+        if (this.instance === null || this.instance.readyState === this.instance.CLOSED) {
+            this.instance = new WebSocket('ws://43.143.134.180:8080/ws')
+            this.instance.onmessage = (event) => {
+                if (this.cipher.hasAES) {
+                    console.log('Receive', this.cipher.decryptAES(event.data))
+                    const data = JSON.parse(this.cipher.decryptAES(event.data))
+                    try {
+                        this.events[data.command as Receive](data.data)
+                    } catch (error) {
+                        console.log(data.command + ' Not defined')
+                    }
+                } else {
+                    console.log('Receive', JSON.parse(event.data))
+                    const data = JSON.parse(event.data)
+                    this.cipher.setSerectKey(data.data)
+                }
+            }
+            this.instance.onopen = () => {
+                this.instance?.send(
+                    JSON.stringify({
+                        command: Send.SetConnectionPubKey,
+                        data: this.cipher.sendKey,
+                    })
+                )
+            }
+            this.instance.onerror = (ev) => {
+                this.cipher = new Crypto()
+                console.log(ev)
+            }
+            this.instance.onclose = (ev) => {
+                this.cipher = new Crypto()
+                console.log(ev)
             }
         }
-        this.socket.onopen = (ev) => {
-            this.send<Send.SetConnectionPubKey>(Send.SetConnectionPubKey, this.cipher.sendKey)
-        }
-        this.socket.onclose = (event) => {
-            console.log(event)
-        }
-        this.socket.onerror = (event) => {
-            console.log(event)
-        }
+        return this
     }
-
+    sendAny(command: string, data: any) {
+        console.log({
+            command: command,
+            data: data,
+        })
+        this.instance?.send(
+            this.cipher.encryptAES({
+                command: command,
+                data: data,
+            })
+        )
+    }
     send<T extends Send>(...args: SendArgumentsType<T>) {
-        const [command, data]: [T, MessageSendData[T]] | [T] = args
-        if (this.cipher.hasAES) {
-            this.socket.send(
-                this.cipher.encryptAES({
-                    command,
-                    data,
-                })
-            )
+        if (this.instance?.readyState !== this.instance?.OPEN || !this.cipher.hasAES) {
+            setTimeout(() => {
+                this.send<T>(...args)
+            }, 50)
         } else {
-            this.socket.send(
-                JSON.stringify({
+            const [command, data]: [T, MessageSendData[T]] | [T] = args
+            console.log('Send', {
+                command,
+                data,
+            })
+            this.instance?.send(
+                this.cipher.encryptAES({
                     command,
                     data,
                 })
@@ -108,6 +133,18 @@ export class MessageServer extends Heart {
         this.events[command] = () => {
             console.log('handle of ' + command + 'has been off')
         }
+    }
+    reSet() {
+        this.reset()
+        this.instance?.close()
+        this.instance = null
+        if (this.cipher.hasAES) {
+            this.cipher = new Crypto()
+        }
+    }
+    resetSocket() {
+        this.instance?.close()
+        this.instance = new WebSocket('ws://43.143.134.180:8080/ws')
     }
 }
 

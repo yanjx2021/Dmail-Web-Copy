@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { NavLink } from 'react-router-dom'
 import axios from 'axios'
 import { messageServer } from '../utils/networkWs'
 import { Receive, Send } from '../utils/message'
 import withRouter from '../components/WithRouter'
+import { SHA256 } from 'crypto-js'
+import { emailTest, emailTester, strengthTest } from '../constants/passwordFormat'
+import { passwordTester } from '../constants/passwordFormat'
 
 interface StateType {
     email: string
@@ -13,11 +16,22 @@ interface StateType {
     userName: string
     disabled: boolean
     cooldown: number
+    showPasswordTip: boolean
+    showCpasswordTip: boolean
+    showEmailTip: boolean
 }
 
 // 校验两次输入的密码是否相同
 function passVerification(password1: string, password2: string): boolean {
     return password1 === password2
+}
+
+const passwordConsistencyTest = (password1: string, password2: string) => {
+    if (passVerification(password1, password2)) {
+        return <div style={{ color: 'green', position: 'absolute', zIndex: 9999, backgroundColor: 'white' }}>密码相同</div>
+    } else {
+        return <div style={{ color: 'red', position: 'absolute', zIndex: 9999, backgroundColor: 'white' }}>两次密码不一致</div>
+    }
 }
 
 class Signup extends React.Component<any, StateType> {
@@ -31,6 +45,9 @@ class Signup extends React.Component<any, StateType> {
             disabled: false,
             userName: '',
             cooldown: 60,
+            showPasswordTip: false,
+            showCpasswordTip: false,
+            showEmailTip: false,
         }
         messageServer.on(Receive.RegisterResponse, (data: any) => {
             if (data.state === 'Success') {
@@ -38,13 +55,11 @@ class Signup extends React.Component<any, StateType> {
             } else {
                 alert('注册失败' + data.state)
             }
-        })  
+        })
     }
-    
-    // TODO 关于向后端发送注册请求部分
+
     handleSubmit = (e: any) => {
         e.preventDefault()
-        // TODO
     }
 
     render() {
@@ -63,7 +78,7 @@ class Signup extends React.Component<any, StateType> {
                                                 <input
                                                     type="text"
                                                     className="form-control form-control-lg"
-                                                    placeholder="请输入昵称"
+                                                    placeholder="请输入用户名"
                                                     value={this.state.userName}
                                                     onChange={(e) => {
                                                         this.setState({ userName: e.target.value })
@@ -76,11 +91,14 @@ class Signup extends React.Component<any, StateType> {
                                                     className="form-control form-control-lg"
                                                     placeholder="请输入邮箱"
                                                     value={this.state.email}
+                                                    onBlur={() => this.setState({...this.state, showEmailTip: true})}
+                                                    onFocus={() => this.setState({...this.state, showEmailTip: false})}
                                                     onChange={(e) => {
                                                         this.setState({ email: e.target.value })
                                                     }}
                                                 />
                                             </div>
+                                            {this.state.showEmailTip ? emailTest(this.state.email) : <div></div>}
                                             <div className="input-group mb-2">
                                                 <input
                                                     type="text"
@@ -88,27 +106,39 @@ class Signup extends React.Component<any, StateType> {
                                                     placeholder="请输入验证码"
                                                     value={this.state.emailCode}
                                                     onChange={(e) => {
-                                                        this.setState({ emailCode: e.target.value })
+                                                        const emailCode = e.target.value.replace(/[^0-9]/g, '')
+                                                        this.setState({ emailCode: emailCode })
                                                     }}
                                                 />
                                                 <button
                                                     className="btn btn-lg btn-primary"
                                                     disabled={this.state.disabled}
                                                     onClick={() => {
+                                                        if (!emailTester.test(this.state.email)) {
+                                                            return
+                                                        }
                                                         axios.post('/api/email/code', {
                                                             email: this.state.email,
                                                         })
-                                                        this.setState({disabled: !this.state.disabled})
+                                                        this.setState({
+                                                            disabled: !this.state.disabled,
+                                                        })
                                                         const timer = setInterval(() => {
-                                                            this.setState({cooldown: this.state.cooldown - 1})
+                                                            this.setState({
+                                                                cooldown: this.state.cooldown - 1,
+                                                            })
                                                         }, 1000)
                                                         setTimeout(() => {
-                                                            this.setState({disabled: !this.state.disabled})
+                                                            this.setState({
+                                                                disabled: !this.state.disabled,
+                                                            })
                                                             clearInterval(timer)
-                                                            this.setState({cooldown: 60})
+                                                            this.setState({ cooldown: 60 })
                                                         }, 60000)
                                                     }}>
-                                                    {this.state.disabled === false ? '发送验证码' : this.state.cooldown + 's'}
+                                                    {this.state.disabled === false
+                                                        ? '发送验证码'
+                                                        : this.state.cooldown + 's'}
                                                 </button>
                                             </div>
                                             <div className="input-group mb-2">
@@ -117,28 +147,52 @@ class Signup extends React.Component<any, StateType> {
                                                     className="form-control form-control-lg"
                                                     placeholder="请输入密码"
                                                     value={this.state.password}
+                                                    onFocus={() => {
+                                                        this.setState({...this.state, showPasswordTip: true})
+                                                    }}
+                                                    onBlur={() => {
+                                                        this.setState({...this.state, showPasswordTip: false})
+                                                    }}
                                                     onChange={(e) => {
                                                         this.setState({ password: e.target.value })
                                                     }}
                                                 />
                                             </div>
-                                            <div className="input-group mb-4">
+                                            {this.state.showPasswordTip ? strengthTest(this.state.password) : <div></div>}
+                                            <div className="input-group mb-2">
                                                 <input
                                                     type="password"
                                                     className="form-control form-control-lg"
                                                     placeholder="请再次输入密码"
                                                     value={this.state.cpassword}
+                                                    onFocus={() => {
+                                                        this.setState({...this.state, showCpasswordTip: true})
+                                                    }}
+                                                    onBlur={() => {
+                                                        this.setState({...this.state, showCpasswordTip: false})
+                                                    }}
                                                     onChange={(e) => {
                                                         this.setState({ cpassword: e.target.value })
                                                     }}
                                                 />
                                             </div>
+                                            {this.state.showCpasswordTip ? passwordConsistencyTest(this.state.password, this.state.cpassword) : <div></div>}
                                             <div className="text-center mt-5">
                                                 <button
                                                     className="btn btn-lg btn-primary"
                                                     title=""
                                                     onClick={() => {
-                                                        if (
+                                                        if (this.state.userName === '') {
+                                                            alert('用户名不能为空')
+                                                        } else if (this.state.email === '') {
+                                                            alert('邮箱不能为空')
+                                                        } else if (this.state.emailCode === '') {
+                                                            alert('验证码不能为空')
+                                                        } else if (this.state.password === '') {
+                                                            alert('密码不能为空')
+                                                        } else if (!passwordTester.test(this.state.password)) {
+                                                            alert('请使用8-20位,至少包含数字和字母的密码')
+                                                        } else if (
                                                             passVerification(
                                                                 this.state.password,
                                                                 this.state.cpassword
@@ -146,12 +200,18 @@ class Signup extends React.Component<any, StateType> {
                                                         ) {
                                                             const data = {
                                                                 email: this.state.email,
-                                                                password: this.state.password,
-                                                                cpassword: this.state.cpassword,
-                                                                emailCode: parseInt(this.state.emailCode),
+                                                                password: SHA256(
+                                                                    this.state.password
+                                                                ).toString(),
+                                                                emailCode: parseInt(
+                                                                    this.state.emailCode
+                                                                ),
                                                                 userName: this.state.userName,
                                                             }
-                                                            messageServer.send<Send.Register>(Send.Register, data)
+                                                            messageServer.getInstance().send<Send.Register>(
+                                                                Send.Register,
+                                                                data
+                                                            )
                                                         } else {
                                                             alert('两次密码不一致')
                                                         }
@@ -177,4 +237,4 @@ class Signup extends React.Component<any, StateType> {
     }
 }
 
-export default withRouter(Signup) 
+export default withRouter(Signup)
