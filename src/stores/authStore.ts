@@ -100,6 +100,7 @@ export class AuthStore {
                 this.userId = data.userId!
                 console.log("登录成功")
         }
+        console.log(this.errors)
     }
 
 }

@@ -33,6 +33,8 @@ export enum RegisterResponseState {
     PasswordFormatError = 'PasswordFormatError',
     EmailRegistered = 'EmailRegistered',
     ServerError = 'ServerError',
+    EmailCodeError = 'EmailCodeError',
+    EmailInvalid = 'EmailInvalid'
 }
 export interface ReceiveRegisterResponseData {
     state: RegisterResponseState
