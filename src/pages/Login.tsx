@@ -1,8 +1,9 @@
 import { observer } from 'mobx-react-lite'
 import { AuthMethod, AuthState, AuthStore, authStore } from '../stores/authStore'
-import { action } from 'mobx'
+import { action, autorun } from 'mobx'
 import { EmailCodeInput } from '../components/EmailCodeInput'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 
 const EmailInput = observer(({ authStore }: { authStore: AuthStore }) => {
     return (
@@ -102,6 +103,17 @@ const LoginCard = observer(({ authStore }: { authStore: AuthStore }) => {
 })
 
 export const LoginPage = () => {
+    const navigate = useNavigate()
+    useEffect(() => {
+        autorun(() => {
+            if (authStore.state === AuthState.Logged) {
+                navigate('/home')
+            }
+        })
+        autorun(() => {
+            console.log(authStore.errors)
+        })
+    }, [navigate])
     return (
         <div id="layout" className="theme-cyan">
             <div className="authentication">

@@ -4,6 +4,9 @@ import { LoginResponseState, Receive, ReceiveLoginResponseData, Send } from "../
 import { MessageServer } from "../utils/networkWs";
 import { passwordTester } from "../constants/passwordFormat";
 import { SHA256 } from "crypto-js";
+import { LocalDatabase } from "./localData";
+
+export type UserId = number
 
 export enum AuthState {
     Started,
@@ -32,6 +35,39 @@ export class AuthStore {
         MessageServer.on(Receive.LoginResponse, this.loginResponseHandler)
     }
 
+    login() {
+        if (this.state === AuthState.Logged) {
+            this.errors = "用户已登录"
+            return
+        }
+        if (this.state === AuthState.Logging) {
+            this.errors = "正在登录"
+            return
+        }
+        if (this.method === AuthMethod.Email) {
+            this.loginWithCode()
+        } else {
+            this.loginWithPassword()
+        }
+    }
+
+    toggleLoginMethod() {
+        this.method = (this.method === AuthMethod.Email ? AuthMethod.Password : AuthMethod.Email)
+    }
+
+    private onLoginSuccess(userId : UserId) {
+        this.state = AuthState.Logged
+        this.userId = userId
+        LocalDatabase.createUserInstance(userId)
+        console.log("登录成功")
+
+        MessageServer.Instance().send(Send.Pull, {
+            lastChatId: 0,
+            lastMessageId: 0,
+            lastRequestId: 0
+        })
+    }
+
     private loginWithPassword() {
         if (!passwordTester.test(this.password)) {
             this.errors = "密码格式错误: 请输入长度为8-20, 包含数字和字母的密码";
@@ -52,26 +88,6 @@ export class AuthStore {
             emailCode: parseInt(this.emailCode),
         })
         this.state = AuthState.Logging
-    }
-
-    login() {
-        if (this.state === AuthState.Logged) {
-            this.errors = "用户已登录"
-            return
-        }
-        if (this.state === AuthState.Logging) {
-            this.errors = "正在登录"
-            return
-        }
-        if (this.method === AuthMethod.Email) {
-            this.loginWithCode()
-        } else {
-            this.loginWithPassword()
-        }
-    }
-
-    toggleLoginMethod() {
-        this.method = (this.method === AuthMethod.Email ? AuthMethod.Password : AuthMethod.Email)
     }
 
     private loginResponseHandler(data : ReceiveLoginResponseData) {
@@ -96,9 +112,7 @@ export class AuthStore {
                 this.errors = "加密协议尚未握手，请稍等"
                 break;
             case LoginResponseState.Success:
-                this.state = AuthState.Logged
-                this.userId = data.userId!
-                console.log("登录成功")
+                this.onLoginSuccess(data.userId!)
         }
         console.log(this.errors)
     }

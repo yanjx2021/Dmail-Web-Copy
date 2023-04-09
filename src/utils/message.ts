@@ -53,7 +53,9 @@ export enum SendMessageResponseState {
 export interface ReceiveSendMessageResponseData {
     state: SendMessageResponseState
     clientId: number
-    serverId: number
+    chatId : number
+    inChatId?: number
+    timestamp?: number
 }
 
 export enum SendRequestResponseState {
@@ -87,14 +89,13 @@ export interface ReceivePullResponseData {
     requests: Request[]
 }
 
-export interface ChatInfo {
+export interface ReceiveChatInfo {
     id: number
     name: string
     avater: string
 }
 
-export interface ChatMessage {
-    serverId: number
+export interface ReceiveChatMessage {
     chatId: number
     senderId: number
     inChatId: number
@@ -153,8 +154,8 @@ export enum Receive {
     PullResponse = 'PullResponse',
     Chat = 'Chat',
     Chats = 'Chats',
-    Messages = 'Messages',
     Message = 'Message',
+    Messages = 'Messages',
     Request = 'Request',
     Requests = 'Requests',
     UpdateRequest = 'UpdateRequest',
@@ -177,8 +178,8 @@ export interface SendLoginData {
 export interface SendSendMessageData {
     clientId: number
     chatId: number
+    timestamp : number
     text: string
-    timestamp: number
 }
 
 export interface SendPullData {
@@ -233,14 +234,14 @@ export interface MessageReceiveData {
     [Receive.SendRequestResponse]: ReceiveSendRequestResponseData
     [Receive.SolveRequestResponse]: ReceiveSolveRequestResponseData
     [Receive.PullResponse]: ReceivePullResponseData
-    [Receive.Chat]: ChatInfo
-    [Receive.Chats]: ChatInfo[]
-    [Receive.Messages]: ChatMessage[]
-    [Receive.Message]: ChatMessage
+    [Receive.Chat]: ReceiveChatInfo
+    [Receive.Chats]: ReceiveChatInfo[]
+    [Receive.Messages]: ReceiveChatMessage[]
+    [Receive.Message]: ReceiveChatMessage
     [Receive.Request]: UserRequest
     [Receive.Requests]: UserRequest[]
     [Receive.UpdateRequest]: UserRequest
-    [Receive.UpdateMessage]: ChatMessage
+    [Receive.UpdateMessage]: ReceiveChatMessage
     [Receive.GetUserInfoResponse]: ReceiveGetUserInfoResponseData
 }
 

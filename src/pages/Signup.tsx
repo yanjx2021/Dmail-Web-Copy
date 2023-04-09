@@ -204,7 +204,7 @@ export const SignupPage = () => {
         autorun(() => {
             console.log(registerStore.errors)
         })
-    }, [])
+    }, [navigate])
     return (
         <div id="layout" className="theme-cyan">
             <div className="authentication">

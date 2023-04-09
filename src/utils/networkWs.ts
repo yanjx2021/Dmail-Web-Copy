@@ -1,7 +1,7 @@
 import { MessageSendData, Send, Receive, DataType } from './message'
 import Crypto from './cipher'
 
-const server_address = "ws://43.143.134.180:8080/ws"
+const server_address = "ws://127.0.0.1:8080/ws"
 
 export type Callback = (e: Event) => void
 export type MessageCallback = (msg: DataType<Receive>) => void
