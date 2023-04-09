@@ -1,12 +1,14 @@
 import localforage from "localforage"
-import { makeAutoObservable, observable, override } from "mobx"
+import { makeAutoObservable, observable, override, runInAction } from "mobx"
 import { UserId, authStore } from "./authStore"
-import { Receive, ReceiveChatMessage, ReceivePullResponseData, Send, SendMessageResponseState, SendSendMessageData } from "../utils/message"
+import { Receive, ReceiveChatMessage, ReceivePullResponseData, Send, SendMessageResponseState, SendSendMessageData, SerializedReceiveChatMessage } from "../utils/message"
 import { MessageServer } from "../utils/networkWs"
 import { PullResponseState } from "../utils/message"
 import { NumericLiteral } from "typescript"
 import { ReceiveSendMessageResponseData } from "../utils/message"
 import { timestamp } from "rxjs"
+import { Updater } from "use-immer"
+import { LocalDatabase } from "./localData"
 
 export type ChatId = number
 
@@ -45,7 +47,10 @@ export class ChatMessage {
     static createFromReciveMessage(receiveMessage : ReceiveChatMessage) {
         return new ChatMessage(
             {
-                ...receiveMessage,
+                text : receiveMessage.text,
+                timestamp : receiveMessage.timestamp,
+                inChatId : receiveMessage.inChatId,
+                senderId : receiveMessage.senderId,
                 state : ChatMessageState.Arrived
             }
         )
@@ -66,6 +71,17 @@ export class ChatMessage {
         this.timestamp = msg.timestamp
         this.inChatId = msg.inChatId
         this.senderId = msg.senderId
+    }
+
+    serialized(chatId : number) : SerializedReceiveChatMessage {
+        const receiveMessage = {
+            chatId: chatId,
+            senderId: this.senderId,
+            inChatId: this.inChatId!,
+            text: this.text,
+            timestamp: this.timestamp
+        }
+        return JSON.stringify(receiveMessage)
     }
 
 }
@@ -111,6 +127,8 @@ export class Chat {
             updated_msg.setToSelf(msg)
         }
 
+        LocalDatabase.saveMessage(this.chatId, msg)
+
         if (this.lastMessage === undefined || updated_msg.inChatId! > this.lastMessage.inChatId!) {
             this.lastMessage = updated_msg
         }
@@ -123,19 +141,34 @@ export class Chat {
         const msg = ChatMessage.getLoadingMessage(inChatId)
         this.messages.set(inChatId, msg)
         // TODO : 从本地数据库拉取数据
+
+
         return msg
     }
 
-    getMessages(endId : MessageId, count : number) {
+    getMessages(endId : MessageId, count : number) : ChatMessage[] {
         if (count === 1) {
             return [this.getMessage(endId)]
         }
+        const startId = Math.max(endId - count + 1, 1);
+        endId = this.lastMessage === undefined ? 0 : Math.min(endId, this.lastMessage.inChatId!)
 
-        const msgs = []
-        const lastId = this.lastMessage === undefined ? 0 : Math.min(endId, this.lastMessage.inChatId!)
-        for (let index=Math.max(endId - count + 1, 1); index <= lastId; index++) {
-            msgs.push(this.getMessage(index))
+        if (endId < startId) {
+            return []
         }
+
+        const msgs : ChatMessage[] = []
+
+        for (let i=startId; i<=endId; i++) {
+            // TODO : 这里可以少一次查询
+            if (!this.messages.has(i)) {
+                this.messages.set(i, ChatMessage.getLoadingMessage(i))
+            }
+            msgs.push(this.messages.get(i)!)
+        }
+
+        LocalDatabase.loadMessages(this.chatId, startId, endId)
+        
         return msgs
     }
 
@@ -162,7 +195,7 @@ export class Chat {
         return msg
     }
 
-    handleSendMessageResponse(response : ReceiveSendMessageResponseData) {
+    handleSendMessageResponse(response : ReceiveSendMessageResponseData, setViewMessages : undefined | Updater<ChatMessage[]>) {
         const chatMsg = this.sendingMessages.find((value) => value.clientId === response.clientId)
         if (chatMsg === undefined) {
             console.error("收到了未经处理的SendMessageResponse")
@@ -180,6 +213,12 @@ export class Chat {
         chatMsg.inChatId = response.inChatId
         chatMsg.state = ChatMessageState.Arrived
 
+        // if (setViewMessages) {
+        //     setViewMessages((draft) => {
+        //         draft.push(chatMsg)
+        //     })
+        // }
+
         this.setMessage(chatMsg)
     }
 }
@@ -187,13 +226,19 @@ export class Chat {
 
 export class ChatStore {
     private chats : Map<ChatId, Chat> = new Map()
+
+    activeChatId : undefined | ChatId = undefined
+    setViewMessages : undefined | Updater<ChatMessage[]> = undefined
+
     errors : string = ""
 
     constructor() {
         makeAutoObservable(this, {}, {autoBind : true})
 
         MessageServer.on(Receive.PullResponse, this.ReceivePullResponseHandler)
-        MessageServer.on(Receive.Message, this.ReceiveMessageHandler)
+        MessageServer.on(Receive.Message, (data : SerializedReceiveChatMessage) => this.ReceiveMessageHandler(data, true))
+        MessageServer.on(Receive.SendMessageResponse, this.ReceiveSendMessageResponseHandler)
+        MessageServer.on(Receive.Messages, (data : SerializedReceiveChatMessage[]) => this.ReceiveMessagesHandler(data))
     }
 
     get chatListView() {
@@ -205,7 +250,7 @@ export class ChatStore {
             }
         })
 
-        chatArray.sort((a, b) => a.lastMessage!.timestamp - b.lastMessage!.timestamp)
+        chatArray.sort((a, b) => b.lastMessage!.timestamp - a.lastMessage!.timestamp)
         return chatArray
     }
 
@@ -223,30 +268,37 @@ export class ChatStore {
         return ret
     }
 
-    private ReceiveSendMessageResponseHandler() {
-
+    private ReceiveSendMessageResponseHandler(response : ReceiveSendMessageResponseData) {
+        this.getChat(response.chatId).handleSendMessageResponse(response, response.chatId === this.activeChatId ? this.setViewMessages : undefined)
     }
 
-    private ReceiveMessageHandler(receiveMessage : ReceiveChatMessage) {
+    private ReceiveMessageHandler(serialized : SerializedReceiveChatMessage, append : boolean) {
+        const receiveMessage : ReceiveChatMessage = JSON.parse(serialized)
+        
+        if (receiveMessage === undefined) {
+            console.log("Message解析失败")
+            return
+        }
         const chat = this.getChat(receiveMessage.chatId)
 
-        chat.setMessage(ChatMessage.createFromReciveMessage(receiveMessage))
+        let msg = ChatMessage.createFromReciveMessage(receiveMessage)
+
+        if (append && receiveMessage.chatId === this.activeChatId && this.setViewMessages) {
+            console.log("refresh")
+            this.setViewMessages((draft) => {
+                draft.push(msg)
+            })
+        }
+
+        chat.setMessage(msg)
+    }
+
+    private ReceiveMessagesHandler(serializeds : SerializedReceiveChatMessage[]) {
+        serializeds.forEach((value) => this.ReceiveMessageHandler(value, false))
     }
 
     private ReceivePullResponseHandler(data : ReceivePullResponseData) {
-        console.log('Pull', data)
-
-        // [chatId, readCursor]
-        const receiveMessages : ReceiveChatMessage[] = data.messages.map((serialized) => JSON.parse(serialized))
         
-        let currentChat : Chat | undefined = undefined
-        for (let i = 0; i < receiveMessages.length; i++) {
-            const receiveMessage = receiveMessages[i]
-            if (currentChat === undefined || receiveMessage.chatId !== currentChat.chatId) {
-                currentChat = this.getChat(receiveMessage.chatId)
-            }
-            currentChat.setMessage(ChatMessage.createFromReciveMessage(receiveMessage))
-        }
     }
 
     private ReceiveChatInfoHandler() {

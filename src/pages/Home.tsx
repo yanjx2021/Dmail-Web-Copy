@@ -21,7 +21,6 @@ const Home = observer(
             return <div>未登录，即将跳转回登录界面</div>
         }
 
-        console.log(activeChatId)
         return (<>
             <Menu/>
             <TabContent activeChatId={activeChatId} setActiveChatId={setActiveChatId} />

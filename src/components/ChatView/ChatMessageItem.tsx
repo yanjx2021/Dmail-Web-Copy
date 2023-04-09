@@ -56,7 +56,7 @@ export const ChatMessageItem = observer(React.forwardRef(({msg}: { msg: ChatMess
             <div className="message-body">
                 <span className="date-time text-muted">
                     {(msg.senderId ? msg.senderId + ', ' : '') +
-                        new Date(msg.timestamp).toLocaleString()}
+                        + msg.state + ' ' +new Date(msg.timestamp).toLocaleString()}
                 </span>
                 <div
                     className={

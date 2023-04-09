@@ -84,9 +84,6 @@ export enum PullResponseState {
 export interface ReceivePullResponseData {
     // TODO
     state: PullResponseState
-    chats: [number, number][]
-    messages: string[]
-    requests: Request[]
 }
 
 export interface ReceiveChatInfo {
@@ -95,6 +92,8 @@ export interface ReceiveChatInfo {
     avater: string
 }
 
+export type SerializedReceiveChatInfo = string
+
 export interface ReceiveChatMessage {
     chatId: number
     senderId: number
@@ -102,6 +101,8 @@ export interface ReceiveChatMessage {
     text: string
     timestamp: number
 }
+
+export type SerializedReceiveChatMessage = string
 
 export enum UserRequestState {
     Unsolved = 'Unsolved',
@@ -125,6 +126,8 @@ export interface UserRequest {
     content: UserRequsetContent
     state: UserRequestState
 }
+
+export type SerializedUserRequest = string
 
 export enum ReceiveGetUserInfoResponseState {
     Success = 'Success',
@@ -205,6 +208,12 @@ export interface SendSolveRequestData {
     answer: 'Refused' | 'Approved'
 }
 
+export interface SendGetMessagesData {
+    chatId: number,
+    startId : number,
+    endId : number
+}
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -219,6 +228,7 @@ export enum Send {
     GetUserInfo = 'GetUserInfo',
     SendRequest = 'SendRequest',
     SolveRequest = 'SolveRequest',
+    GetMessages = 'GetMessages'
 }
 
 // COMMAND和DATA类型捆绑
@@ -234,12 +244,12 @@ export interface MessageReceiveData {
     [Receive.SendRequestResponse]: ReceiveSendRequestResponseData
     [Receive.SolveRequestResponse]: ReceiveSolveRequestResponseData
     [Receive.PullResponse]: ReceivePullResponseData
-    [Receive.Chat]: ReceiveChatInfo
-    [Receive.Chats]: ReceiveChatInfo[]
-    [Receive.Messages]: ReceiveChatMessage[]
-    [Receive.Message]: ReceiveChatMessage
-    [Receive.Request]: UserRequest
-    [Receive.Requests]: UserRequest[]
+    [Receive.Chat]: SerializedReceiveChatInfo
+    [Receive.Chats]: SerializedReceiveChatInfo[]
+    [Receive.Messages]: SerializedReceiveChatMessage[]
+    [Receive.Message]: SerializedReceiveChatMessage
+    [Receive.Request]: SerializedUserRequest
+    [Receive.Requests]: SerializedUserRequest[]
     [Receive.UpdateRequest]: UserRequest
     [Receive.UpdateMessage]: ReceiveChatMessage
     [Receive.GetUserInfoResponse]: ReceiveGetUserInfoResponseData
@@ -257,6 +267,7 @@ export interface MessageSendData {
     [Send.GetUserInfo]: number
     [Send.SendRequest]: SendUserSendRequestData
     [Send.SolveRequest]: SendSolveRequestData
+    [Send.GetMessages]: SendGetMessagesData
 }
 
 // 封装消息包

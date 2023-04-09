@@ -1,72 +1,37 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Chat, ChatMessage, ChatMessageState } from '../../stores/chatStore'
+import { Chat, ChatMessage, ChatMessageState, MessageId } from '../../stores/chatStore'
 import { ChatMessageItem } from './ChatMessageItem'
 import { action, autorun, observe, runInAction } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { Virtuoso } from 'react-virtuoso'
 import { useFetcher } from 'react-router-dom'
+import { AnyARecord } from 'dns'
+import { authStore } from '../../stores/authStore'
 
 export const ChatMessageContent = observer(
-    ({chat, messages, setMessages}: { chat: Chat, messages : ChatMessage[], setMessages : any }) => {
+    ({chat, messages, setMessages}: { chat: Chat, messages : ChatMessage[], setMessages : any}) => {
         const virtuosoRef : any = useRef(null)
-        const [firstItemIndex, setFirstItemIndex] = useState(chat.lastMessage!.inChatId!)
-        
-        const autoUpdateDisposer : any = useRef(null)
 
         const [atBottom, setAtBottom] = useState(false)
         const showButtonTimeoutRef : any = useRef(null)
         const [showButton, setShowButton] = useState(false)
 
         const prependItems = useCallback(() => {
-            const messagesToPrepend = 20
-            const nextFirstItemIndex = firstItemIndex - messagesToPrepend
-        
-            setFirstItemIndex(() => nextFirstItemIndex)
-            setMessages(() => [...chat.getMessages(firstItemIndex - 1, messagesToPrepend), ...messages])
+            const firstIndex = action(() => messages[0].inChatId!)()
 
-            return false
-          }, [chat, firstItemIndex, messages, setMessages])
+            if (firstIndex === 1) {
+                return
+            }
+            const messagesToPrepend = 20
+        
+            setMessages(() => [...chat.getMessages(firstIndex - 1, messagesToPrepend), ...messages])
+          }, [chat, messages, setMessages])
         
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const itemContent = useCallback(
-            action((index : number, message : ChatMessage) => <ChatMessageItem msg={message} key={message.inChatId}/>)
+            action((index : number, message : ChatMessage) => <ChatMessageItem msg={message} key={message.senderId === authStore.userId ? message.timestamp : message.inChatId}/>)
         , [])
 
-        useEffect(() => {
-            // For Test
-            // setInterval(action(() => {
-            //     setMessages((messages) => [...messages, ChatMessage.getLoadingMessage(messages[messages.length - 1].inChatId + 1)])
-            // }), 700)
-            if (autoUpdateDisposer.current) {
-                autoUpdateDisposer.current()
-                autoUpdateDisposer.current = null
-            }
-
-            autoUpdateDisposer.current = autorun(() => {
-                if (!chat.lastMessage) {
-                    return
-                }
-
-                let index = messages.length - 1;
-                while (index >= 0 && messages[index].state !== ChatMessageState.Arrived) {
-                    index--;
-                }
-
-                if (index === -1) {
-                    setMessages(() => [...messages, ...chat.getMessages( chat.lastMessage!.inChatId!, chat.lastMessage!.inChatId!)])
-                    return
-                } 
-                const lastMessage = messages[index]
-
-                const delta = chat.lastMessage!.inChatId! - lastMessage.inChatId!
-                if (delta > 0) {
-                    setMessages(() => [...messages, ...chat.getMessages( chat.lastMessage!.inChatId!, delta)])
-                }
-            })
-
-            return autoUpdateDisposer.current
-            // 这里不应该加入对Messages的依赖，Messages的主动更新仅会向前加入消息
-        }, [chat, messages, setMessages])
 
         useEffect( () => {
             if (!atBottom) {
@@ -80,7 +45,7 @@ export const ChatMessageContent = observer(
             <>
             <Virtuoso className="chat-content container-xxl list-unstyled py-4"
                 ref={virtuosoRef}
-                firstItemIndex={firstItemIndex}
+                firstItemIndex={messages[0]?.inChatId ?? 1}
                 initialTopMostItemIndex={chat.lastMessage!.inChatId}
                 data={messages}
                 startReached={prependItems}
