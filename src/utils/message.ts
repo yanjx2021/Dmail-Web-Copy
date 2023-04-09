@@ -62,8 +62,10 @@ export enum SendRequestResponseState {
 }
 export interface ReceiveSendRequestResponseData {
     state: SendRequestResponseState
-    reqId: number
-    clientId: number
+    type?: 'MakeFriend' | 'JoinGroup'
+    errorType?: "AlreadyBeFrineds" | 'SameUser' | 'AlreadyInGroup'
+    reqId?: number
+    clientId?: number
 }
 
 export enum ReceiveSolveRequestResponseData {
@@ -197,6 +199,11 @@ export interface SendUserSendRequestData {
     clientId: number
 }
 
+export interface SendSolveRequestData {
+    reqId: number,
+    answer: 'Refused' | 'Approved'
+}
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -210,6 +217,7 @@ export enum Send {
     Pull = 'Pull',
     GetUserInfo = 'GetUserInfo',
     SendRequest = 'SendRequest',
+    SolveRequest = 'SolveRequest',
 }
 
 // COMMAND和DATA类型捆绑
@@ -247,6 +255,7 @@ export interface MessageSendData {
     [Send.Pull]: SendPullData
     [Send.GetUserInfo]: number
     [Send.SendRequest]: SendUserSendRequestData
+    [Send.SolveRequest]: SendSolveRequestData
 }
 
 // 封装消息包
