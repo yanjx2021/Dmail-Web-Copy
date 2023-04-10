@@ -1,26 +1,26 @@
 import { action, makeAutoObservable } from 'mobx'
 import localforage from 'localforage'
-import { LoginResponseState, Receive, ReceiveLoginResponseData, Send, SendUserSendRequestData } from '../utils/message'
+import { LoginResponseState, Receive, ReceiveLoginResponseData, ReceiveRequestStateUpdateData, ReceiveSolveRequestResponseData, Send, SendUserSendRequestData } from '../utils/message'
 import { MessageServer } from '../utils/networkWs'
 import { ReceiveSendRequestResponseData } from '../utils/message'
 import { SendRequestResponseState } from '../utils/message'
 import { authStore } from './authStore'
 
-enum RequestContentType {
+export enum RequestContentType {
     MakeFriend = 'MakeFriend',
     JoinGroup = 'JoinGroup'
 }
 
-interface MakeFriendRequest {
+export interface MakeFriendRequest {
     type: RequestContentType.MakeFriend
     receiverId: number
 }
-interface JoinGroupRequest {
+export interface JoinGroupRequest {
     type: RequestContentType.JoinGroup
     chatId: number
 }
 
-type RequestContent = MakeFriendRequest | JoinGroupRequest
+export type RequestContent = MakeFriendRequest | JoinGroupRequest
 
 interface RequestInfo {
     reqId: number,
@@ -29,7 +29,7 @@ interface RequestInfo {
     content: RequestContent,
 }
 
-enum RequestState {
+export enum RequestState {
     Unsolved = 'Unsolved',
     Refused = 'Refused',
     Approved = 'Approved',
@@ -40,7 +40,7 @@ interface ReceiveRequest {
     info: RequestInfo
 }
 
-class Request {
+export class Request {
     state: RequestState = RequestState.Unsolved
     reqId: number = 0
     senderId: number = 0
@@ -96,19 +96,37 @@ class Request {
 type ReqId = number
 type ClientId = number
 
-class RequestStore {
+export class RequestStore {
     errors: string = ''
     message: string = ''
     clientId: ClientId = 0
-    requsetStash: Map<ClientId, Request | null> = new Map()
+    requsetStash: Map<ClientId, Request> = new Map()
     requests: Map<ReqId, Request> = new Map()
+
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
         MessageServer.on(Receive.Request, this.receiveRequestHandler)
         MessageServer.on(Receive.SendRequestResponse, this.sendRequestResponseHandler)
+        MessageServer.on(Receive.SolveRequestResponse, this.solveRequestResponseHandler)
+        MessageServer.on(Receive.RequestStateUpdate, this.requestStateUpdateHandler)
     }
     toggleClientId() {
         this.clientId++
+    }
+
+    get requestsList() {
+        const requests : {message: string, reqId: number, senderId: number, content: RequestContent, state: RequestState}[] = []
+        this.requests.forEach((req, reqId) => {
+            requests.push({message: req.message, reqId: reqId, senderId: req.senderId, content: req.content, state: req.state})
+        })
+        return requests
+    }
+    get requestStashList() {
+        const requests: {message: string, reqId: number}[] = []
+        this.requsetStash.forEach((req, reqId) => {
+            requests.push({message: req.message, reqId: reqId})
+        })
+        return requests
     }
 
     sendRequestResponseHandler(data: ReceiveSendRequestResponseData) {
@@ -122,7 +140,7 @@ class RequestStore {
             this.setRequest(req!)
             this.requsetStash.delete(data.clientId!)
         } else {
-            switch (data.errorType) {
+            switch (data.state.RequestError.errorType) {
                 case 'SameUser':
                     this.errors = '不能添加自己为好友'
                     break
@@ -135,6 +153,18 @@ class RequestStore {
             }
             //TODO-需要clientId
         }
+    }
+
+    setRequestState(reqId: number, state: RequestState) {
+        if (!this.requests.has(reqId)) {
+            this.errors = '找不到这个请求'
+            return
+        }
+        this.requests.get(reqId)!.state = state
+    }
+
+    requestStateUpdateHandler(data: ReceiveRequestStateUpdateData) {
+        this.setRequestState(data.reqId, data.state)
     }
 
     sendMakeFriendRequest(receiverId: number) {
@@ -193,6 +223,20 @@ class RequestStore {
         //TODO-拉取Request
         return req
     }
+
+    solveRequestResponseHandler(data: ReceiveSolveRequestResponseData) {
+        const req = this.requests.get(data.reqId)
+        if (req === undefined) {
+            this.errors = '修改请求状态失败: 找不到这条请求 ' + data.reqId
+            return
+        }
+        if (data.state === 'Success') {
+            console.log('成功发送请求处理')
+        } else {
+            this.errors = '修改请求状态失败：' + data.state
+        }
+    }
+
     receiveRequestHandler(data: string) {
         const req: ReceiveRequest = JSON.parse(data)
         this.setRequest(Request.createFromReceiveRequest(req))

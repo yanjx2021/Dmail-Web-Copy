@@ -4,6 +4,7 @@ import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
 import { authStore } from '../stores/authStore'
+import RecentRequests from '../components/RecentRequests'
 
 const Test = observer(() => {
     const [receiverId, setReceiverId] = useImmer('')
@@ -34,7 +35,9 @@ const Test = observer(() => {
                         requestStore.message = e.target.value
                     })}
                 />
-                <button onClick={() => requestStore.sendMakeFriendRequest(parseInt(receiverId))}>发送</button>
+                <button onClick={() => requestStore.sendMakeFriendRequest(parseInt(receiverId))}>
+                    发送
+                </button>
             </div>
             <div>
                 <input
@@ -44,18 +47,25 @@ const Test = observer(() => {
                         setApproveId(e.target.value)
                     }}
                 />
-                <button onClick={action(() => {requestStore.approveRequest(parseInt(approveId))})}>同意</button>
+                <button onClick={action(() => requestStore.approveRequest(parseInt(approveId)))}>
+                    同意
+                </button>
             </div>
             <input
-                    placeholder="拒绝的Id"
-                    value={refuseId}
-                    onChange={(e) => {
-                        setRefusedId(e.target.value)
-                    }}
-                />
-                <button onClick={action(() => {requestStore.refuseRequest(parseInt(refuseId))})}>拒绝</button>
+                placeholder="拒绝的Id"
+                value={refuseId}
+                onChange={(e) => {
+                    setRefusedId(e.target.value)
+                }}
+            />
+            <button
+                onClick={action(() => {
+                    requestStore.refuseRequest(parseInt(refuseId))
+                })}>
+                拒绝
+            </button>
             <div>
-
+                <RecentRequests requestStore={requestStore} />
             </div>
         </div>
     )

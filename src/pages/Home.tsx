@@ -7,22 +7,38 @@ import { ChatId, ChatStore, chatStore } from "../stores/chatStore"
 import { TabContent } from "../components/TabContent"
 import { NoneActiveChatBody } from "../components/NoneActiveChatBody"
 import { ChatView } from "../components/ChatView/ChatView"
+import { autorun } from "mobx"
+import { requestStore } from "../stores/requestStore"
 
 
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore, chatStore : ChatStore}) => {
         const [activeChatId, setActiveChatId] = useState<ChatId | null>(null)
         const navigate = useNavigate()
-
+        useEffect(()=> {
+            const errorFucker = autorun(() => {
+                if (authStore.errors !== '') alert(authStore.errors)
+            }
+            )
+            return errorFucker
+        }, [])
+        useEffect(()=> {
+            const errorFucker = autorun(() => {
+                if (requestStore.errors !== '') alert(requestStore.errors)
+        })
+            return errorFucker
+        }, [])
         if (authStore.state !== AuthState.Logged) {
             setTimeout(() => {
-               navigate('/login') 
+                navigate('/login') 
             }, 1000);
             return <div>未登录，即将跳转回登录界面</div>
         }
 
         return (<>
+        {/* <button onClick={() => {navigate('/test')}}>测试</button> */}
             <Menu/>
+            <p>{authStore.userId}</p>
             <TabContent activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
             {
                 activeChatId === null ?
