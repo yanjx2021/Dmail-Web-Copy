@@ -15,6 +15,21 @@ export class LocalDatabase {
     static messageIndex(chatId : number, inChatId : number) {
         return `chat:${chatId}:${inChatId}`
     }
+    static chatInfoIndex(chatId : number) {
+        return `chat:${chatId}:info`
+    }
+
+    static async loadChatInfo(chatId : number) {
+        return localforage.getItem<string>(this.chatInfoIndex(chatId)).then((serialized) => {
+            if (serialized == null) {
+                MessageServer.Instance().send<Send.GetChatInfo>(Send.GetChatInfo, chatId)
+                return 
+            }
+            const info = JSON.parse(serialized)
+            chatStore.setChatInfo(info)
+        })
+    }
+
 
     static async saveMessage(chatId : number, msg : ChatMessage) {
         const serialized = msg.serialized(chatId)
@@ -53,8 +68,10 @@ export class LocalDatabase {
         // TODO 
         if (unknown.length < 4) {
             // 逐个
+
         } else {
             // 合批
+            
         }
 
         const endId = Math.max(...unknown);

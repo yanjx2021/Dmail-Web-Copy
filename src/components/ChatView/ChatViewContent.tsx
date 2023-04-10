@@ -50,7 +50,7 @@ export const ChatMessageContent = observer(
                 data={messages}
                 startReached={prependItems}
                 itemContent={itemContent}
-                atBottomStateChange={(bottom) => setAtBottom(bottom)}
+                atBottomStateChange={setAtBottom}
                 followOutput={'auto'}
             />
             { showButton && (

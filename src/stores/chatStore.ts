@@ -9,6 +9,7 @@ import { ReceiveSendMessageResponseData } from "../utils/message"
 import { timestamp } from "rxjs"
 import { Updater } from "use-immer"
 import { LocalDatabase } from "./localData"
+import { User, UserStore, userStore } from "./userStore"
 
 export type ChatId = number
 
@@ -86,6 +87,12 @@ export class ChatMessage {
 
 }
 
+export enum ChatType {
+    Private,
+    Group,
+    Unknown
+}
+
 export class Chat {
     private messages : Map<MessageId, ChatMessage> = new Map()
     private sendingMessages : ChatMessage[] = []
@@ -94,8 +101,12 @@ export class Chat {
 
     errors = ""
 
-    name : string = ""
     chatId : ChatId = 0
+    chatType : ChatType = ChatType.Unknown
+
+    name : string = ""  
+    avaterPath : string = ""
+    bindUser : User | null = null
 
     lastMessage : ChatMessage | undefined = undefined
     readCursor : number = 0
@@ -113,6 +124,24 @@ export class Chat {
 
     get unreadCount() {
         return this.lastMessage === undefined ? 0 : this.lastMessage.inChatId! - this.readCursor
+    }
+
+    setChatInfo(info : any) {
+        // TODO : More Typescript
+        
+        if ("name" in info) {
+            // 群聊
+            this.name = info.name
+            this.avaterPath = info.avaterPath
+        } else {
+            // 私聊
+            const users : [number, number] = info.users
+            const otherId = (users[0] === authStore.userId ? users[1] : users[0])
+
+            this.bindUser = userStore.getUser(otherId)
+        }
+
+        // TODO : SaveChatInfo
     }
 
     setMessage(msg : ChatMessage) {
@@ -141,7 +170,7 @@ export class Chat {
         const msg = ChatMessage.getLoadingMessage(inChatId)
         this.messages.set(inChatId, msg)
         // TODO : 从本地数据库拉取数据
-
+        
 
         return msg
     }
@@ -213,12 +242,6 @@ export class Chat {
         chatMsg.inChatId = response.inChatId
         chatMsg.state = ChatMessageState.Arrived
 
-        // if (setViewMessages) {
-        //     setViewMessages((draft) => {
-        //         draft.push(chatMsg)
-        //     })
-        // }
-
         this.setMessage(chatMsg)
     }
 }
@@ -236,26 +259,38 @@ export class ChatStore {
         makeAutoObservable(this, {}, {autoBind : true})
 
         MessageServer.on(Receive.PullResponse, this.ReceivePullResponseHandler)
-        MessageServer.on(Receive.Message, (data : SerializedReceiveChatMessage) => this.ReceiveMessageHandler(data, true))
+        MessageServer.on(Receive.Message, this.ReceiveMessageHandler)
         MessageServer.on(Receive.SendMessageResponse, this.ReceiveSendMessageResponseHandler)
-        MessageServer.on(Receive.Messages, (data : SerializedReceiveChatMessage[]) => this.ReceiveMessagesHandler(data))
+        MessageServer.on(Receive.Messages, this.ReceiveMessagesHandler)
+        MessageServer.on(Receive.Chat, this.ReceiveChatInfoHandler)
     }
 
-    get chatListView() {
+    get recentChatsView() {
+        // 1.数据有序
+        // 2.timestamp在一定范围
+
         // TODO : listView使用二叉树维护
+        // O(nlogn + rank) => O(rank+logn)
         const chatArray : Chat[] = []
         this.chats.forEach((chat) => {
             if (chat.lastMessage !== undefined) {
                 chatArray.push(chat)
             }
         })
-
+    
         chatArray.sort((a, b) => b.lastMessage!.timestamp - a.lastMessage!.timestamp)
         return chatArray
     }
 
-    setChatInfo(chatInfo : any) {
+    // get allChatsView() {
+        // assigned to lzy
+        // O(n)
+    // }
 
+
+    setChatInfo(info : any) {
+        // TODO : More Typescript
+        this.getChat(info.id).setChatInfo(info)
     }
 
     getChat(chatId : ChatId) {
@@ -264,7 +299,8 @@ export class ChatStore {
         }
         const ret = Chat.getLoadingChat(chatId)
         this.chats.set(chatId, ret)
-        // TODO : 从本地数据库拉取数据
+
+        LocalDatabase.loadChatInfo(chatId)
         return ret
     }
 
@@ -272,19 +308,14 @@ export class ChatStore {
         this.getChat(response.chatId).handleSendMessageResponse(response, response.chatId === this.activeChatId ? this.setViewMessages : undefined)
     }
 
-    private ReceiveMessageHandler(serialized : SerializedReceiveChatMessage, append : boolean) {
+    private ReceiveMessageHandler(serialized : SerializedReceiveChatMessage) {
         const receiveMessage : ReceiveChatMessage = JSON.parse(serialized)
         
-        if (receiveMessage === undefined) {
-            console.log("Message解析失败")
-            return
-        }
         const chat = this.getChat(receiveMessage.chatId)
 
-        let msg = ChatMessage.createFromReciveMessage(receiveMessage)
+        const msg = ChatMessage.createFromReciveMessage(receiveMessage)
 
-        if (append && receiveMessage.chatId === this.activeChatId && this.setViewMessages) {
-            console.log("refresh")
+        if (receiveMessage.chatId === this.activeChatId && this.setViewMessages) {
             this.setViewMessages((draft) => {
                 draft.push(msg)
             })
@@ -294,15 +325,27 @@ export class ChatStore {
     }
 
     private ReceiveMessagesHandler(serializeds : SerializedReceiveChatMessage[]) {
-        serializeds.forEach((value) => this.ReceiveMessageHandler(value, false))
+        let chat : Chat | undefined = undefined 
+        for (let i = 0; i < serializeds.length; i++) {
+            const receiveMessage : ReceiveChatMessage = JSON.parse(serializeds[i])
+
+            if (chat === undefined || chat!.chatId !== receiveMessage.chatId) {
+                chat = this.getChat(receiveMessage.chatId)
+            }
+
+            const msg = ChatMessage.createFromReciveMessage(receiveMessage)
+
+            chat.setMessage(msg)
+        }
     }
 
     private ReceivePullResponseHandler(data : ReceivePullResponseData) {
         
     }
 
-    private ReceiveChatInfoHandler() {
-
+    private ReceiveChatInfoHandler(data : SerializedReceiveChatMessage) {
+        const chatInfo = JSON.parse(data)
+        this.setChatInfo(chatInfo)
     }
 
 }

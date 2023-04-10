@@ -1,3 +1,5 @@
+import { ChatId } from "../stores/chatStore"
+
 /*--------------------Receive数据类型----------------------*/
 export enum SetConnectionPubKeyState {
     NeedSetPubKey = 'NeedSetPubKey',
@@ -214,6 +216,7 @@ export interface SendGetMessagesData {
     endId : number
 }
 
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -228,7 +231,8 @@ export enum Send {
     GetUserInfo = 'GetUserInfo',
     SendRequest = 'SendRequest',
     SolveRequest = 'SolveRequest',
-    GetMessages = 'GetMessages'
+    GetMessages = 'GetMessages',
+    GetChatInfo = 'GetChatInfo',
 }
 
 // COMMAND和DATA类型捆绑
@@ -268,6 +272,7 @@ export interface MessageSendData {
     [Send.SendRequest]: SendUserSendRequestData
     [Send.SolveRequest]: SendSolveRequestData
     [Send.GetMessages]: SendGetMessagesData
+    [Send.GetChatInfo] : ChatId
 }
 
 // 封装消息包

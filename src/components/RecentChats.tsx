@@ -55,7 +55,7 @@ export const RecentChats = observer(({ chatStore, activeChatId, setActiveChatId}
                 <li className="header d-flex justify-content-between ps-3 pe-3 mb-1">
                     <span>最近的对话</span>
                 </li>
-                {chatStore.chatListView.map((chat) => <RecentChatItem chat={chat} activeChatId={activeChatId} setActiveChatId={setActiveChatId} key={chat.chatId}/>)}
+                {chatStore.recentChatsView.map((chat) => <RecentChatItem chat={chat} activeChatId={activeChatId} setActiveChatId={setActiveChatId} key={chat.chatId}/>)}
             </ul>
         </div>
     )
