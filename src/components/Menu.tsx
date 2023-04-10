@@ -1,8 +1,13 @@
+import { authStore } from '../stores/authStore'
+
 const Menu = () => {
     return (
         <div className="navigation navbar justify-content-center py-xl-4 py-md-3 py-0 px-3">
-            <a href="/home" title="dMail" className="brand">
-                <img src="assets/logo.jpg" className="avatar md rounded-circle " />
+            <a href="/home" title="dMail" className="brand" onClick={(e) => e.preventDefault()}>
+                {/* <img src="assets/logo.jpg" className="avatar md rounded-circle " /> */}
+                <div className="avatar rounded-circle no-image timber">
+                    <span>{authStore.userId}</span>
+                </div>
             </a>
             <div
                 className="nav flex-md-column nav-pills flex-grow-1"

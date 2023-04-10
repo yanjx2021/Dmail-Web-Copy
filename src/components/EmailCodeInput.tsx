@@ -24,19 +24,36 @@ export const EmailCodeInput = (props: {
     )
 
     const onSendEmailButtonClicked = useCallback(() => {
+        if (email === '') {
+            setErrors('邮箱不能为空')
+            return
+        }
         if (!emailTester.test(email)) {
             setErrors('邮箱格式错误')
             return
         }
-        axios.post('/api/email/code', { email: email })
         setCurCoolDown(emailCodeCoolDown)
         const timer = setInterval(() => {
             setCurCoolDown((curCoolDown) => curCoolDown - 1)
         }, 1000)
-        setTimeout(() => {
+        const timeouter = setTimeout(() => {
             setCurCoolDown(0)
             clearInterval(timer)
         }, emailCodeCoolDown * 1000)
+        axios
+            .post('/api/email/code', { email: email })
+            .then((response) => {
+                if (response.status !== 200) {
+                    setCurCoolDown(0)
+                    clearTimeout(timeouter)
+                    alert(`发送失败：错误值${response.status}`)
+                }
+            })
+            .catch(() => {
+                setCurCoolDown(0)
+                clearTimeout(timeouter)
+                alert('发送失败：网络环境异常，请检查网络')
+            })
     }, [email, setCurCoolDown])
 
     return (

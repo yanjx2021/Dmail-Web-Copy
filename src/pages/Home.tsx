@@ -38,7 +38,6 @@ const Home = observer(
         return (<>
         {/* <button onClick={() => {navigate('/test')}}>测试</button> */}
             <Menu/>
-            <p>{authStore.userId}</p>
             <TabContent activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
             {
                 activeChatId === null ?
