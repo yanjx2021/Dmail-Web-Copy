@@ -1,3 +1,5 @@
+import { RequestState } from "../stores/requestStore"
+
 /*--------------------Receive数据类型----------------------*/
 export enum SetConnectionPubKeyState {
     NeedSetPubKey = 'NeedSetPubKey',
@@ -63,18 +65,23 @@ export enum SendRequestResponseState {
     Success = 'Success',
 }
 export interface ReceiveSendRequestResponseData {
-    state: SendRequestResponseState
+    state: SendRequestResponseState | any
     type?: 'MakeFriend' | 'JoinGroup'
     errorType?: "AlreadyBeFrineds" | 'SameUser' | 'AlreadyInGroup'
     reqId?: number
     clientId?: number
 }
 
-export enum ReceiveSolveRequestResponseData {
+export enum ReceiveSolveRequestResponseState {
     Success = 'Success',
     DatabaseError = 'DatabaseError',
     NotHandler = 'NotHandler',
     Unsolved = 'Unsolved',
+}
+
+export interface ReceiveSolveRequestResponseData {
+    state: ReceiveSolveRequestResponseState
+    reqId: number
 }
 
 export enum PullResponseState {
@@ -137,6 +144,16 @@ export interface ReceiveGetUserInfoResponseData {
     state: ReceiveGetUserInfoResponseState
 }
 
+export interface ReceiveRequestStateUpdateData {
+    reqId: number
+    state: RequestState
+}
+
+export interface ReceiveCreateGroupChatResponse {
+    state: 'Success' | 'DatabaseError'
+    chatId?: number
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -160,6 +177,9 @@ export enum Receive {
     Requests = 'Requests',
     UpdateRequest = 'UpdateRequest',
     UpdateMessage = 'UpdateMessage',
+    RequestStateUpdate = 'RequestStateUpdate',
+    CreateGroupChatResponse = 'CreateGroupChatResponse',
+
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -204,6 +224,10 @@ export interface SendSolveRequestData {
     reqId: number,
     answer: 'Refused' | 'Approved'
 }
+export interface SendCreateGroupChatData {
+    name: string,
+    avatarPath: string
+}
 
 /*--------------------Send数据类型----------------------*/
 
@@ -219,6 +243,7 @@ export enum Send {
     GetUserInfo = 'GetUserInfo',
     SendRequest = 'SendRequest',
     SolveRequest = 'SolveRequest',
+    CreateGroupChat = 'CreateGroupChat'
 }
 
 // COMMAND和DATA类型捆绑
@@ -243,6 +268,8 @@ export interface MessageReceiveData {
     [Receive.UpdateRequest]: UserRequest
     [Receive.UpdateMessage]: ReceiveChatMessage
     [Receive.GetUserInfoResponse]: ReceiveGetUserInfoResponseData
+    [Receive.RequestStateUpdate]: ReceiveRequestStateUpdateData
+    [Receive.CreateGroupChatResponse]: ReceiveCreateGroupChatResponse
 }
 
 export interface MessageSendData {
@@ -257,6 +284,7 @@ export interface MessageSendData {
     [Send.GetUserInfo]: number
     [Send.SendRequest]: SendUserSendRequestData
     [Send.SolveRequest]: SendSolveRequestData
+    [Send.CreateGroupChat]: SendCreateGroupChatData
 }
 
 // 封装消息包
