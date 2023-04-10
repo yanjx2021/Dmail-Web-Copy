@@ -36,7 +36,7 @@ export class ChatMessage {
     static getLoadingMessage(inChatId : ChatId) {
         return new ChatMessage(
             {
-                text : `正在加载${inChatId}`,
+                text : `消息${inChatId}`,
                 inChatId : inChatId,
                 timestamp : 0,
                 senderId : 0,
@@ -104,8 +104,9 @@ export class Chat {
     chatId : ChatId = 0
     chatType : ChatType = ChatType.Unknown
 
-    name : string = ""  
-    avaterPath : string = ""
+    groupName : string | null = ""  
+    groupAvaterPath : string | null = ""
+
     bindUser : User | null = null
 
     lastMessage : ChatMessage | undefined = undefined
@@ -117,9 +118,17 @@ export class Chat {
 
     static getLoadingChat(chatId : ChatId) {
         let ret = new Chat()
-        ret.name = "正在加载"
         ret.chatId = chatId
         return ret
+    }
+
+    get name() {
+        if (this.chatType === ChatType.Unknown) {
+            return `群聊${this.chatId}`
+        } else if (this.chatType === ChatType.Private) {
+            return this.bindUser!.name
+        }
+        return this.groupName!
     }
 
     get unreadCount() {
@@ -131,14 +140,16 @@ export class Chat {
         
         if ("name" in info) {
             // 群聊
-            this.name = info.name
-            this.avaterPath = info.avaterPath
+            this.groupName = info.name
+            this.groupAvaterPath = info.avaterPath
+            this.chatType = ChatType.Group
         } else {
             // 私聊
             const users : [number, number] = info.users
             const otherId = (users[0] === authStore.userId ? users[1] : users[0])
 
             this.bindUser = userStore.getUser(otherId)
+            this.chatType = ChatType.Private
         }
 
         // TODO : SaveChatInfo
@@ -290,6 +301,7 @@ export class ChatStore {
 
     setChatInfo(info : any) {
         // TODO : More Typescript
+        
         this.getChat(info.id).setChatInfo(info)
     }
 
@@ -297,6 +309,7 @@ export class ChatStore {
         if (this.chats.has(chatId)) {
             return this.chats.get(chatId)!
         }
+        console.log("chatID ", chatId)
         const ret = Chat.getLoadingChat(chatId)
         this.chats.set(chatId, ret)
 

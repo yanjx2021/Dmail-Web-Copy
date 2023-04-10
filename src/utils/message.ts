@@ -255,7 +255,7 @@ export enum Send {
     GetUserInfo = 'GetUserInfo',
     SendRequest = 'SendRequest',
     SolveRequest = 'SolveRequest',
-    CreateGroupChat = 'CreateGroupChat'
+    CreateGroupChat = 'CreateGroupChat',
     GetMessages = 'GetMessages',
     GetChatInfo = 'GetChatInfo',
 }
