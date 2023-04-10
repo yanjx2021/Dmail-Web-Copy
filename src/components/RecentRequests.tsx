@@ -47,44 +47,49 @@ const RequestItemStatus = observer(
     }
 )
 
-const RequestFriendItem = ({
-    message,
-    reqId,
-    senderId,
-    receiverId,
-    state,
-}: {
-    message: string
-    reqId: number
-    senderId: number
-    receiverId: number
-    state: RequestState
-}) => {
-    return (
-        <li>
-            <a className="card">
-                <div className="card-body">
-                    <div className="media">
-                        <div className="avatar me-3">
-                            <span className="rounded-circle"></span>
-                            <div className="avatar rounded-circle no-image timber">
-                                <span>{reqId}</span>
+const RequestFriendItem = observer(
+    ({
+        message,
+        reqId,
+        senderId,
+        receiverId,
+        state,
+    }: {
+        message: string
+        reqId: number
+        senderId: number
+        receiverId: number
+        state: RequestState
+    }) => {
+        return (
+            <li>
+                <a className="card">
+                    <div className="card-body">
+                        <div className="media">
+                            <div className="avatar me-3">
+                                <span className="rounded-circle"></span>
+                                <div className="avatar rounded-circle no-image timber">
+                                    <span>{reqId}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="apply-media-body overflow-hidden">
-                            <div className="d-flex align-items-center mb-1">
-                                <h6 className="text-truncate mb-0 me-auto">名字</h6>
+                            <div className="apply-media-body overflow-hidden">
+                                <div className="d-flex align-items-center mb-1">
+                                    <h6 className="text-truncate mb-0 me-auto">
+                                        {senderId === authStore.userId
+                                            ? `发给${receiverId}`
+                                            : `来自${senderId}`}
+                                    </h6>
+                                </div>
+                                <div className="text-truncate">{message}</div>
                             </div>
-                            <div className="text-truncate">{message}</div>
+                            <RequestItemStatus senderId={senderId} state={state} reqId={reqId} />
                         </div>
-                        <RequestItemStatus senderId={senderId} state={state} reqId={reqId} />
                     </div>
-                </div>
-            </a>
-        </li>
-    )
-}
-
+                </a>
+            </li>
+        )
+    }
+)
 const RequestGroupItem = ({
     message,
     reqId,
@@ -198,7 +203,9 @@ const AddFriendBox = observer(() => {
                                     type="text"
                                     className="form-control"
                                     value={requestStore.message}
-                                    onChange={action((e) => requestStore.message = e.target.value)}
+                                    onChange={action(
+                                        (e) => (requestStore.message = e.target.value)
+                                    )}
                                 />
                             </div>
                         </form>
@@ -206,7 +213,10 @@ const AddFriendBox = observer(() => {
                             <button
                                 type="button"
                                 className="btn btn-primaty"
-                                onClick={() => requestStore.sendMakeFriendRequest(parseInt(reqId))}>
+                                onClick={() => {
+                                    requestStore.sendMakeFriendRequest(parseInt(reqId))
+                                    setReqId('')
+                                }}>
                                 发送请求
                             </button>
                         </div>

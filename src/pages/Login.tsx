@@ -4,6 +4,7 @@ import { action, autorun } from 'mobx'
 import { EmailCodeInput } from '../components/EmailCodeInput'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
+import { ErrorBox } from '../components/ErrorBox'
 
 const EmailInput = observer(({ authStore }: { authStore: AuthStore }) => {
     return (
@@ -80,7 +81,7 @@ const LoginCard = observer(({ authStore }: { authStore: AuthStore }) => {
                     <span className="ms-2 todo_name">记住我</span>
                     <span className="checkmark"></span>
                 </label>
-                <NavLink to="/test" className="link">
+                <NavLink to="/" className="link">
                     重置密码
                 </NavLink>
             </div>
@@ -102,16 +103,13 @@ const LoginCard = observer(({ authStore }: { authStore: AuthStore }) => {
     )
 })
 
-export const LoginPage = () => {
+export const LoginPage = observer(() => {
     const navigate = useNavigate()
     useEffect(() => {
         autorun(() => {
             if (authStore.state === AuthState.Logged) {
                 navigate('/home')
             }
-        })
-        autorun(() => {
-            console.log(authStore.errors)
         })
     }, [navigate])
     return (
@@ -121,6 +119,15 @@ export const LoginPage = () => {
                     <div className="row align-items-center justify-content-center no-gutters min-vh-100">
                         <div className="col-12 col-md-7 col-lg-5 col-xl-4 py-md-11">
                             <div className="card border-0 shadow-sm">
+                                {authStore.showError ? (
+                                    <ErrorBox
+                                        title="登陆失败"
+                                        error={authStore.errors}
+                                        setError={action((error) => (authStore.errors = error))}
+                                    />
+                                ) : (
+                                    <></>
+                                )}
                                 <LoginCard authStore={authStore} />
                             </div>
                         </div>
@@ -129,4 +136,4 @@ export const LoginPage = () => {
             </div>
         </div>
     )
-}
+})

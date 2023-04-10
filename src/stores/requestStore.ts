@@ -109,17 +109,25 @@ export class RequestStore {
         MessageServer.on(Receive.SendRequestResponse, this.sendRequestResponseHandler)
         MessageServer.on(Receive.SolveRequestResponse, this.solveRequestResponseHandler)
         MessageServer.on(Receive.RequestStateUpdate, this.requestStateUpdateHandler)
+        MessageServer.on(Receive.Requests, this.receiveRequestsHandler)
     }
     toggleClientId() {
         this.clientId++
     }
 
     get requestsList() {
-        const requests : {message: string, reqId: number, senderId: number, content: RequestContent, state: RequestState}[] = []
+        const unsolvedRequests : {message: string, reqId: number, senderId: number, content: RequestContent, state: RequestState}[] = []
+        const waitintSolvedRequests : {message: string, reqId: number, senderId: number, content: RequestContent, state: RequestState}[] = []
+        const solvedRequests : {message: string, reqId: number, senderId: number, content: RequestContent, state: RequestState}[] = []
         this.requests.forEach((req, reqId) => {
-            requests.push({message: req.message, reqId: reqId, senderId: req.senderId, content: req.content, state: req.state})
+            if (req.state === RequestState.Unsolved) {
+                if (req.senderId !== authStore.userId) unsolvedRequests.push({message: req.message, reqId: reqId, senderId: req.senderId, content: req.content, state: req.state})
+                else waitintSolvedRequests.push({message: req.message, reqId: reqId, senderId: req.senderId, content: req.content, state: req.state})
+            } else {
+                solvedRequests.push({message: req.message, reqId: reqId, senderId: req.senderId, content: req.content, state: req.state})
+            }
         })
-        return requests
+        return unsolvedRequests.concat(waitintSolvedRequests, solvedRequests)
     }
     get requestStashList() {
         const requests: {message: string, reqId: number}[] = []
@@ -241,6 +249,15 @@ export class RequestStore {
         const req: ReceiveRequest = JSON.parse(data)
         this.setRequest(Request.createFromReceiveRequest(req))
     }
+    receiveRequestsHandler(data: string[]) {
+        console.log(data)
+        const reqs: ReceiveRequest[] = data.map((serializedReq) => JSON.parse(serializedReq))
+        console.log('reqs', reqs)
+        reqs.forEach((req, index) => {
+            this.setRequest(Request.createFromReceiveRequest(req))
+        })
+    }
+
     approveRequest(reqId: number) {
         const req = this.requests.get(reqId)
         if (req === undefined) {

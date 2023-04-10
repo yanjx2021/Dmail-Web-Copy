@@ -25,6 +25,7 @@ export enum LoginResponseState {
     PasswordError = 'PasswordError',
     ServerError = 'ServerError',
     NeedLogin = 'NeedLogin',
+    EmailCodeError = 'EmailCodeError',
 }
 export interface ReceiveLoginResponseData {
     state: LoginResponseState

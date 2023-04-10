@@ -1,7 +1,7 @@
 import { MessageSendData, Send, Receive, DataType } from './message'
 import Crypto from './cipher'
 
-const server_address = "ws://127.0.0.1:8080/ws"
+const server_address = "ws://43.143.134.180:8080/ws"
 
 export type Callback = (e: Event) => void
 export type MessageCallback = (msg: DataType<Receive>) => void
@@ -33,37 +33,32 @@ export interface Distributer {
     [Receive.UpdateMessage]: Function
 }
 
-export class Heart {
-    private static readonly timeout: number = 5000
-    private heartTimeOut!: number
-    private serverHeartTimeOut!: number
-    reset() {
-        clearTimeout(this.heartTimeOut)
-        clearTimeout(this.serverHeartTimeOut)
-        return this
-    }
-    start(callback: Callback) {
-        this.heartTimeOut = setTimeout((e: Event) => {
-            callback(e)
-            this.serverHeartTimeOut = setTimeout((e: Event) => {
-                callback(e)
-                this.reset().start(callback)
-            }, Heart.timeout)
-        }, Heart.timeout)
-    }
-}
-
-export class MessageServer extends Heart {
+export class MessageServer {
     private static instance: MessageServer | null = null
     private static events: any = {}
     private websocket : WebSocket 
     private cipher : Crypto
+    private timer: any
+    private timeout: number = 8000
     
     constructor() {
-        super()
         this.websocket = this.createWebsocket()
         this.cipher = new Crypto()
     }
+
+    setHeartBeat(timeout: number) {
+        this.timer = setInterval(() => {
+            this.send<Send.Ping>(Send.Ping)
+        }, timeout)
+    }
+    resetHeartBeat() {
+        this.clearHeartBeat()
+        this.setHeartBeat(this.timeout)
+    }
+    clearHeartBeat() {
+        clearInterval(this.timer)
+    }
+
     static Instance() {
         if (this.instance === null) {
             this.instance = new MessageServer()
@@ -74,6 +69,8 @@ export class MessageServer extends Heart {
         return this.instance
     }
     static destroyInstance() {
+        this.instance?.websocket.close()
+        this.instance?.clearHeartBeat()
         this.instance = null
     }
     static on(command: Receive, callback: Function) {
@@ -84,6 +81,7 @@ export class MessageServer extends Heart {
             console.log('handle of ' + command + 'has been off')
         }
     }
+
     sendAny(command: string, data: any) {
         console.log({
             command: command,
@@ -96,6 +94,7 @@ export class MessageServer extends Heart {
             })
         )
     }
+
     send<T extends Send>(...args: SendArgumentsType<T>) {
         if (this.websocket?.readyState !== this.websocket?.OPEN || !this.cipher.hasAES) {
             setTimeout(() => {
@@ -141,12 +140,15 @@ export class MessageServer extends Heart {
                     data: this.cipher.sendKey,
                 })
             )
+            this.setHeartBeat(this.timeout)
         }
         websocket.onerror = (ev) => {
             console.log(ev)
+            this.clearHeartBeat()
         }
         websocket.onclose = (ev) => {
             console.log(ev)
+            this.clearHeartBeat()
         }
 
         return websocket
