@@ -1,3 +1,7 @@
+import { RequestState } from "../stores/requestStore"
+
+import { ChatId } from "../stores/chatStore"
+
 /*--------------------Receive数据类型----------------------*/
 export enum SetConnectionPubKeyState {
     NeedSetPubKey = 'NeedSetPubKey',
@@ -21,6 +25,7 @@ export enum LoginResponseState {
     PasswordError = 'PasswordError',
     ServerError = 'ServerError',
     NeedLogin = 'NeedLogin',
+    EmailCodeError = 'EmailCodeError',
 }
 export interface ReceiveLoginResponseData {
     state: LoginResponseState
@@ -33,6 +38,8 @@ export enum RegisterResponseState {
     PasswordFormatError = 'PasswordFormatError',
     EmailRegistered = 'EmailRegistered',
     ServerError = 'ServerError',
+    EmailCodeError = 'EmailCodeError',
+    EmailInvalid = 'EmailInvalid'
 }
 export interface ReceiveRegisterResponseData {
     state: RegisterResponseState
@@ -51,7 +58,9 @@ export enum SendMessageResponseState {
 export interface ReceiveSendMessageResponseData {
     state: SendMessageResponseState
     clientId: number
-    serverId: number
+    chatId : number
+    inChatId?: number
+    timestamp?: number
 }
 
 export enum SendRequestResponseState {
@@ -59,16 +68,23 @@ export enum SendRequestResponseState {
     Success = 'Success',
 }
 export interface ReceiveSendRequestResponseData {
-    state: SendRequestResponseState
-    reqId: number
-    clientId: number
+    state: SendRequestResponseState | any
+    type?: 'MakeFriend' | 'JoinGroup'
+    errorType?: "AlreadyBeFrineds" | 'SameUser' | 'AlreadyInGroup'
+    reqId?: number
+    clientId?: number
 }
 
-export enum ReceiveSolveRequestResponseData {
+export enum ReceiveSolveRequestResponseState {
     Success = 'Success',
     DatabaseError = 'DatabaseError',
     NotHandler = 'NotHandler',
     Unsolved = 'Unsolved',
+}
+
+export interface ReceiveSolveRequestResponseData {
+    state: ReceiveSolveRequestResponseState
+    reqId: number
 }
 
 export enum PullResponseState {
@@ -78,25 +94,25 @@ export enum PullResponseState {
 export interface ReceivePullResponseData {
     // TODO
     state: PullResponseState
-    chats: [number, number][]
-    messages: string[]
-    requests: Request[]
 }
 
-export interface ChatInfo {
+export interface ReceiveChatInfo {
     id: number
     name: string
     avater: string
 }
 
-export interface ChatMessage {
-    serverId: number
+export type SerializedReceiveChatInfo = string
+
+export interface ReceiveChatMessage {
     chatId: number
     senderId: number
     inChatId: number
     text: string
     timestamp: number
 }
+
+export type SerializedReceiveChatMessage = string
 
 export enum UserRequestState {
     Unsolved = 'Unsolved',
@@ -121,6 +137,8 @@ export interface UserRequest {
     state: UserRequestState
 }
 
+export type SerializedUserRequest = string
+
 export enum ReceiveGetUserInfoResponseState {
     Success = 'Success',
     UserNotFound = 'UserNotFound',
@@ -130,6 +148,16 @@ export enum ReceiveGetUserInfoResponseState {
 export interface ReceiveGetUserInfoResponseData {
     // TODO
     state: ReceiveGetUserInfoResponseState
+}
+
+export interface ReceiveRequestStateUpdateData {
+    reqId: number
+    state: RequestState
+}
+
+export interface ReceiveCreateGroupChatResponse {
+    state: 'Success' | 'DatabaseError'
+    chatId?: number
 }
 
 /*--------------------Receive数据类型----------------------*/
@@ -149,12 +177,15 @@ export enum Receive {
     PullResponse = 'PullResponse',
     Chat = 'Chat',
     Chats = 'Chats',
-    Messages = 'Messages',
     Message = 'Message',
+    Messages = 'Messages',
     Request = 'Request',
     Requests = 'Requests',
     UpdateRequest = 'UpdateRequest',
     UpdateMessage = 'UpdateMessage',
+    RequestStateUpdate = 'RequestStateUpdate',
+    CreateGroupChatResponse = 'CreateGroupChatResponse',
+
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -173,8 +204,8 @@ export interface SendLoginData {
 export interface SendSendMessageData {
     clientId: number
     chatId: number
+    timestamp : number
     text: string
-    timestamp: number
 }
 
 export interface SendPullData {
@@ -195,6 +226,22 @@ export interface SendUserSendRequestData {
     clientId: number
 }
 
+export interface SendSolveRequestData {
+    reqId: number,
+    answer: 'Refused' | 'Approved'
+}
+export interface SendCreateGroupChatData {
+    name: string,
+    avatarPath: string
+}
+
+export interface SendGetMessagesData {
+    chatId: number,
+    startId : number,
+    endId : number
+}
+
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -208,6 +255,10 @@ export enum Send {
     Pull = 'Pull',
     GetUserInfo = 'GetUserInfo',
     SendRequest = 'SendRequest',
+    SolveRequest = 'SolveRequest',
+    CreateGroupChat = 'CreateGroupChat',
+    GetMessages = 'GetMessages',
+    GetChatInfo = 'GetChatInfo',
 }
 
 // COMMAND和DATA类型捆绑
@@ -223,15 +274,17 @@ export interface MessageReceiveData {
     [Receive.SendRequestResponse]: ReceiveSendRequestResponseData
     [Receive.SolveRequestResponse]: ReceiveSolveRequestResponseData
     [Receive.PullResponse]: ReceivePullResponseData
-    [Receive.Chat]: ChatInfo
-    [Receive.Chats]: ChatInfo[]
-    [Receive.Messages]: ChatMessage[]
-    [Receive.Message]: ChatMessage
-    [Receive.Request]: UserRequest
-    [Receive.Requests]: UserRequest[]
+    [Receive.Chat]: SerializedReceiveChatInfo
+    [Receive.Chats]: SerializedReceiveChatInfo[]
+    [Receive.Messages]: SerializedReceiveChatMessage[]
+    [Receive.Message]: SerializedReceiveChatMessage
+    [Receive.Request]: SerializedUserRequest
+    [Receive.Requests]: SerializedUserRequest[]
     [Receive.UpdateRequest]: UserRequest
-    [Receive.UpdateMessage]: ChatMessage
+    [Receive.UpdateMessage]: ReceiveChatMessage
     [Receive.GetUserInfoResponse]: ReceiveGetUserInfoResponseData
+    [Receive.RequestStateUpdate]: ReceiveRequestStateUpdateData
+    [Receive.CreateGroupChatResponse]: ReceiveCreateGroupChatResponse
 }
 
 export interface MessageSendData {
@@ -245,6 +298,10 @@ export interface MessageSendData {
     [Send.Pull]: SendPullData
     [Send.GetUserInfo]: number
     [Send.SendRequest]: SendUserSendRequestData
+    [Send.SolveRequest]: SendSolveRequestData
+    [Send.CreateGroupChat]: SendCreateGroupChatData
+    [Send.GetMessages]: SendGetMessagesData
+    [Send.GetChatInfo] : ChatId
 }
 
 // 封装消息包

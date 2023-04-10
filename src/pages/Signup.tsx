@@ -1,240 +1,262 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
-import axios from 'axios'
-import { messageServer } from '../utils/networkWs'
-import { Receive, Send } from '../utils/message'
-import withRouter from '../components/WithRouter'
+import { action, autorun, makeAutoObservable } from 'mobx'
+import { observer } from 'mobx-react-lite'
+import { EmailCodeInput } from '../components/EmailCodeInput'
+import { MessageServer } from '../utils/networkWs'
+import { Receive, ReceiveRegisterResponseData, RegisterResponseState, Send } from '../utils/message'
 import { SHA256 } from 'crypto-js'
-import { emailTest, emailTester, strengthTest } from '../constants/passwordFormat'
-import { passwordTester } from '../constants/passwordFormat'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { emailTester, passwordTester } from '../constants/passwordFormat'
+import { ErrorBox } from '../components/ErrorBox'
 
-interface StateType {
-    email: string
-    password: string
-    cpassword: string
-    emailCode: string
-    userName: string
-    disabled: boolean
-    cooldown: number
-    showPasswordTip: boolean
-    showCpasswordTip: boolean
-    showEmailTip: boolean
+export {}
+
+enum RegisterState {
+    Started,
+    Signuping,
+    Signuped,
 }
 
-// 校验两次输入的密码是否相同
-function passVerification(password1: string, password2: string): boolean {
-    return password1 === password2
-}
+class RegisterStore {
+    state = RegisterState.Started
+    userName: string = ''
+    email: string = ''
+    emailCode: string = ''
+    password: string = ''
+    confirmPassword: string = ''
+    errors: string = ''
+    timer: any
+    timeout: number = 3000
 
-const passwordConsistencyTest = (password1: string, password2: string) => {
-    if (passVerification(password1, password2)) {
-        return <div style={{ color: 'green', position: 'absolute', zIndex: 9999, backgroundColor: 'white' }}>密码相同</div>
-    } else {
-        return <div style={{ color: 'red', position: 'absolute', zIndex: 9999, backgroundColor: 'white' }}>两次密码不一致</div>
+
+    constructor() {
+        makeAutoObservable(this, {}, { autoBind: true })
+        MessageServer.on(Receive.RegisterResponse, this.handleRegisterResponse)
     }
+    private handleRegisterResponse(data: ReceiveRegisterResponseData) {
+        this.state = RegisterState.Started
+        this.errors = ''
+        clearTimeout(this.timer)
+        switch (data.state) {
+            case RegisterResponseState.Success:
+                this.state = RegisterState.Signuped
+                break
+            case RegisterResponseState.EmailRegistered:
+                this.errors = '该邮箱已被注册'
+                break
+            case RegisterResponseState.UserNameFormatError:
+                this.errors = '用户名称格式错误'
+                break
+            case RegisterResponseState.ServerError:
+                this.errors = '服务器异常，请重试'
+                break
+            case RegisterResponseState.PasswordFormatError:
+                this.errors = '密码格式错误'
+                break
+            case RegisterResponseState.EmailCodeError:
+                this.errors = '验证码错误'
+                break
+            case RegisterResponseState.EmailInvalid:
+                this.errors = '邮箱格式错误'
+                break
+        }
+        MessageServer.destroyInstance()
+    }
+    verify(): boolean {
+        if (this.password !== this.confirmPassword) {
+            this.errors = '两次密码不一致'
+            return false
+        }
+        return true
+    }
+
+    signup() {
+        if (this.state === RegisterState.Signuping) {
+            this.errors = '正在注册'
+            return
+        }
+        if (!emailTester.test(this.email)) {
+            this.errors = '邮箱格式错误'
+            this.email = ''
+            return
+        }
+        if (!passwordTester.test(this.password)) {
+            this.errors = '密码格式错误: 请输入长度为8-20, 包含数字和字母的密码'
+            this.password = ''
+            this.confirmPassword = ''
+            return
+        }
+        if (!this.verify()) {
+            this.errors = '两次输入的密码不同，请重新输入'
+            return
+        }
+        if (this.emailCode === '') {
+            this.errors = '验证码不能为空'
+            return
+        }
+        this.timer = setTimeout(action(() => {
+            this.state = RegisterState.Started
+            this.errors = '网络连接超时，请检查网络状况'
+        }), this.timeout)
+        MessageServer.Instance().send<Send.Register>(Send.Register, {
+            userName: this.userName,
+            email: this.email,
+            emailCode: parseInt(this.emailCode),
+            password: SHA256(this.password + 'dmail' + this.email).toString(),
+        })
+        this.state = RegisterState.Signuping
+    }
+
+    get showError(): boolean {
+        return this.errors !== ''
+    }
+
 }
 
-class Signup extends React.Component<any, StateType> {
-    constructor(props: any) {
-        super(props)
-        this.state = {
-            email: '',
-            password: '',
-            cpassword: '',
-            emailCode: '',
-            disabled: false,
-            userName: '',
-            cooldown: 60,
-            showPasswordTip: false,
-            showCpasswordTip: false,
-            showEmailTip: false,
-        }
-        messageServer.on(Receive.RegisterResponse, (data: any) => {
-            if (data.state === 'Success') {
-                props.navigate('/login')
-            } else {
-                alert('注册失败' + data.state)
+const registerStore = new RegisterStore()
+
+const PasswordInput = observer(
+    ({
+        placeholder,
+        registerStore,
+        type,
+    }: {
+        placeholder: '请输入密码' | '请再次输入密码'
+        registerStore: RegisterStore
+        type: 'Password' | 'ConfirmPassword'
+    }) => {
+        return (
+            <div className="input-group mb-2">
+                <input
+                    type="password"
+                    className="form-control form-control-lg"
+                    placeholder={placeholder}
+                    value={
+                        type === 'Password' ? registerStore.password : registerStore.confirmPassword
+                    }
+                    onChange={action((e) => {
+                        if (type === 'Password') {
+                            registerStore.password = e.target.value
+                        } else {
+                            registerStore.confirmPassword = e.target.value
+                        }
+                    })}
+                />
+            </div>
+        )
+    }
+)
+
+const EmailInput = observer(({ registerStore }: { registerStore: RegisterStore }) => {
+    return (
+        <div className="input-group mb-2">
+            <input
+                type="email"
+                className="form-control form-control-lg"
+                placeholder="请输入邮箱"
+                value={registerStore.email}
+                onChange={action((e) => {
+                    registerStore.email = e.target.value
+                })}
+            />
+        </div>
+    )
+})
+
+const UserNameInput = observer(({ registerStore }: { registerStore: RegisterStore }) => {
+    return (
+        <div className="input-group mb-2">
+            <input
+                type="text"
+                className="form-control form-control-lg"
+                placeholder="请输入用户名"
+                value={registerStore.userName}
+                onChange={action((e) => {
+                    registerStore.userName = e.target.value
+                })}
+            />
+        </div>
+    )
+})
+
+
+
+
+const SignupCard = observer(({ registerStore }: { registerStore: RegisterStore }) => {
+    return (
+        <div className="card-body">
+            <h3 className="text-center">注册</h3>
+            <p className="text-center mb-6">欢迎使用dMail</p>
+            <form
+                className="mb-4 mt-5"
+                onSubmit={(e) => {
+                    e.preventDefault()
+                }}>
+                <UserNameInput registerStore={registerStore} />
+                <EmailInput registerStore={registerStore} />
+                <EmailCodeInput
+                    email={registerStore.email}
+                    emailCode={registerStore.emailCode}
+                    setEmailCode={action((code) => {
+                        registerStore.emailCode = code
+                    })}
+                    setErrors={action((error) => {
+                        registerStore.errors = error
+                    })}
+                />
+                <PasswordInput
+                    registerStore={registerStore}
+                    placeholder="请输入密码"
+                    type="Password"
+                />
+                <PasswordInput
+                    registerStore={registerStore}
+                    placeholder="请再次输入密码"
+                    type="ConfirmPassword"
+                />
+                <div className="text-center mt-5">
+                    <button onClick={registerStore.signup} className="btn btn-lg btn-primary">
+                        {registerStore.state === RegisterState.Signuping
+                            ? '注册中...'
+                            : '注册'}
+                    </button>
+                </div>
+            </form>
+            <p className="text-center mb-0">
+                已经拥有账户?
+                <NavLink to="/login" className="link">
+                    登录
+                </NavLink>
+            </p>
+        </div>
+    )
+})
+
+export const SignupPage = observer(() => {
+    const navigate = useNavigate()
+    useEffect(() => {
+        autorun(() => {
+            if (registerStore.state === RegisterState.Signuped) {
+                navigate('/login')
             }
         })
-    }
-
-    handleSubmit = (e: any) => {
-        e.preventDefault()
-    }
-
-    render() {
-        return (
-            <div id="layout" className="theme-cyan">
-                <div className="authentication">
-                    <div className="container d-flex flex-column">
-                        <div className="row align-items-center justify-content-center no-gutters min-vh-100">
-                            <div className="col-12 col-md-7 col-lg-5 col-xl-4 py-md-11">
-                                <div className="card border-0 shadow-sm">
-                                    <div className="card-body">
-                                        <h3 className="text-center">注册</h3>
-                                        <p className="text-center mb-6">欢迎使用dMail</p>
-                                        <form className="mb-4 mt-5" onSubmit={this.handleSubmit}>
-                                            <div className="input-group mb-2">
-                                                <input
-                                                    type="text"
-                                                    className="form-control form-control-lg"
-                                                    placeholder="请输入用户名"
-                                                    value={this.state.userName}
-                                                    onChange={(e) => {
-                                                        this.setState({ userName: e.target.value })
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="input-group mb-2">
-                                                <input
-                                                    type="email"
-                                                    className="form-control form-control-lg"
-                                                    placeholder="请输入邮箱"
-                                                    value={this.state.email}
-                                                    onBlur={() => this.setState({...this.state, showEmailTip: true})}
-                                                    onFocus={() => this.setState({...this.state, showEmailTip: false})}
-                                                    onChange={(e) => {
-                                                        this.setState({ email: e.target.value })
-                                                    }}
-                                                />
-                                            </div>
-                                            {this.state.showEmailTip ? emailTest(this.state.email) : <div></div>}
-                                            <div className="input-group mb-2">
-                                                <input
-                                                    type="text"
-                                                    className="form-control form-control-lg"
-                                                    placeholder="请输入验证码"
-                                                    value={this.state.emailCode}
-                                                    onChange={(e) => {
-                                                        const emailCode = e.target.value.replace(/[^0-9]/g, '')
-                                                        this.setState({ emailCode: emailCode })
-                                                    }}
-                                                />
-                                                <button
-                                                    className="btn btn-lg btn-primary"
-                                                    disabled={this.state.disabled}
-                                                    onClick={() => {
-                                                        if (!emailTester.test(this.state.email)) {
-                                                            return
-                                                        }
-                                                        axios.post('/api/email/code', {
-                                                            email: this.state.email,
-                                                        })
-                                                        this.setState({
-                                                            disabled: !this.state.disabled,
-                                                        })
-                                                        const timer = setInterval(() => {
-                                                            this.setState({
-                                                                cooldown: this.state.cooldown - 1,
-                                                            })
-                                                        }, 1000)
-                                                        setTimeout(() => {
-                                                            this.setState({
-                                                                disabled: !this.state.disabled,
-                                                            })
-                                                            clearInterval(timer)
-                                                            this.setState({ cooldown: 60 })
-                                                        }, 60000)
-                                                    }}>
-                                                    {this.state.disabled === false
-                                                        ? '发送验证码'
-                                                        : this.state.cooldown + 's'}
-                                                </button>
-                                            </div>
-                                            <div className="input-group mb-2">
-                                                <input
-                                                    type="password"
-                                                    className="form-control form-control-lg"
-                                                    placeholder="请输入密码"
-                                                    value={this.state.password}
-                                                    onFocus={() => {
-                                                        this.setState({...this.state, showPasswordTip: true})
-                                                    }}
-                                                    onBlur={() => {
-                                                        this.setState({...this.state, showPasswordTip: false})
-                                                    }}
-                                                    onChange={(e) => {
-                                                        this.setState({ password: e.target.value })
-                                                    }}
-                                                />
-                                            </div>
-                                            {this.state.showPasswordTip ? strengthTest(this.state.password) : <div></div>}
-                                            <div className="input-group mb-2">
-                                                <input
-                                                    type="password"
-                                                    className="form-control form-control-lg"
-                                                    placeholder="请再次输入密码"
-                                                    value={this.state.cpassword}
-                                                    onFocus={() => {
-                                                        this.setState({...this.state, showCpasswordTip: true})
-                                                    }}
-                                                    onBlur={() => {
-                                                        this.setState({...this.state, showCpasswordTip: false})
-                                                    }}
-                                                    onChange={(e) => {
-                                                        this.setState({ cpassword: e.target.value })
-                                                    }}
-                                                />
-                                            </div>
-                                            {this.state.showCpasswordTip ? passwordConsistencyTest(this.state.password, this.state.cpassword) : <div></div>}
-                                            <div className="text-center mt-5">
-                                                <button
-                                                    className="btn btn-lg btn-primary"
-                                                    title=""
-                                                    onClick={() => {
-                                                        if (this.state.userName === '') {
-                                                            alert('用户名不能为空')
-                                                        } else if (this.state.email === '') {
-                                                            alert('邮箱不能为空')
-                                                        } else if (this.state.emailCode === '') {
-                                                            alert('验证码不能为空')
-                                                        } else if (this.state.password === '') {
-                                                            alert('密码不能为空')
-                                                        } else if (!passwordTester.test(this.state.password)) {
-                                                            alert('请使用8-20位,至少包含数字和字母的密码')
-                                                        } else if (
-                                                            passVerification(
-                                                                this.state.password,
-                                                                this.state.cpassword
-                                                            )
-                                                        ) {
-                                                            const data = {
-                                                                email: this.state.email,
-                                                                password: SHA256(
-                                                                    this.state.password
-                                                                ).toString(),
-                                                                emailCode: parseInt(
-                                                                    this.state.emailCode
-                                                                ),
-                                                                userName: this.state.userName,
-                                                            }
-                                                            messageServer.getInstance().send<Send.Register>(
-                                                                Send.Register,
-                                                                data
-                                                            )
-                                                        } else {
-                                                            alert('两次密码不一致')
-                                                        }
-                                                    }}>
-                                                    注册
-                                                </button>
-                                            </div>
-                                        </form>
-                                        <p className="text-center mb-0">
-                                            已经拥有账户?
-                                            <NavLink to="/login" className="link">
-                                                登录
-                                            </NavLink>
-                                        </p>
-                                    </div>
-                                </div>
+    }, [navigate])
+    //TODO-yjx
+    return (
+        <div id="layout" className="theme-cyan">
+            <div className="authentication">
+                <div className="container d-flex flex-column">
+                    <div className="row align-items-center justify-content-center no-gutters min-vh-100">
+                        <div className="col-12 col-md-7 col-lg-5 col-xl-4 py-md-11">
+                            <div className="card border-0 shadow-sm">
+                                
+                                {registerStore.showError ? <ErrorBox title='注册失败' error={registerStore.errors} setError={action((error) => registerStore.errors = error)} />  : <></>}
+                                <SignupCard registerStore={registerStore} />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        )
-    }
-}
-
-export default withRouter(Signup)
+        </div>
+    )
+})

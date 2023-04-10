@@ -1,6 +1,8 @@
 import { MessageSendData, Send, Receive, DataType } from './message'
 import Crypto from './cipher'
 
+const server_address = "ws://43.143.134.180:8080/ws"
+
 export type Callback = (e: Event) => void
 export type MessageCallback = (msg: DataType<Receive>) => void
 
@@ -31,85 +33,70 @@ export interface Distributer {
     [Receive.UpdateMessage]: Function
 }
 
-export class Heart {
-    heartTimeOut!: number
-    serverHeartTimeOut!: number
-    timeout: number = 5000
-    reset() {
-        clearTimeout(this.heartTimeOut)
-        clearTimeout(this.serverHeartTimeOut)
-        return this
-    }
-    start(cb: Callback) {
-        this.heartTimeOut = setTimeout((e: Event) => {
-            cb(e)
-            this.serverHeartTimeOut = setTimeout((e: Event) => {
-                cb(e)
-                this.reset().start(cb)
-            }, this.timeout)
-        }, this.timeout)
-    }
-}
-
-export class MessageServer extends Heart {
-    instance: null | WebSocket = null
-    cipher = new Crypto()
-    events: any = {}
+export class MessageServer {
+    private static instance: MessageServer | null = null
+    private static events: any = {}
+    private websocket : WebSocket 
+    private cipher : Crypto
+    private timer: any
+    private timeout: number = 8000
+    
     constructor() {
-        super()
+        this.websocket = this.createWebsocket()
+        this.cipher = new Crypto()
     }
-    getInstance() {
-        if (this.instance === null || this.instance.readyState === this.instance.CLOSED) {
-            this.instance = new WebSocket('ws://43.143.134.180:8080/ws')
-            this.instance.onmessage = (event) => {
-                if (this.cipher.hasAES) {
-                    console.log('Receive', this.cipher.decryptAES(event.data))
-                    const data = JSON.parse(this.cipher.decryptAES(event.data))
-                    try {
-                        this.events[data.command as Receive](data.data)
-                    } catch (error) {
-                        console.log(data.command + ' Not defined')
-                        console.log(error)
-                    }
-                } else {
-                    console.log('Receive', JSON.parse(event.data))
-                    const data = JSON.parse(event.data)
-                    this.cipher.setSerectKey(data.data)
-                }
-            }
-            this.instance.onopen = () => {
-                this.instance?.send(
-                    JSON.stringify({
-                        command: Send.SetConnectionPubKey,
-                        data: this.cipher.sendKey,
-                    })
-                )
-            }
-            this.instance.onerror = (ev) => {
-                this.cipher = new Crypto()
-                console.log(ev)
-            }
-            this.instance.onclose = (ev) => {
-                this.cipher = new Crypto()
-                console.log(ev)
-            }
+
+    setHeartBeat(timeout: number) {
+        this.timer = setInterval(() => {
+            this.send<Send.Ping>(Send.Ping)
+        }, timeout)
+    }
+    resetHeartBeat() {
+        this.clearHeartBeat()
+        this.setHeartBeat(this.timeout)
+    }
+    clearHeartBeat() {
+        clearInterval(this.timer)
+    }
+
+    static Instance() {
+        if (this.instance === null) {
+            this.instance = new MessageServer()
         }
-        return this
+        if (this.instance.websocket?.readyState === WebSocket.CLOSED) {
+            this.instance.createWebsocket()
+        }
+        return this.instance
     }
+    static destroyInstance() {
+        this.instance?.websocket.close()
+        this.instance?.clearHeartBeat()
+        this.instance = null
+    }
+    static on(command: Receive, callback: Function) {
+        this.events[command] = callback
+    }
+    static off(command: Receive) {
+        this.events[command] = () => {
+            console.log('handle of ' + command + 'has been off')
+        }
+    }
+
     sendAny(command: string, data: any) {
         console.log({
             command: command,
             data: data,
         })
-        this.instance?.send(
+        this.websocket?.send(
             this.cipher.encryptAES({
                 command: command,
                 data: data,
             })
         )
     }
+
     send<T extends Send>(...args: SendArgumentsType<T>) {
-        if (this.instance?.readyState !== this.instance?.OPEN || !this.cipher.hasAES) {
+        if (this.websocket?.readyState !== this.websocket?.OPEN || !this.cipher.hasAES) {
             setTimeout(() => {
                 this.send<T>(...args)
             }, 50)
@@ -119,7 +106,7 @@ export class MessageServer extends Heart {
                 command,
                 data,
             })
-            this.instance?.send(
+            this.websocket?.send(
                 this.cipher.encryptAES({
                     command,
                     data,
@@ -127,26 +114,43 @@ export class MessageServer extends Heart {
             )
         }
     }
-    on(command: Receive, callback: Function) {
-        this.events[command] = callback
-    }
-    off(command: Receive) {
-        this.events[command] = () => {
-            console.log('handle of ' + command + 'has been off')
+
+    private createWebsocket() {
+        const websocket = new WebSocket(server_address)
+
+        websocket.onmessage = (event) => {
+            try {
+                if (this.cipher.hasAES) {
+                    const data = JSON.parse(this.cipher.decryptAES(event.data))
+                    console.log('Receive', data)
+                    MessageServer.events[data.command as Receive](data.data)
+                } else {
+                    console.log('Receive', JSON.parse(event.data))
+                    const data = JSON.parse(event.data)
+                    this.cipher.setSerectKey(data.data)
+                }
+            } catch (error) {
+                console.error(error)
+            }
         }
-    }
-    reSet() {
-        this.reset()
-        this.instance?.close()
-        this.instance = null
-        if (this.cipher.hasAES) {
-            this.cipher = new Crypto()
+        websocket.onopen = () => {
+            this.websocket?.send(
+                JSON.stringify({
+                    command: Send.SetConnectionPubKey,
+                    data: this.cipher.sendKey,
+                })
+            )
+            this.setHeartBeat(this.timeout)
         }
-    }
-    resetSocket() {
-        this.instance?.close()
-        this.instance = new WebSocket('ws://43.143.134.180:8080/ws')
+        websocket.onerror = (ev) => {
+            console.log(ev)
+            this.clearHeartBeat()
+        }
+        websocket.onclose = (ev) => {
+            console.log(ev)
+            this.clearHeartBeat()
+        }
+
+        return websocket
     }
 }
-
-export const messageServer = new MessageServer()

@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
-import { Message, Chat, ChatList } from '../utils/messagePage'
+/* eslint-disable jsx-a11y/anchor-is-valid */
+import { observer } from 'mobx-react-lite'
+import React, { useEffect, useRef, useState } from 'react'
 import { useImmer } from 'use-immer'
+import { ChatMessage } from '../../stores/chatStore'
+import { authStore } from '../../stores/authStore'
 
 const MessageAlert = () => {
     return (
@@ -36,37 +39,36 @@ const MessageTool = () => {
         </div>
     )
 }
-const MessageItem = (props: Message) => {
+export const ChatMessageItem = observer(React.forwardRef(({msg}: { msg: ChatMessage}, ref : any) => {
+    const isRight = msg.senderId === authStore.userId
+
     return (
-        <li className={'d-flex message' + (props.isRight ? ' right' : '')}>
-            {!props.isRight ? (
+        <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
+            {!isRight ? (
                 <div className="avatar mr-lg-3 me-2">
                     <div
                         //添加颜色
                         className={'avatar rounded-circle no-image ' + ''}>
-                        <span>{props.senderId}</span>
+                        <span>{msg.senderId}</span>
                     </div>
                 </div>
-            ) : (
-                ''
-            )}
+            ) : ( '' )}
             <div className="message-body">
                 <span className="date-time text-muted">
-                    {(props.senderId ? props.senderId + ', ' : '') +
-                        new Date(props.timestamp * 1000).toLocaleString()}
+                    {(msg.senderId ? msg.senderId + ', ' : '') +
+                        + msg.state + ' ' +new Date(msg.timestamp).toLocaleString()}
                 </span>
                 <div
                     className={
                         'message-row d-flex align-items-center' +
-                        (props.isRight ? ' justify-content-end' : '')
+                        (isRight ? ' justify-content-end' : '')
                     }>
-                    <div className={'message-content p-3' + (props.isRight ? ' border' : '')}>
-                        {props.text}
+                    <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                        {msg.text}
                     </div>
                 </div>
             </div>
         </li>
     )
 }
-
-export default MessageItem
+))

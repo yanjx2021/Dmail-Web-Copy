@@ -5,7 +5,7 @@ export const strongRegex = new RegExp(
 export const mediumRegex = new RegExp(
     '^((?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]))(.{8,20})$'
 )
-export const emailTester = new RegExp('^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$')
+export const emailTester = new RegExp(/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/)
 
 export const emailTest = (email: string) =>{
     if (email === '' || emailTester.test(email)) {
@@ -17,12 +17,12 @@ export const emailTest = (email: string) =>{
 
 export const strengthTest = (password: string) => {
     if (strongRegex.test(password)) {
-        return <div style={{ color: 'green', position: 'absolute', zIndex: 9999, backgroundColor: 'white' }}>密码强度: 强</div>
+        return '密码强度: 强'
     } else if (mediumRegex.test(password)) {
-        return <div style={{ color: '#c4870d', position: 'absolute', zIndex: 9999, backgroundColor: 'white' }}>密码强度: 中</div>
+        return '密码强度: 中'
     } else if (passwordTester.test(password)) {
-        return <div style={{ color: 'red', position: 'absolute', zIndex: 9999, backgroundColor: 'white' }}>密码强度: 低</div>
+        return '密码强度: 弱'
     } else {
-        return <div style={{ color: 'red', position: 'absolute', zIndex: 9999, backgroundColor: 'white' }}>请使用8-20位,至少包含数字和字母的密码</div>
+        return '请使用8-20位,至少包含数字和字母的密码'
     }
 }

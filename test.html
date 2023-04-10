@@ -1,0 +1,31 @@
+<template>
+    <div class="infinity">
+        <div class="template">
+            <li ref="message" class="infinity-item">
+                <img class="infinity-avatar" width="48" height="48">
+                <div class="infinity-bubble">
+                    <p></p>
+                    <img width="300" height="300">
+                    <div class="infinity-meta">
+                        <time class="infinity-posted-date"></time>
+                    </div>
+                </div>
+            </li>
+            <li ref="tombstone" class="infinity-item tombstone">
+                <img class="infinity-avatar" width="48" height="48" :src="require('./image/unknown.jpg')">
+                <div class="infinity-bubble">
+                    <p></p>
+                    <p></p>
+                    <p></p>
+                    <div class="infinity-meta">
+                        <time class="infinity-posted-date"></time>
+                    </div>
+                </div>
+            </li>
+        </div>
+        <div ref="chat" class="infinity-timeline">
+            <ul>
+            </ul>
+        </div>
+    </div>
+</template>

@@ -1,20 +1,17 @@
-import ChatIndexContent from "./ChatIndexContent"
-import { ChatIndexList } from "../utils/chatIndexListPage"
-import UserList from "./UserList"
+import { ChatId, chatStore } from "../stores/chatStore"
+import { requestStore } from "../stores/requestStore"
+import { AllChatList } from "./AllChatList"
+import { RecentChats } from "./RecentChats"
+import RecentRequests from "./RecentRequests"
 
-const TabContent = (props: {
-    chatIndexList: ChatIndexList
-    handleClick: Function
-    activeId: number
-}) => {
+export const TabContent = ({activeChatId, setActiveChatId}: { activeChatId: ChatId | null, setActiveChatId: (chatId: ChatId) => any}) => {
     return (
         <div className="sidebar border-end py-xl-4 py-3 px-xl-4 px-3">
             <div className="tab-content">
-                <UserList />
-                <ChatIndexContent chatIndexList={props.chatIndexList} handleClick={props.handleClick} activeId={props.activeId}/>
+                <RecentChats chatStore={chatStore} activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
+                <RecentRequests requestStore={requestStore}/>
+                <AllChatList/>
             </div>
         </div>
     )
 }
-
-export default TabContent

@@ -1,4 +1,4 @@
-const ConstChatbody = () => {
+export const NoneActiveChatBody = () => {
     return (
         <div className="main px-xl-5 px-lg-4 px-3">
             <div className="chat-body">
@@ -21,4 +21,3 @@ const ConstChatbody = () => {
         </div>
     )
 }
-export default ConstChatbody

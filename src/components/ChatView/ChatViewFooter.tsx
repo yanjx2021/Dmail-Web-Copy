@@ -1,14 +1,12 @@
-import { useState, useEffect } from 'react'
-import { Message, Chat, ChatList } from '../utils/messagePage'
+import { useEffect, useState } from "react"
 
-const MessageFooter = (props: { handleSend: Function }) => {
+export const ChatViewFooter = (props: { handleSend: Function }) => {
     // 消息发送在父组件处理
     // 接受ChatId
     const [text, setText] = useState<string>('')
 
     const handleSend = () => {
-        const timestamp = Date.parse(new Date().toString()) / 1000
-        props.handleSend(text, timestamp)
+        props.handleSend(text)
         setText('')
     }
     const onKeyDown = (e: any) => {
@@ -101,5 +99,3 @@ const MessageFooter = (props: { handleSend: Function }) => {
         </div>
     )
 }
-
-export default MessageFooter
