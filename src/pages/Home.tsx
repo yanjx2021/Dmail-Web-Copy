@@ -9,25 +9,13 @@ import { NoneActiveChatBody } from "../components/NoneActiveChatBody"
 import { ChatView } from "../components/ChatView/ChatView"
 import { autorun } from "mobx"
 import { requestStore } from "../stores/requestStore"
+import { ErrorBox } from "../components/ErrorBox"
 
 
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore, chatStore : ChatStore}) => {
         const [activeChatId, setActiveChatId] = useState<ChatId | null>(null)
         const navigate = useNavigate()
-        useEffect(()=> {
-            const errorFucker = autorun(() => {
-                if (authStore.errors !== '') alert(authStore.errors)
-            }
-            )
-            return errorFucker
-        }, [])
-        useEffect(()=> {
-            const errorFucker = autorun(() => {
-                if (requestStore.errors !== '') alert(requestStore.errors)
-        })
-            return errorFucker
-        }, [])
         if (authStore.state !== AuthState.Logged) {
             setTimeout(() => {
                 navigate('/login') 

@@ -1,6 +1,6 @@
 import { action, makeAutoObservable } from 'mobx'
 import localforage from 'localforage'
-import { LoginResponseState, Receive, ReceiveLoginResponseData, ReceiveRequestStateUpdateData, ReceiveSolveRequestResponseData, Send, SendUserSendRequestData } from '../utils/message'
+import { LoginResponseState, Receive, ReceiveLoginResponseData, ReceiveRequestStateUpdateData, ReceiveSolveRequestResponseData, RequestError, Send, SendUserSendRequestData } from '../utils/message'
 import { MessageServer } from '../utils/networkWs'
 import { ReceiveSendRequestResponseData } from '../utils/message'
 import { SendRequestResponseState } from '../utils/message'
@@ -104,7 +104,7 @@ export class RequestStore {
     requsetStash: Map<ClientId, Request> = new Map()
     requests: Map<ReqId, Request> = new Map()
 
-    
+
 
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
@@ -150,17 +150,25 @@ export class RequestStore {
             req!.reqId = data.reqId!
             this.setRequest(req!)
             this.requsetStash.delete(data.clientId!)
+        } else if (data.state === SendRequestResponseState.DatabaseError) {
+            this.errors = '服务器数据异常'
+            if (this.requsetStash.has(data.clientId)) this.requsetStash.delete(data.clientId)
         } else {
             switch (data.state.RequestError.errorType) {
                 case 'SameUser':
                     this.errors = '不能添加自己为好友'
                     break
                 case 'AlreadyBeFrineds':
-                    console.log('befriends')
                     this.errors = '已经添加过该好友'
                     break
                 case 'AlreadyInGroup':
                     this.errors = '已经在该群聊中了'
+                    break
+                case 'RequestExisted':
+                    this.errors = '已向该用户发送过请求，或尚未处理对方请求'
+                    break
+                case 'UserNotFound':
+                    this.errors = '未找到该用户'
                     break
             }
             //TODO-需要clientId
@@ -179,12 +187,16 @@ export class RequestStore {
         this.setRequestState(data.reqId, data.state)
     }
 
-    sendMakeFriendRequest(receiverId: number) {
+    sendMakeFriendRequest(receiverId: number | null) {
+        if (receiverId === null) {
+            this.errors = "用户ID不能为空, 请输入用户ID"
+            return
+        }
         this.requsetStash.set(this.clientId, Request.createFromSendRequest({
             message: this.message,
             content: {
                 type: RequestContentType.MakeFriend,
-                receiverId: receiverId
+                receiverId: receiverId!
             }
         }))
         MessageServer.Instance().send(Send.SendRequest, {
@@ -192,7 +204,7 @@ export class RequestStore {
             message: this.message,
             content: {
                 type: RequestContentType.MakeFriend,
-                receiverId: receiverId
+                receiverId: receiverId!
             }
         })
         this.message = ''
@@ -283,6 +295,9 @@ export class RequestStore {
             reqId: reqId,
             answer: 'Refused'
         })
+    }
+    get showError() {
+        return this.errors !== ''
     }
 }
 

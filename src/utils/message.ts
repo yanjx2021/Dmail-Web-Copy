@@ -63,16 +63,23 @@ export interface ReceiveSendMessageResponseData {
     timestamp?: number
 }
 
+export interface RequestError {
+    RequestError: RequestErrorData
+}
+
+export interface RequestErrorData {
+    errorType: "AlreadyBeFrineds" | 'SameUser' | 'AlreadyInGroup' | 'RequestExisted' | 'UserNotFound'
+    type: 'MakeFriend' | 'JoinGroup'
+}
+
 export enum SendRequestResponseState {
-    Error = 'Error',
     Success = 'Success',
+    DatabaseError = 'DatabaseError',
 }
 export interface ReceiveSendRequestResponseData {
-    state: SendRequestResponseState | any
-    type?: 'MakeFriend' | 'JoinGroup'
-    errorType?: "AlreadyBeFrineds" | 'SameUser' | 'AlreadyInGroup'
+    state: SendRequestResponseState | RequestError
     reqId?: number
-    clientId?: number
+    clientId: number
 }
 
 export enum ReceiveSolveRequestResponseState {

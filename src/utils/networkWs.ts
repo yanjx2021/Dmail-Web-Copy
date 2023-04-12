@@ -151,9 +151,6 @@ export class MessageServer {
             console.log(ev)
             // Maybe here some bugs
             this.clearHeartBeat()
-            if (authStore.state === AuthState.Logged) {
-                authStore.loginWithCode()
-            }
         }
 
         return websocket

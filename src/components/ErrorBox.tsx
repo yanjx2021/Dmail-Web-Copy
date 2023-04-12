@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
 import '../styles/ErrorBox.css'
 //TODO-yjx
-const timeout = 5000
+const timeout = 3000
 export const ErrorBox = ({
     title,
     error,
@@ -21,7 +21,7 @@ export const ErrorBox = ({
     }, [error])
 
     return (
-        <div className="overlay" tabIndex={999}>
+        <div className="overlay" tabIndex={-1}>
             <div className="modal-box">
                 <h4>{title}</h4>
                 <p>{error}</p>

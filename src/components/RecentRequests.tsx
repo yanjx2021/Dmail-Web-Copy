@@ -12,6 +12,7 @@ import { useEffect } from 'react'
 import { authStore } from '../stores/authStore'
 import '../styles/RecentRequests.css'
 import { userStore } from '../stores/userStore'
+import { ErrorBox } from './ErrorBox'
 
 const RequestItemStatus = observer(
     ({ senderId, state, reqId }: { senderId: number; state: RequestState; reqId: number }) => {
@@ -53,21 +54,19 @@ const RequestItemStatus = observer(
     }
 )
 
-const RequestFriendItem = (
+const RequestFriendItem = observer(
     ({
         message,
         reqId,
         senderId,
         receiverId,
         state,
-        userName,
     }: {
         message: string
         reqId: number
         senderId: number
         receiverId: number
         state: RequestState
-        userName: string
     }) => {
         return (
             <li>
@@ -83,7 +82,9 @@ const RequestFriendItem = (
                             <div className="media-body overflow-hidden">
                                 <div className="d-flex align-items-center mb-1">
                                     <h6 className="text-truncate mb-0 me-auto">
-                                        {userName}
+                                        {senderId === authStore.userId
+                                            ? userStore.getUser(receiverId).name
+                                            : userStore.getUser(senderId).name}
                                     </h6>
                                 </div>
                                 <div className="text-truncate">{message}</div>
@@ -102,14 +103,12 @@ const RequestGroupItem = ({
     senderId,
     chatId,
     state,
-    userName,
 }: {
     message: string
     reqId: number
     senderId: number
     chatId: number
     state: RequestState
-    userName: string
 }) => {
     return (
         <li>
@@ -124,7 +123,7 @@ const RequestGroupItem = ({
                         </div>
                         <div className="media-body overflow-hidden">
                             <div className="d-flex align-items-center mb-1">
-                                <h6 className="text-truncate mb-0 me-auto">{userName}</h6>
+                                <h6 className="text-truncate mb-0 me-auto">名字</h6>
                             </div>
                             <div className="text-truncate">{message}</div>
                         </div>
@@ -160,7 +159,6 @@ const RequestItem = observer(
                         reqId={reqId}
                         senderId={senderId}
                         receiverId={content.receiverId}
-                        userName={userName}
                     />
                 )
                 break
@@ -172,7 +170,6 @@ const RequestItem = observer(
                         reqId={reqId}
                         senderId={senderId}
                         chatId={content.chatId}
-                        userName={userName}
                     />
                 )
             default:
@@ -184,7 +181,7 @@ const RequestItem = observer(
 const AddFriendBox = observer(() => {
     const [reqId, setReqId] = useImmer<string>('')
     return (
-        <div className="modal fade" id="InviteFriends" tabIndex={-1} aria-hidden="true">
+        <div className="modal fade" id="InviteFriends" tabIndex={9999} aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
@@ -205,7 +202,10 @@ const AddFriendBox = observer(() => {
                                     type="text"
                                     className="form-control"
                                     value={reqId}
-                                    onChange={(e) => setReqId(e.target.value)}
+                                    onChange={(e) => {
+                                        const input = e.target.value.replace(/[^0-9]/g, '')
+                                        setReqId(input)
+                                    }}
                                 />
                             </div>
                             <div className="form-group">
@@ -225,7 +225,7 @@ const AddFriendBox = observer(() => {
                                 type="button"
                                 className="btn btn-primary"
                                 onClick={() => {
-                                    requestStore.sendMakeFriendRequest(parseInt(reqId))
+                                    requestStore.sendMakeFriendRequest(parseInt(reqId) ? parseInt(reqId) : null)
                                     setReqId('')
                                 }}>
                                 发送请求
@@ -241,6 +241,15 @@ const AddFriendBox = observer(() => {
 const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore }) => {
     return (
         <div className="tab-pane fade" id="nav-tab-newfriends" role="tabpanel">
+            {requestStore.showError ? (
+                <ErrorBox
+                    title="请求失败"
+                    error={requestStore.errors}
+                    setError={action((error) => (requestStore.errors = error))}
+                />
+            ) : (
+                <></>
+            )}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h3 className="mb-0 text-primary">请求列表</h3>
             </div>

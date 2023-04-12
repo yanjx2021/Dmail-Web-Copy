@@ -43,7 +43,6 @@ const MessageTool = () => {
 }
 export const ChatMessageItem = observer(React.forwardRef(({msg}: { msg: ChatMessage}, ref : any) => {
     const isRight = msg.senderId === authStore.userId
-
     return (
         <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
             {!isRight ? (
@@ -57,8 +56,7 @@ export const ChatMessageItem = observer(React.forwardRef(({msg}: { msg: ChatMess
             ) : ( '' )}
             <div className="message-body">
                 <span className="date-time text-muted">
-                    {(msg.senderId ? userStore.getUser(msg.senderId).name + ', ' : '') +
-                        + msg.state + ' ' +new Date(msg.timestamp).toLocaleString()}
+                    {msg.getMessageTip}
                 </span>
                 <div
                     className={
