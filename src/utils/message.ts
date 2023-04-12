@@ -148,6 +148,9 @@ export enum ReceiveGetUserInfoResponseState {
 export interface ReceiveGetUserInfoResponseData {
     // TODO
     state: ReceiveGetUserInfoResponseState
+    userId?: number
+    userName?: string
+    avaterPath?: string
 }
 
 export interface ReceiveRequestStateUpdateData {

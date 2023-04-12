@@ -5,6 +5,7 @@ import { MessageServer } from '../utils/networkWs'
 import { ReceiveSendRequestResponseData } from '../utils/message'
 import { SendRequestResponseState } from '../utils/message'
 import { authStore } from './authStore'
+import { User, userStore } from './userStore'
 
 export enum RequestContentType {
     MakeFriend = 'MakeFriend',
@@ -66,13 +67,13 @@ export class Request {
             content: {
                 type: RequestContentType.MakeFriend,
                 receiverId: 0
-            }
+            },
         })
     }
     static createFromReceiveRequest(req: ReceiveRequest) {
         return new Request({
             state: req.state,
-            ...req.info
+            ...req.info,
         })
     }
     static createFromSendRequest({message, content} : {message: string, content: RequestContent}) {
@@ -102,6 +103,8 @@ export class RequestStore {
     clientId: ClientId = 0
     requsetStash: Map<ClientId, Request> = new Map()
     requests: Map<ReqId, Request> = new Map()
+
+    
 
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
@@ -153,6 +156,7 @@ export class RequestStore {
                     this.errors = '不能添加自己为好友'
                     break
                 case 'AlreadyBeFrineds':
+                    console.log('befriends')
                     this.errors = '已经添加过该好友'
                     break
                 case 'AlreadyInGroup':

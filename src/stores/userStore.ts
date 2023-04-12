@@ -1,5 +1,7 @@
 import { makeAutoObservable } from 'mobx'
 import { UserId } from './authStore'
+import { MessageServer } from '../utils/networkWs'
+import { Receive, ReceiveGetUserInfoResponseData, ReceiveGetUserInfoResponseState, Send } from '../utils/message'
 
 export class User {
     name = '加载中...'
@@ -22,6 +24,23 @@ export class UserStore {
     errors: string = ''
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
+        MessageServer.on(Receive.GetUserInfoResponse, this.getUserInfoResponseHandler)
+    }
+
+    getUserInfo(userId: number) {
+        console.log(`请求用户${userId}的信息`)
+        MessageServer.Instance().send<Send.GetUserInfo>(Send.GetUserInfo, userId)
+    }
+
+    getUserInfoResponseHandler(data: ReceiveGetUserInfoResponseData) {
+        switch (data.state) {
+            case ReceiveGetUserInfoResponseState.Success:
+                console.log(`接受用户${data.userId}的信息`)
+                this.setUser(data.userId!, data.userName!, data.avaterPath!)
+                break
+            default:
+                this.errors = '服务器跑路了'
+        }
     }
 
     createUser(name: string, avater_path: string) {
@@ -32,7 +51,7 @@ export class UserStore {
         return new User('加载中...', '')
     }
 
-    setUser(name: string, useId: number, avater_path: string) {
+    setUser(useId: number, name: string, avater_path: string) {
         const user = this.users.get(useId)
         if (user === undefined) {
             this.users.set(useId, this.createUser(name, avater_path))
@@ -47,8 +66,9 @@ export class UserStore {
         const user = this.users.get(userId)
         if (user === undefined) {
             this.users.set(userId, this.createLoadingUser())
-            return this.users.get(userId)!
             //TODO pull_user_info
+            this.getUserInfo(userId)
+            return this.users.get(userId)!
         } else {
             return user
         }

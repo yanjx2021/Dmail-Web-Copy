@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useImmer } from 'use-immer'
 import { ChatMessage } from '../../stores/chatStore'
 import { authStore } from '../../stores/authStore'
+import { userStore } from '../../stores/userStore'
 
 const MessageAlert = () => {
     return (
@@ -55,7 +56,7 @@ export const ChatMessageItem = observer(React.forwardRef(({msg}: { msg: ChatMess
             ) : ( '' )}
             <div className="message-body">
                 <span className="date-time text-muted">
-                    {(msg.senderId ? msg.senderId + ', ' : '') +
+                    {(msg.senderId ? userStore.getUser(msg.senderId).name + ', ' : '') +
                         + msg.state + ' ' +new Date(msg.timestamp).toLocaleString()}
                 </span>
                 <div

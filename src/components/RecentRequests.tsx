@@ -10,6 +10,7 @@ import { observer } from 'mobx-react-lite'
 import { useImmer } from 'use-immer'
 import { useEffect } from 'react'
 import { authStore } from '../stores/authStore'
+import { userStore } from '../stores/userStore'
 
 const RequestItemStatus = observer(
     ({ senderId, state, reqId }: { senderId: number; state: RequestState; reqId: number }) => {
@@ -47,19 +48,21 @@ const RequestItemStatus = observer(
     }
 )
 
-const RequestFriendItem = observer(
+const RequestFriendItem = (
     ({
         message,
         reqId,
         senderId,
         receiverId,
         state,
+        userName,
     }: {
         message: string
         reqId: number
         senderId: number
         receiverId: number
         state: RequestState
+        userName: string
     }) => {
         return (
             <li>
@@ -69,15 +72,13 @@ const RequestFriendItem = observer(
                             <div className="avatar me-3">
                                 <span className="rounded-circle"></span>
                                 <div className="avatar rounded-circle no-image timber">
-                                    <span>{reqId}</span>
+                                    <span>{receiverId}</span>
                                 </div>
                             </div>
                             <div className="apply-media-body overflow-hidden">
                                 <div className="d-flex align-items-center mb-1">
                                     <h6 className="text-truncate mb-0 me-auto">
-                                        {senderId === authStore.userId
-                                            ? `发给${receiverId}`
-                                            : `来自${senderId}`}
+                                        {userName}
                                     </h6>
                                 </div>
                                 <div className="text-truncate">{message}</div>
@@ -96,12 +97,14 @@ const RequestGroupItem = ({
     senderId,
     chatId,
     state,
+    userName,
 }: {
     message: string
     reqId: number
     senderId: number
     chatId: number
     state: RequestState
+    userName: string
 }) => {
     return (
         <li>
@@ -116,7 +119,7 @@ const RequestGroupItem = ({
                         </div>
                         <div className="apply-media-body overflow-hidden">
                             <div className="d-flex align-items-center mb-1">
-                                <h6 className="text-truncate mb-0 me-auto">名字</h6>
+                                <h6 className="text-truncate mb-0 me-auto">{userName}</h6>
                             </div>
                             <div className="text-truncate">{message}</div>
                         </div>
@@ -142,6 +145,7 @@ const RequestItem = observer(
         content: RequestContent
         state: RequestState
     }) => {
+        const userName = userStore.getUser(senderId).name
         switch (content.type) {
             case RequestContentType.MakeFriend:
                 return (
@@ -151,6 +155,7 @@ const RequestItem = observer(
                         reqId={reqId}
                         senderId={senderId}
                         receiverId={content.receiverId}
+                        userName={userName}
                     />
                 )
                 break
@@ -162,6 +167,7 @@ const RequestItem = observer(
                         reqId={reqId}
                         senderId={senderId}
                         chatId={content.chatId}
+                        userName={userName}
                     />
                 )
             default:
