@@ -7,15 +7,18 @@ export const ErrorBox = ({
     title,
     error,
     setError,
+    onError,
 }: {
     title: string
     error: string
     setError: (error: string) => any
+    onError?: () => any
 }) => {
     useEffect(() => {
         if (error !== '') {
             setTimeout(() => {
                 setError('')
+                onError && onError()
             }, timeout)
         }
     }, [error])

@@ -1,8 +1,12 @@
 import { MessageSendData, Send, Receive, DataType } from './message'
 import Crypto from './cipher'
-import { AuthState, authStore } from '../stores/authStore'
+import { AuthMethod, AuthState, authStore } from '../stores/authStore'
+import { requestStore } from '../stores/requestStore'
+import { action, runInAction } from 'mobx'
+import { SHA256 } from 'crypto-js'
 
-const server_address = "ws://43.143.134.180:8080/ws"
+
+const server_address = 'ws://43.143.134.180:8080/ws'
 // 43.143.134.180
 export type Callback = (e: Event) => void
 export type MessageCallback = (msg: DataType<Receive>) => void
@@ -35,13 +39,14 @@ export interface Distributer {
 }
 
 export class MessageServer {
+
     private static instance: MessageServer | null = null
     private static events: any = {}
-    private websocket : WebSocket 
-    private cipher : Crypto
+    private websocket: WebSocket
+    private cipher: Crypto
     private timer: any
-    private timeout: number = 8000
-    
+    private timeout: number = 5000
+
     constructor() {
         this.websocket = this.createWebsocket()
         this.cipher = new Crypto()
@@ -64,7 +69,10 @@ export class MessageServer {
         if (this.instance === null) {
             this.instance = new MessageServer()
         }
-        if (this.instance.websocket?.readyState === WebSocket.CLOSED) {
+        if (
+            this.instance.websocket?.readyState === WebSocket.CLOSED ||
+            this.instance.websocket?.readyState === WebSocket.CLOSING
+        ) {
             this.instance.createWebsocket()
         }
         return this.instance
@@ -82,20 +90,6 @@ export class MessageServer {
             console.log('handle of ' + command + 'has been off')
         }
     }
-
-    sendAny(command: string, data: any) {
-        console.log({
-            command: command,
-            data: data,
-        })
-        this.websocket?.send(
-            this.cipher.encryptAES({
-                command: command,
-                data: data,
-            })
-        )
-    }
-
     send<T extends Send>(...args: SendArgumentsType<T>) {
         if (this.websocket?.readyState !== this.websocket?.OPEN || !this.cipher.hasAES) {
             setTimeout(() => {
@@ -147,11 +141,16 @@ export class MessageServer {
             console.log(ev)
             this.clearHeartBeat()
         }
-        websocket.onclose = (ev) => {
+        websocket.onclose = action((ev) => {
             console.log(ev)
-            // Maybe here some bugs
             this.clearHeartBeat()
-        }
+            if (authStore.state === AuthState.Logged) {
+                authStore.errors = '网络环境异常，正在尝试重新连接'
+                setTimeout(() => {
+
+                })
+            }
+        })
 
         return websocket
     }

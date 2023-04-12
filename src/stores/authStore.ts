@@ -94,7 +94,6 @@ export class AuthStore {
     }
 
     private loginWithCode() {
-
         MessageServer.Instance().send<Send.Login>(Send.Login, {
             email: this.email,
             emailCode: parseInt(this.emailCode),

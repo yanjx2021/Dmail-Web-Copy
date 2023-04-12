@@ -99,6 +99,7 @@ export class ChatMessage {
         this.timestamp = msg.timestamp
         this.inChatId = msg.inChatId
         this.senderId = msg.senderId
+        this.state = msg.state
     }
 
     serialized(chatId: number): SerializedReceiveChatMessage {

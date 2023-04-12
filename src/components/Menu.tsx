@@ -60,12 +60,12 @@ const Menu = observer(() => {
                 className="nav flex-md-column nav-pills flex-grow-2"
                 role="tablist"
                 aria-orientation="vertical">
-                <a
+                {/* <a
                     className="mt-xl-3 mt-md-2 nav-link light-dark-toggle"
                     href="javascript:void(0);">
                     <i className="zmdi zmdi-brightness-2"></i>
                     <input className="light-dark-btn" type="checkbox" />
-                </a>
+                </a> */}
                 <a className="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="#" role="tab">
                     <i className="zmdi zmdi-settings"></i>
                 </a>
