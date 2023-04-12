@@ -34,7 +34,6 @@ const Home = observer(
                         onError={action(() => {
                             console.log('error')
                             authStore.state = AuthState.Started
-                            MessageServer.destroyInstance()
                             navigate('/login')
                         })}
                     />

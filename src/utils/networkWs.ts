@@ -5,7 +5,6 @@ import { requestStore } from '../stores/requestStore'
 import { action, runInAction } from 'mobx'
 import { SHA256 } from 'crypto-js'
 
-
 const server_address = 'ws://43.143.134.180:8080/ws'
 // 43.143.134.180
 export type Callback = (e: Event) => void
@@ -39,7 +38,6 @@ export interface Distributer {
 }
 
 export class MessageServer {
-
     private static instance: MessageServer | null = null
     private static events: any = {}
     private websocket: WebSocket
@@ -51,6 +49,15 @@ export class MessageServer {
         this.websocket = this.createWebsocket()
         this.cipher = new Crypto()
     }
+
+    temporaryShutDownHandler = action((ev: any) => {
+        console.log(ev)
+        this.clearHeartBeat()
+        if (authStore.state === AuthState.Logged) {
+            authStore.errors = '网络环境异常，请重新登录'
+        }
+        MessageServer.destroyInstance()
+    })
 
     setHeartBeat(timeout: number) {
         this.timer = setInterval(() => {
@@ -137,20 +144,8 @@ export class MessageServer {
             )
             this.setHeartBeat(this.timeout)
         }
-        websocket.onerror = (ev) => {
-            console.log(ev)
-            this.clearHeartBeat()
-        }
-        websocket.onclose = action((ev) => {
-            console.log(ev)
-            this.clearHeartBeat()
-            if (authStore.state === AuthState.Logged) {
-                authStore.errors = '网络环境异常，正在尝试重新连接'
-                setTimeout(() => {
-
-                })
-            }
-        })
+        websocket.onerror = this.temporaryShutDownHandler
+        websocket.onclose = this.temporaryShutDownHandler
 
         return websocket
     }
