@@ -1,0 +1,67 @@
+.overlay
+{
+  align-items: center;
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  z-index: 3;
+}
+
+.modal-box
+{
+  align-items: center;
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+  max-width: 360px;
+  max-height: 160px;
+  width:100%;
+  height:100%;
+  background:linear-gradient(155deg, 	#ffcdb9 0%, #FFFAF0 90%) ;
+  padding:30px 20px;
+  border-radius: 6px;
+  opacity: 0.95;
+  overflow: hidden;
+}
+
+.modal-box::after
+{
+  position: absolute;
+  font-size: 1.3em;
+  content: '\2716';
+  right:.7rem;
+  top:.7rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.x-btn
+{
+  position: absolute;
+  width: 6rem;
+  height:6rem;
+  background:#ffcdb9;
+  border-radius: 50%;
+  right:-3rem;
+  top:-3rem;
+  border: none;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.x-btn:hover
+{
+  right:-2.8rem;
+  top:-2.8rem;
+}
+
+.modal-box button:focus
+{
+  outline: none;
+}

@@ -4,15 +4,6 @@ export const AllChatList = (props: {}) => {
             <div className="tab-pane fade" id="nav-tab-contact" role="tabpanel">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h3 className="mb-0 text-primary">通讯录</h3>
-                    <div>
-                        <button
-                            className="btn btn-primary"
-                            type="button"
-                            data-toggle="modal"
-                            data-target="#InviteFriends">
-                            邀请好友
-                        </button>
-                    </div>
                 </div>
 
                 <div className="form-group input-group-lg search mb-3">
@@ -20,7 +11,7 @@ export const AllChatList = (props: {}) => {
                     <input type="text" className="form-control" placeholder="搜索..." />
                 </div>
                 <ul className="chat-list">
-                    <li>
+                    {/*<li>
                         <a href="#" className="card">
                             <div className="card-body">
                                 <div className="media">
@@ -37,7 +28,7 @@ export const AllChatList = (props: {}) => {
                                 </div>
                             </div>
                         </a>
-                    </li>
+                    </li>*/}
                     <li className="header d-flex justify-content-between ps-3 pe-3 mb-1">
                         <span>TODO-下面是通讯录</span>
                     </li>

@@ -39,13 +39,6 @@ const Menu = () => {
                     <i className="zmdi zmdi-comment-alert"></i>
                 </a>
                 <a
-                    className="mb-xl-3 mb-md-2 nav-link"
-                    data-toggle="pill"
-                    href="#nav-tab-phone"
-                    role="tab">
-                    <i className="zmdi zmdi-phone"></i>
-                </a>
-                <a
                     className="mb-xl-3 mb-md-2 nav-link "
                     data-toggle="pill"
                     href="#nav-tab-contact"

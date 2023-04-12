@@ -5,6 +5,7 @@ import { EmailCodeInput } from '../components/EmailCodeInput'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { ErrorBox } from '../components/ErrorBox'
+import '../styles/Login.css'
 
 const EmailInput = observer(({ authStore }: { authStore: AuthStore }) => {
     return (
@@ -69,29 +70,32 @@ const LoginCard = observer(({ authStore }: { authStore: AuthStore }) => {
                     {authStore.method === AuthMethod.Email ? '密码登录?' : '验证码登录?'}
                 </button>
             </p>
-            {authStore.method === AuthMethod.Password ? (
-                <LoginPasswordForm authStore={authStore} />
-            ) : (
-                <LoginCodeForm authStore={authStore} />
-            )}
+            <div className="mb-4 mt-5">
+                {authStore.method === AuthMethod.Password ? (
+                    <LoginPasswordForm authStore={authStore} />
+                ) : (
+                    <LoginCodeForm authStore={authStore} />
+                )}
 
-            <div className="form-group d-flex justify-content-between">
-                <label className="c_checkbox">
-                    <input type="checkbox" />
-                    <span className="ms-2 todo_name">记住我</span>
-                    <span className="checkmark"></span>
-                </label>
-                <NavLink to="/" className="link">
-                    重置密码
-                </NavLink>
-            </div>
-            <div className="text-center mt-5">
-                <button
-                    disabled={authStore.state === AuthState.Logging}
-                    className="btn btn-lg btn-primary"
-                    onClick={authStore.login}>
-                    {authStore.state === AuthState.Logging ? '正在登录...' : '登录'}
-                </button>
+                <div className="form-group d-flex justify-content-between">
+                    <label className="c_checkbox">
+                        <input type="checkbox" />
+                        <span className="ms-2 todo_name">记住我</span>
+                        <span className="checkmark"></span>
+                    </label>
+                    <NavLink to="/" className="link">
+                        重置密码
+                    </NavLink>
+                </div>
+
+                <div className="text-center mt-5">
+                    <button
+                        disabled={authStore.state === AuthState.Logging}
+                        className="btn btn-lg btn-primary"
+                        onClick={authStore.login}>
+                        {authStore.state === AuthState.Logging ? '正在登录...' : '登录'}
+                    </button>
+                </div>
             </div>
             <p className="text-center mb-0">
                 还没有账户?
@@ -119,6 +123,7 @@ export const LoginPage = observer(() => {
                     <div className="row align-items-center justify-content-center no-gutters min-vh-100">
                         <div className="col-12 col-md-7 col-lg-5 col-xl-4 py-md-11">
                             <div className="card border-0 shadow-sm">
+                                <LoginCard authStore={authStore} />
                                 {authStore.showError ? (
                                     <ErrorBox
                                         title="登陆失败"
@@ -128,7 +133,6 @@ export const LoginPage = observer(() => {
                                 ) : (
                                     <></>
                                 )}
-                                <LoginCard authStore={authStore} />
                             </div>
                         </div>
                     </div>
