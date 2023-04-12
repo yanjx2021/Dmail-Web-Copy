@@ -1,0 +1,38 @@
+.d-flex.message
+{
+  padding-right: var(--bs-gutter-x, 2.5rem);
+  padding-left: var(--bs-gutter-x, 0rem);
+}
+
+.main .chat-body .chat-content 
+{
+  overflow-y: hidden;
+  margin-bottom: 1rem;  
+}
+
+.main .chat-body .chat-content .container-xxl 
+{
+  overflow-x: hidden;
+}
+
+.main .chat-body .chat-content .container-xxl::-webkit-scrollbar 
+{
+  width: 8px;
+  background-color: var(--font-eee)
+}
+
+.main .chat-body .chat-content .container-xxl::-webkit-scrollbar-thumb 
+{
+  background: var(--sidebar-bg);
+  border-radius: 5px
+}
+
+.main .chat-body .chat-content .container-xxl::-webkit-scrollbar-thumb:active 
+{
+  background-color: var(--font-color);
+}
+
+.main .chat-body .chat-content .container-xxl div>div>:first-child li 
+{
+    padding-top: .75rem !important;
+}

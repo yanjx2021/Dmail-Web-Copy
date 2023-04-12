@@ -57,7 +57,7 @@ export const EmailCodeInput = (props: {
     }, [email, setCurCoolDown])
 
     return (
-        <div className="input-group mb-4">
+        <div className="input-group mb-2">
             <input
                 type="text"
                 className="form-control form-control-lg"

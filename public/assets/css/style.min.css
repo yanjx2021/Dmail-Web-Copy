@@ -12685,7 +12685,7 @@ body.admin .main-body .body-page::-webkit-scrollbar-thumb {
     -webkit-box-flex: 1;
     -ms-flex: 1;
     flex: 1;
-    margin-right: 53px
+    margin-right: 23px
 }
 
 .main .chat-body {
@@ -12730,13 +12730,16 @@ body.admin .main-body .body-page::-webkit-scrollbar-thumb {
 }
 
 .main .chat-body .chat-content::-webkit-scrollbar {
-    width: 0;
-    background-color: var(--sidebar-bg)
+    width: 0px;
+    background-color: var(--font-eee)
 }
 
 .main .chat-body .chat-content::-webkit-scrollbar-thumb {
-    background: var(--font-eee);
+    background: var(--sidebar-bg);
     border-radius: 5px
+}
+.main .chat-body .chat-content::-webkit-scrollbar-thumb:active {
+  background-color: var(--font-color);
 }
 
 .main .chat-body .chat-content .message .message-body {

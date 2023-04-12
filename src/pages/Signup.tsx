@@ -8,6 +8,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { emailTester, passwordTester } from '../constants/passwordFormat'
 import { ErrorBox } from '../components/ErrorBox'
+import '../styles/Login.css'
 
 export {}
 
@@ -249,9 +250,9 @@ export const SignupPage = observer(() => {
                     <div className="row align-items-center justify-content-center no-gutters min-vh-100">
                         <div className="col-12 col-md-7 col-lg-5 col-xl-4 py-md-11">
                             <div className="card border-0 shadow-sm">
-                                
-                                {registerStore.showError ? <ErrorBox title='注册失败' error={registerStore.errors} setError={action((error) => registerStore.errors = error)} />  : <></>}
                                 <SignupCard registerStore={registerStore} />
+                                {registerStore.showError ? <ErrorBox title='注册失败' error={registerStore.errors} setError={action((error) => registerStore.errors = error)} />  : <></>}
+                                
                             </div>
                         </div>
                     </div>

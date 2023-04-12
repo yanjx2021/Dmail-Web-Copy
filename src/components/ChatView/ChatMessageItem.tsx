@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useImmer } from 'use-immer'
 import { ChatMessage } from '../../stores/chatStore'
 import { authStore } from '../../stores/authStore'
+import "../../styles/ChatMessageItem.css"
 import { userStore } from '../../stores/userStore'
 
 const MessageAlert = () => {

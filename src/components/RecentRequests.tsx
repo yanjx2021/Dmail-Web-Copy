@@ -10,6 +10,7 @@ import { observer } from 'mobx-react-lite'
 import { useImmer } from 'use-immer'
 import { useEffect } from 'react'
 import { authStore } from '../stores/authStore'
+import '../styles/RecentRequests.css'
 import { userStore } from '../stores/userStore'
 
 const RequestItemStatus = observer(
@@ -17,33 +18,37 @@ const RequestItemStatus = observer(
         switch (state) {
             case RequestState.Unsolved:
                 return senderId === authStore.userId ? (
-                    <div>等待对方验证...</div>
+                    <div className="align-center-container">等待对方验证...</div>
                 ) : (
-                    <div>
-                        <div className="btn-friend d-flex">
-                            <button
-                                className="btn btn-success"
-                                type="button"
-                                onClick={action(() => requestStore.approveRequest(reqId))}>
-                                同意
-                            </button>
-                        </div>
-                        <div className="btn-friend d-flex">
-                            <button
-                                className="btn btn-danger"
-                                type="button"
-                                onClick={action(() => requestStore.refuseRequest(reqId))}>
-                                拒绝
-                            </button>
-                        </div>
+                    <div className="align-center-container">
+                        <button
+                            className="btn btn-success"
+                            type="button"
+                            onClick={action(() => requestStore.approveRequest(reqId))}>
+                            同意
+                        </button>
+                        <button
+                            className="btn btn-danger"
+                            type="button"
+                            onClick={action(() => requestStore.refuseRequest(reqId))}>
+                            拒绝
+                        </button>
                     </div>
                 )
                 break
             case RequestState.Approved:
-                return senderId === authStore.userId ? <div>请求已通过</div> : <div>已同意</div>
+                return senderId === authStore.userId ? (
+                    <div className="align-center-container">请求已通过</div>
+                ) : (
+                    <div className="align-center-container">已同意</div>
+                )
                 break
             case RequestState.Refused:
-                return senderId === authStore.userId ? <div>请求被拒绝</div> : <div>已拒绝</div>
+                return senderId === authStore.userId ? (
+                    <div className="align-center-container">请求被拒绝</div>
+                ) : (
+                    <div className="align-center-container">已拒绝</div>
+                )
         }
     }
 )
@@ -75,7 +80,7 @@ const RequestFriendItem = (
                                     <span>{receiverId}</span>
                                 </div>
                             </div>
-                            <div className="apply-media-body overflow-hidden">
+                            <div className="media-body overflow-hidden">
                                 <div className="d-flex align-items-center mb-1">
                                     <h6 className="text-truncate mb-0 me-auto">
                                         {userName}
@@ -117,7 +122,7 @@ const RequestGroupItem = ({
                                 <span>{reqId}</span>
                             </div>
                         </div>
-                        <div className="apply-media-body overflow-hidden">
+                        <div className="media-body overflow-hidden">
                             <div className="d-flex align-items-center mb-1">
                                 <h6 className="text-truncate mb-0 me-auto">{userName}</h6>
                             </div>
@@ -215,10 +220,10 @@ const AddFriendBox = observer(() => {
                                 />
                             </div>
                         </form>
-                        <div className="mt-5">
+                        <div className="mb-2 mt-4">
                             <button
                                 type="button"
-                                className="btn btn-primaty"
+                                className="btn btn-primary"
                                 onClick={() => {
                                     requestStore.sendMakeFriendRequest(parseInt(reqId))
                                     setReqId('')
@@ -241,10 +246,11 @@ const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore 
             </div>
             <div>
                 <a
-                    className="btn btn-primary"
+                    className="btn btn-primary join-btn"
                     type="button"
                     data-toggle="modal"
                     data-target="#InviteFriends">
+                    <i className="zmdi zmdi-account-add" />
                     添加好友
                 </a>
             </div>

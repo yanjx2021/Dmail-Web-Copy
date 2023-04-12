@@ -7,13 +7,22 @@ import { Virtuoso } from 'react-virtuoso'
 import { useFetcher } from 'react-router-dom'
 import { AnyARecord } from 'dns'
 import { authStore } from '../../stores/authStore'
+import { NoneActiveChatBody } from '../NoneActiveChatBody'
 
 export const ChatMessageContent = observer(
-    ({chat, messages, setMessages}: { chat: Chat, messages : ChatMessage[], setMessages : any}) => {
-        const virtuosoRef : any = useRef(null)
+    ({
+        chat,
+        messages,
+        setMessages,
+    }: {
+        chat: Chat
+        messages: ChatMessage[]
+        setMessages: any
+    }) => {
+        const virtuosoRef: any = useRef(null)
 
         const [atBottom, setAtBottom] = useState(false)
-        const showButtonTimeoutRef : any = useRef(null)
+        const showButtonTimeoutRef: any = useRef(null)
         const [showButton, setShowButton] = useState(false)
 
         const prependItems = useCallback(() => {
@@ -23,50 +32,66 @@ export const ChatMessageContent = observer(
                 return
             }
             const messagesToPrepend = 20
-        
+
             setMessages(() => [...chat.getMessages(firstIndex - 1, messagesToPrepend), ...messages])
-          }, [chat, messages, setMessages])
-        
+        }, [chat, messages, setMessages])
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const itemContent = useCallback(
-            action((index : number, message : ChatMessage) => <ChatMessageItem msg={message} key={message.senderId === authStore.userId ? message.timestamp : message.inChatId}/>)
-        , [])
+            action((index: number, message: ChatMessage) => (
+                <ChatMessageItem
+                    msg={message}
+                    key={
+                        message.senderId === authStore.userId ? message.timestamp : message.inChatId
+                    }
+                />
+            )),
+            []
+        )
 
-
-        useEffect( () => {
+        useEffect(() => {
             if (!atBottom) {
                 showButtonTimeoutRef.current = setTimeout(() => setShowButton(true), 500)
             } else {
                 setShowButton(false)
             }
         }, [atBottom])
-        
+
         return (
             <>
-            <Virtuoso className="chat-content container-xxl list-unstyled py-4"
-                ref={virtuosoRef}
-                firstItemIndex={messages[0]?.inChatId ?? 1}
-                initialTopMostItemIndex={chat.lastMessage!.inChatId}
-                data={messages}
-                startReached={prependItems}
-                itemContent={itemContent}
-                atBottomStateChange={setAtBottom}
-                followOutput={'auto'}
-            />
-            { showButton && (
-                <button
-                  onClick={() => virtuosoRef!.current.scrollToIndex({ index: messages.length - 1, behavior: 'smooth' })}
-                  style={{ float: 'right', transform: 'translate(60rem, -1rem)', width : '3'}}
-                >
-                  Bottom
-                </button>
-              ) }
+                <div className="chat-content">
+                    <Virtuoso
+                        className=" container-xxl list-unstyled py-4"
+                        ref={virtuosoRef}
+                        firstItemIndex={messages[0]?.inChatId ?? 1}
+                        initialTopMostItemIndex={chat.lastMessage!.inChatId}
+                        data={messages}
+                        startReached={prependItems}
+                        itemContent={itemContent}
+                        atBottomStateChange={setAtBottom}
+                        followOutput={'auto'}
+                    />
+                    {showButton && (
+                        <button
+                            onClick={() =>
+                                virtuosoRef!.current.scrollToIndex({
+                                    index: messages.length - 1,
+                                    behavior: 'smooth',
+                                })
+                            }
+                            style={{
+                                float: 'right',
+                                transform: 'translate(60rem, -1rem)',
+                                width: '3',
+                            }}>
+                            Bottom
+                        </button>
+                    )}
+                </div>
             </>
         )
     }
 )
-
-
 
 // export const ChatMessageContent = observer(
 //     ({chat}: { chat: Chat}) => {
@@ -106,7 +131,7 @@ export const ChatMessageContent = observer(
 //             console.log(perItemHeight)
 
 //             if (isUp && scrollTop === 0) {
-//                 prevCallback()    
+//                 prevCallback()
 
 //                 if (overlayRef !== null) {
 //                     const scrollPos = perItemHeight * blockSize
@@ -125,7 +150,6 @@ export const ChatMessageContent = observer(
 //             setCurrentScrollTopPosition(scrollTop)
 //         })
 
-
 //         return (
 //             <>
 //                 <div className="chat-content" ref={overlayRef} onScroll={((e : any) => scrollHandler(e.currentTarget))}>
@@ -133,7 +157,7 @@ export const ChatMessageContent = observer(
 //                         <ul className="list-unstyled py-4">
 //                             { <ChatMessageItem msg={ChatMessage.getLoadingMessage(0)} ref={tombRef} key={0}/>}
 //                             { curMsgs.map((msg) => <ChatMessageItem msg={msg} key={msg.inChatId} />) }
-                            
+
 //                         </ul>
 //                     </div>
 //                 </div>
@@ -141,4 +165,3 @@ export const ChatMessageContent = observer(
 //         )
 //     }
 // )
-

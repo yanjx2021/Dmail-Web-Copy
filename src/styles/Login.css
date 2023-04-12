@@ -1,0 +1,25 @@
+p
+{
+  letter-spacing:1px;
+}
+
+.btn:focus
+{
+  box-shadow: none;
+}
+
+.card-body .tect-center button:focus 
+{
+  outline: none;
+}
+
+.link
+{
+  border:none;
+  background:#fff;
+}
+
+.link:hover
+{
+  color: #0a58ca
+}
