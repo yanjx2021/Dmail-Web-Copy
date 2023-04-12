@@ -56,10 +56,6 @@ export class AuthStore {
         } else {
             this.loginWithPassword()
         }
-        this.timer = setTimeout(action(() => {
-            this.state = AuthState.Started
-            this.errors = '网络连接超时，请检查网络状况'
-        }), this.timeout)
     }
 
     toggleLoginMethod() {
@@ -89,15 +85,24 @@ export class AuthStore {
             email: this.email,
             password: SHA256(this.password + 'dmail' + this.email).toString(),
         })
+        this.timer = setTimeout(action(() => {
+            this.state = AuthState.Started
+            this.errors = '网络连接超时，请检查网络状况'
+        }), this.timeout)
 
         this.state = AuthState.Logging
     }
 
     private loginWithCode() {
+
         MessageServer.Instance().send<Send.Login>(Send.Login, {
             email: this.email,
             emailCode: parseInt(this.emailCode),
         })
+        this.timer = setTimeout(action(() => {
+            this.state = AuthState.Started
+            this.errors = '网络连接超时，请检查网络状况'
+        }), this.timeout)
         this.state = AuthState.Logging
     }
 
