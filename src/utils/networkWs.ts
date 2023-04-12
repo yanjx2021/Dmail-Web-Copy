@@ -1,5 +1,6 @@
 import { MessageSendData, Send, Receive, DataType } from './message'
 import Crypto from './cipher'
+import { AuthState, authStore } from '../stores/authStore'
 
 const server_address = "ws://43.143.134.180:8080/ws"
 
@@ -148,7 +149,11 @@ export class MessageServer {
         }
         websocket.onclose = (ev) => {
             console.log(ev)
+            // Maybe here some bugs
             this.clearHeartBeat()
+            if (authStore.state === AuthState.Logged) {
+                authStore.loginWithCode()
+            }
         }
 
         return websocket

@@ -93,7 +93,7 @@ export class AuthStore {
         this.state = AuthState.Logging
     }
 
-    private loginWithCode() {
+    loginWithCode() {
         MessageServer.Instance().send<Send.Login>(Send.Login, {
             email: this.email,
             emailCode: parseInt(this.emailCode),

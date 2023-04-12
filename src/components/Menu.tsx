@@ -1,6 +1,7 @@
+import { observer } from 'mobx-react-lite'
 import { authStore } from '../stores/authStore'
 
-const Menu = () => {
+const Menu = observer(() => {
     return (
         <div className="navigation navbar justify-content-center py-xl-4 py-md-3 py-0 px-3">
             <a href="/home" title="dMail" className="brand" onClick={(e) => e.preventDefault()}>
@@ -82,6 +83,5 @@ const Menu = () => {
             </button>
         </div>
     )
-}
-
+})
 export default Menu
