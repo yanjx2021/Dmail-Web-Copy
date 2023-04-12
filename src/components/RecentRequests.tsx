@@ -76,7 +76,7 @@ const RequestFriendItem = observer(
                             <div className="avatar me-3">
                                 <span className="rounded-circle"></span>
                                 <div className="avatar rounded-circle no-image timber">
-                                    <span>{receiverId}</span>
+                                    <span>{senderId === authStore.userId ? receiverId : senderId}</span>
                                 </div>
                             </div>
                             <div className="media-body overflow-hidden">
