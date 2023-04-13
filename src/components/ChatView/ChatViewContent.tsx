@@ -56,7 +56,7 @@ export const ChatMessageContent = observer(
                 setShowButton(false)
             }
         }, [atBottom])
-
+        
         return (
             <>
                 <div className="chat-content">

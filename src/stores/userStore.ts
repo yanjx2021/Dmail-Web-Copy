@@ -2,20 +2,29 @@ import { makeAutoObservable } from 'mobx'
 import { UserId } from './authStore'
 import { MessageServer } from '../utils/networkWs'
 import { Receive, ReceiveGetUserInfoResponseData, ReceiveGetUserInfoResponseState, Send } from '../utils/message'
+import { LocalDatabase } from './localData'
 
 export class User {
     name = '加载中...'
-    avater_path = ''
+    avaterPath = ''
 
     setToSelf(user: User) {
         this.name = user.name
-        this.avater_path = user.avater_path
+        this.avaterPath = user.avaterPath
+    }
+
+    serialized() {
+        const user = {
+            name: this.name,
+            avaterPath: this.avaterPath
+        }
+        return JSON.stringify(user)
     }
 
     constructor(name: string, avater_path: string) {
         makeAutoObservable(this, {}, { autoBind: true })
         this.name = name
-        this.avater_path = avater_path
+        this.avaterPath = avater_path
     }
 }
 
@@ -27,16 +36,12 @@ export class UserStore {
         MessageServer.on(Receive.GetUserInfoResponse, this.getUserInfoResponseHandler)
     }
 
-    getUserInfo(userId: number) {
-        console.log(`请求用户${userId}的信息`)
-        MessageServer.Instance().send<Send.GetUserInfo>(Send.GetUserInfo, userId)
-    }
-
     getUserInfoResponseHandler(data: ReceiveGetUserInfoResponseData) {
         switch (data.state) {
             case ReceiveGetUserInfoResponseState.Success:
                 console.log(`接受用户${data.userId}的信息`)
                 this.setUser(data.userId!, data.userName!, data.avaterPath!)
+                LocalDatabase.saveUserInfo(data.userId!, this.createUser(data.userName!, data.avaterPath!))
                 break
             default:
                 this.errors = '服务器跑路了'
@@ -57,7 +62,7 @@ export class UserStore {
             this.users.set(useId, this.createUser(name, avater_path))
         } else {
             user.name = name
-            user.avater_path = avater_path
+            user.avaterPath = avater_path
             this.users.get(useId)?.setToSelf(user)
         }
     }
@@ -67,7 +72,7 @@ export class UserStore {
         if (user === undefined) {
             this.users.set(userId, this.createLoadingUser())
             //TODO pull_user_info
-            this.getUserInfo(userId)
+            LocalDatabase.loadUserInfo(userId)
             return this.users.get(userId)!
         } else {
             return user
