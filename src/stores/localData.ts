@@ -1,5 +1,5 @@
 import localforage from 'localforage'
-import { ChatMessage, chatStore } from './chatStore'
+import { ChatInfo, ChatMessage, chatStore } from './chatStore'
 import { Send, SerializedReceiveChatMessage } from '../utils/message'
 import { MessageServer } from '../utils/networkWs'
 import { Request, requestStore } from './requestStore'
@@ -27,12 +27,6 @@ export class LocalDatabase {
         return `request:${reqId}`
     }
 
-    static async saveRequest(reqId: number, req: Request) {
-        // 保存request
-        const serialized = req.serialized()
-        localforage.setItem(this.requestIndex(reqId), serialized).catch((err) => console.error(err))
-    }
-
     static async saveUserInfo(userId: number, user: User) {
         const userInfo = user.serialized()
         localforage.setItem(this.userInfoIndex(userId), userInfo).catch((err) => console.error(err))
@@ -50,14 +44,25 @@ export class LocalDatabase {
         })
     }
 
+    static async saveRequest(reqId: number, req: Request) {
+        // 保存request
+        const serialized = req.serialized()
+        localforage.setItem(this.requestIndex(reqId), serialized).catch((err) => console.error(err))
+    }
+
     static async loadRequest(reqId: number) {
         localforage.getItem<string>(this.requestIndex(reqId)).then((value) => {
             if (value === null) {
                 //TODO 目前还没有拉取的接口
+                console.log('还没有主动获取Request的接口')
                 return
             }
             requestStore.setRequest(JSON.parse(value))
         })
+    }
+
+    static async saveChatInfo(chatId: number, chatInfo: ChatInfo) {
+        localforage.setItem(this.chatInfoIndex(chatId), JSON.stringify(chatInfo)).catch((err) => console.error(err))
     }
 
     static async loadChatInfo(chatId: number) {

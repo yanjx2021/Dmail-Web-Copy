@@ -28,6 +28,19 @@ export type MessageReadCursor = MessageId
 
 type ClientId = number
 
+export interface PrivateChatInfo {
+    id: number
+    users: [number, number]
+}
+
+export interface GroupChatInfo {
+    id: number
+    name: string
+    avaterPath: string
+}
+
+export type ChatInfo = PrivateChatInfo | GroupChatInfo
+
 export enum ChatMessageState {
     Sending = "发送中...",
     Getting = "拉取中...",
@@ -162,9 +175,8 @@ export class Chat {
         return this.lastMessage === undefined ? 0 : this.lastMessage.inChatId! - this.readCursor
     }
 
-    setChatInfo(info: any) {
+    setChatInfo(info: ChatInfo) {
         // TODO : More Typescript
-
         if ('name' in info) {
             // 群聊
             this.groupName = info.name
@@ -174,7 +186,6 @@ export class Chat {
             // 私聊
             const users: [number, number] = info.users
             const otherId = users[0] === authStore.userId ? users[1] : users[0]
-
             this.bindUser = userStore.getUser(otherId)
             this.chatType = ChatType.Private
         }
@@ -326,7 +337,7 @@ export class ChatStore {
     // O(n)
     // }
 
-    setChatInfo(info: any) {
+    setChatInfo(info: ChatInfo) {
         // TODO : More Typescript
 
         this.getChat(info.id).setChatInfo(info)
@@ -387,6 +398,7 @@ export class ChatStore {
     private ReceiveChatInfoHandler(data: SerializedReceiveChatMessage) {
         const chatInfo = JSON.parse(data)
         this.setChatInfo(chatInfo)
+        LocalDatabase.saveChatInfo(chatInfo.id, chatInfo)
     }
 }
 
