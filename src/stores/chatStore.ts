@@ -19,6 +19,8 @@ import { Updater } from 'use-immer'
 import { LocalDatabase } from './localData'
 import { User, UserStore, userStore } from './userStore'
 import { timeStamp } from 'console'
+import { pinyin } from 'pinyin-pro'
+import { ReceiveCreateGroupChatResponse } from '../utils/message'
 
 export type ChatId = number
 
@@ -27,6 +29,19 @@ export type MessageId = number
 export type MessageReadCursor = MessageId
 
 type ClientId = number
+
+export interface PrivateChatInfo {
+    id: number
+    users: [number, number]
+}
+
+export interface GroupChatInfo {
+    id: number
+    name: string
+    avaterPath: string
+}
+
+export type ChatInfo = PrivateChatInfo | GroupChatInfo
 
 export enum ChatMessageState {
     Sending = "发送中...",
@@ -162,9 +177,7 @@ export class Chat {
         return this.lastMessage === undefined ? 0 : this.lastMessage.inChatId! - this.readCursor
     }
 
-    setChatInfo(info: any) {
-        // TODO : More Typescript
-
+    setChatInfo(info: ChatInfo) {
         if ('name' in info) {
             // 群聊
             this.groupName = info.name
@@ -174,12 +187,10 @@ export class Chat {
             // 私聊
             const users: [number, number] = info.users
             const otherId = users[0] === authStore.userId ? users[1] : users[0]
-
             this.bindUser = userStore.getUser(otherId)
             this.chatType = ChatType.Private
         }
-
-        // TODO : SaveChatInfo
+        LocalDatabase.saveChatInfo(this.chatId, info)
     }
 
     setMessage(msg: ChatMessage) {
@@ -302,6 +313,38 @@ export class ChatStore {
         MessageServer.on(Receive.SendMessageResponse, this.ReceiveSendMessageResponseHandler)
         MessageServer.on(Receive.Messages, this.ReceiveMessagesHandler)
         MessageServer.on(Receive.Chat, this.ReceiveChatInfoHandler)
+        MessageServer.on(Receive.CreateGroupChatResponse, this.ReceiveCreateGroupChatResponseHandler)
+    }
+
+    get privateChatGroup() {
+        const chats: Chat[] = []
+        let groupCounts: number[] = Array(26).fill(0)
+        const groups: string[] = []
+        const firstLetter = (chat: Chat) => pinyin(chat.name[0].toLowerCase(), {pattern: 'initial', toneType: 'none'})
+
+        this.chats.forEach((chat, _) => {
+            if (chat.chatType === ChatType.Private) {
+                chats.push(chat)
+            }
+        })
+        chats.sort((a, b) => {
+            if (firstLetter(a) > firstLetter(b)) return 1
+            else return -1
+        })
+        chats.forEach((chat, _) => {
+            const index = firstLetter(chat).toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0)
+            if (groupCounts[index] === 0) { // 首次计算
+                groups.push(firstLetter(chat).toUpperCase())
+            }
+            groupCounts[index]++
+        })
+        groups.sort((a, b) => a.charCodeAt(0) - b.charCodeAt(0))
+        groupCounts = groupCounts.filter((value, _) => value !== 0)
+        return {
+            chats: chats,
+            groups: groups,
+            groupCounts: groupCounts,
+        }
     }
 
     get recentChatsView() {
@@ -326,7 +369,7 @@ export class ChatStore {
     // O(n)
     // }
 
-    setChatInfo(info: any) {
+    setChatInfo(info: ChatInfo) {
         // TODO : More Typescript
 
         this.getChat(info.id).setChatInfo(info)
@@ -387,6 +430,16 @@ export class ChatStore {
     private ReceiveChatInfoHandler(data: SerializedReceiveChatMessage) {
         const chatInfo = JSON.parse(data)
         this.setChatInfo(chatInfo)
+        LocalDatabase.saveChatInfo(chatInfo.id, chatInfo)
+    }
+
+    private ReceiveCreateGroupChatResponseHandler(data: ReceiveCreateGroupChatResponse) {
+        if (data.state === 'DatabaseError') {
+            this.errors = '数据库异常，请稍后再试'
+            return
+        } else {
+            this.getChat(data.chatId!)
+        }
     }
 }
 

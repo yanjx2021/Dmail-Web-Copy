@@ -13,6 +13,8 @@ import { authStore } from '../stores/authStore'
 import '../styles/RecentRequests.css'
 import { userStore } from '../stores/userStore'
 import { ErrorBox } from './ErrorBox'
+import { MessageServer } from '../utils/networkWs'
+import { Send } from '../utils/message'
 
 const RequestItemStatus = observer(
     ({ senderId, state, reqId }: { senderId: number; state: RequestState; reqId: number }) => {
@@ -178,10 +180,10 @@ const RequestItem = observer(
     }
 )
 
-const AddFriendBox = observer(() => {
+export const AddFriendBox = observer(({id} : {id : string}) => {
     const [reqId, setReqId] = useImmer<string>('')
     return (
-        <div className="modal fade" id="InviteFriends" tabIndex={9999} aria-hidden="true">
+        <div className="modal fade" id={id} tabIndex={9999} aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
@@ -238,18 +240,60 @@ const AddFriendBox = observer(() => {
     )
 })
 
+export const CreateGroupChatBox = ({id} : {id : string}) => {
+    const [groupName, setGroupName] = useImmer<string>('')
+    return (
+        <div className="modal fade" id={id} tabIndex={9999} aria-hidden="true">
+            <div className="modal-dialog">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">创建群聊</h5>
+                        <button
+                            type="button"
+                            className="close"
+                            data-dismiss="modal"
+                            aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div className="modal-body">
+                        <form>
+                            <div className="form-group">
+                                <label>群聊名称</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={groupName}
+                                    onChange={(e) => {
+                                        setGroupName(e.target.value)
+                                    }}
+                                />
+                            </div>
+                        </form>
+                        <div className="mb-2 mt-4">
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={() => {
+                                    MessageServer.Instance().send<Send.CreateGroupChat>(Send.CreateGroupChat, {
+                                        name: groupName,
+                                        avaterPath: ''
+                                    })
+                                    setGroupName('')
+                                }}>
+                                创建群聊
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore }) => {
     return (
         <div className="tab-pane fade" id="nav-tab-newfriends" role="tabpanel">
-            {requestStore.showError ? (
-                <ErrorBox
-                    title="请求失败"
-                    error={requestStore.errors}
-                    setError={action((error) => (requestStore.errors = error))}
-                />
-            ) : (
-                <></>
-            )}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h3 className="mb-0 text-primary">请求列表</h3>
             </div>
@@ -258,7 +302,7 @@ const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore 
                     className="btn btn-primary join-btn"
                     type="button"
                     data-toggle="modal"
-                    data-target="#InviteFriends">
+                    data-target="#InviteFriendsRequest">
                     <i className="zmdi zmdi-account-add" />
                     添加好友
                 </a>
@@ -275,7 +319,7 @@ const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore 
                     />
                 ))}
             </ul>
-            <AddFriendBox />
+            <AddFriendBox id='InviteFriendsRequest' />
         </div>
     )
 })

@@ -242,7 +242,7 @@ export interface SendSolveRequestData {
 }
 export interface SendCreateGroupChatData {
     name: string,
-    avatarPath: string
+    avaterPath: string
 }
 
 export interface SendGetMessagesData {

@@ -6,6 +6,7 @@ import { ReceiveSendRequestResponseData } from '../utils/message'
 import { SendRequestResponseState } from '../utils/message'
 import { authStore } from './authStore'
 import { User, userStore } from './userStore'
+import { LocalDatabase } from './localData'
 
 export enum RequestContentType {
     MakeFriend = 'MakeFriend',
@@ -92,6 +93,16 @@ export class Request {
         this.message = req.message
         this.content = req.content
     }
+    serialized(): string {
+        const request = {
+            state: this.state,
+            reqId: this.reqId,
+            senderId: this.senderId,
+            message: this.message,
+            content: this.content,
+        }
+        return JSON.stringify(request)
+    }
 }
 
 type ReqId = number
@@ -152,7 +163,6 @@ export class RequestStore {
             this.requsetStash.delete(data.clientId!)
         } else if (data.state === SendRequestResponseState.DatabaseError) {
             this.errors = '服务器数据异常'
-            if (this.requsetStash.has(data.clientId)) this.requsetStash.delete(data.clientId)
         } else {
             switch (data.state.RequestError.errorType) {
                 case 'SameUser':
@@ -171,8 +181,8 @@ export class RequestStore {
                     this.errors = '未找到该用户'
                     break
             }
-            //TODO-需要clientId
         }
+        if (this.requsetStash.has(data.clientId)) this.requsetStash.delete(data.clientId)
     }
 
     setRequestState(reqId: number, state: RequestState) {
@@ -237,7 +247,9 @@ export class RequestStore {
         } else {
             request.setToSelf(req)
         }
+        LocalDatabase.saveRequest(req.reqId, req) // 本地缓存
     }
+    
     getRequest(reqId: ReqId) {
         if (this.requests.has(reqId)) {
             return this.requests.get(reqId)
@@ -245,6 +257,7 @@ export class RequestStore {
         const req = Request.getLoadingRequest(reqId)
         this.requests.set(reqId, req)
         //TODO-拉取Request
+        LocalDatabase.loadRequest(reqId)
         return req
     }
 
@@ -266,9 +279,7 @@ export class RequestStore {
         this.setRequest(Request.createFromReceiveRequest(req))
     }
     receiveRequestsHandler(data: string[]) {
-        console.log(data)
         const reqs: ReceiveRequest[] = data.map((serializedReq) => JSON.parse(serializedReq))
-        console.log('reqs', reqs)
         reqs.forEach((req, index) => {
             this.setRequest(Request.createFromReceiveRequest(req))
         })

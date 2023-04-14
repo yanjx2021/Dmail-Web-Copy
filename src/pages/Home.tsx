@@ -40,6 +40,15 @@ const Home = observer(
                 ) : (
                     <></>
                 )}
+                {requestStore.showError ? (
+                    <ErrorBox
+                        title="请求失败"
+                        error={requestStore.errors}
+                        setError={action((error) => (requestStore.errors = error))}
+                    />
+                ) : (
+                    <></>
+                )}
                 <Menu />
                 <TabContent activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
                 {activeChatId === null ? (
