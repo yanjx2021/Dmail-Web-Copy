@@ -1,6 +1,8 @@
+import { action } from "mobx"
 import { ChatId, chatStore } from "../stores/chatStore"
 import { requestStore } from "../stores/requestStore"
-import { AllChatList } from "./AllChatList"
+import { AllChatList } from "./AllChats"
+import { ErrorBox } from "./ErrorBox"
 import { RecentChats } from "./RecentChats"
 import RecentRequests from "./RecentRequests"
 
@@ -10,7 +12,7 @@ export const TabContent = ({activeChatId, setActiveChatId}: { activeChatId: Chat
             <div className="tab-content">
                 <RecentChats chatStore={chatStore} activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
                 <RecentRequests requestStore={requestStore}/>
-                <AllChatList/>
+                <AllChatList chatStore={chatStore} activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
             </div>
         </div>
     )

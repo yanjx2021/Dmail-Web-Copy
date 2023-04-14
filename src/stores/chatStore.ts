@@ -19,6 +19,8 @@ import { Updater } from 'use-immer'
 import { LocalDatabase } from './localData'
 import { User, UserStore, userStore } from './userStore'
 import { timeStamp } from 'console'
+import { pinyin } from 'pinyin-pro'
+import { ReceiveCreateGroupChatResponse } from '../utils/message'
 
 export type ChatId = number
 
@@ -176,7 +178,6 @@ export class Chat {
     }
 
     setChatInfo(info: ChatInfo) {
-        // TODO : More Typescript
         if ('name' in info) {
             // 群聊
             this.groupName = info.name
@@ -189,8 +190,7 @@ export class Chat {
             this.bindUser = userStore.getUser(otherId)
             this.chatType = ChatType.Private
         }
-
-        // TODO : SaveChatInfo
+        LocalDatabase.saveChatInfo(this.chatId, info)
     }
 
     setMessage(msg: ChatMessage) {
@@ -313,6 +313,38 @@ export class ChatStore {
         MessageServer.on(Receive.SendMessageResponse, this.ReceiveSendMessageResponseHandler)
         MessageServer.on(Receive.Messages, this.ReceiveMessagesHandler)
         MessageServer.on(Receive.Chat, this.ReceiveChatInfoHandler)
+        MessageServer.on(Receive.CreateGroupChatResponse, this.ReceiveCreateGroupChatResponseHandler)
+    }
+
+    get privateChatGroup() {
+        const chats: Chat[] = []
+        let groupCounts: number[] = Array(26).fill(0)
+        const groups: string[] = []
+        const firstLetter = (chat: Chat) => pinyin(chat.name[0].toLowerCase(), {pattern: 'initial', toneType: 'none'})
+
+        this.chats.forEach((chat, _) => {
+            if (chat.chatType === ChatType.Private) {
+                chats.push(chat)
+            }
+        })
+        chats.sort((a, b) => {
+            if (firstLetter(a) > firstLetter(b)) return 1
+            else return -1
+        })
+        chats.forEach((chat, _) => {
+            const index = firstLetter(chat).toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0)
+            if (groupCounts[index] === 0) { // 首次计算
+                groups.push(firstLetter(chat).toUpperCase())
+            }
+            groupCounts[index]++
+        })
+        groups.sort((a, b) => a.charCodeAt(0) - b.charCodeAt(0))
+        groupCounts = groupCounts.filter((value, _) => value !== 0)
+        return {
+            chats: chats,
+            groups: groups,
+            groupCounts: groupCounts,
+        }
     }
 
     get recentChatsView() {
@@ -399,6 +431,15 @@ export class ChatStore {
         const chatInfo = JSON.parse(data)
         this.setChatInfo(chatInfo)
         LocalDatabase.saveChatInfo(chatInfo.id, chatInfo)
+    }
+
+    private ReceiveCreateGroupChatResponseHandler(data: ReceiveCreateGroupChatResponse) {
+        if (data.state === 'DatabaseError') {
+            this.errors = '数据库异常，请稍后再试'
+            return
+        } else {
+            this.getChat(data.chatId!)
+        }
     }
 }
 
