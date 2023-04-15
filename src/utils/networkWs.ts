@@ -85,8 +85,8 @@ export class MessageServer {
         return this.instance
     }
     static destroyInstance() {
-        this.instance?.websocket.close()
         this.instance?.clearHeartBeat()
+        this.instance?.websocket.close()
         this.instance = null
     }
     static on(command: Receive, callback: Function) {

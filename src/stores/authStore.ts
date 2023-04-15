@@ -6,6 +6,9 @@ import { passwordTester } from '../constants/passwordFormat'
 import { SHA256 } from 'crypto-js'
 import { LocalDatabase } from './localData'
 import { emailTester } from '../constants/passwordFormat'
+import { chatStore } from './chatStore'
+import { requestStore } from './requestStore'
+import { userStore } from './userStore'
 
 export type UserId = number
 
@@ -35,6 +38,30 @@ export class AuthStore {
         makeAutoObservable(this, {}, { autoBind: true })
 
         MessageServer.on(Receive.LoginResponse, this.loginResponseHandler)
+    }
+
+
+
+    reset() {
+        this.state = AuthState.Started
+        this.method = AuthMethod.Password
+        this.userId = 0
+        this.email = ''
+        this.emailCode = ''
+        this.password = ''
+        this.errors = ''
+    }
+
+    logout() {
+        if (this.state !== AuthState.Logged) {
+            console.error('尚未登录', this.state)
+            return
+        }
+        this.reset()
+        chatStore.reset()
+        requestStore.reset()
+        userStore.reset()
+        MessageServer.destroyInstance()
     }
 
     login() {

@@ -50,26 +50,28 @@ export const HoverOption = observer(({ chat }: { chat: Chat }) => {
     )
 })
 
-export const AllChatsItem = ({
-    chat,
-    activeChatId,
-    setActiveChatId,
-}: {
-    chat: Chat
-    activeChatId: ChatId | null
-    setActiveChatId: (chatId: ChatId) => any
-}) => {
-    return (
-        <li className={activeChatId && activeChatId === chat.chatId ? 'online active' : ''}>
-            <HoverOption chat={chat} />
-            <AllChatsCard
-                chat={chat}
-                activeChatId={activeChatId}
-                setActiveChatId={setActiveChatId}
-            />
-        </li>
-    )
-}
+export const AllChatsItem = observer(
+    ({
+        chat,
+        activeChatId,
+        setActiveChatId,
+    }: {
+        chat: Chat
+        activeChatId: ChatId | null
+        setActiveChatId: (chatId: ChatId) => any
+    }) => {
+        return (
+            <li className={activeChatId === chat.chatId ? 'online active' : ''}>
+                <HoverOption chat={chat} />
+                <AllChatsCard
+                    chat={chat}
+                    activeChatId={activeChatId}
+                    setActiveChatId={setActiveChatId}
+                />
+            </li>
+        )
+    }
+)
 
 export const AllChatContent = observer(
     ({
