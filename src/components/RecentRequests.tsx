@@ -296,16 +296,22 @@ const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore 
         <div className="tab-pane fade" id="nav-tab-newfriends" role="tabpanel">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h3 className="mb-0 text-primary">请求列表</h3>
-            </div>
-            <div>
+                <div>
                 <a
-                    className="btn btn-primary join-btn"
+                    className="btn btn-dark"
                     type="button"
                     data-toggle="modal"
                     data-target="#InviteFriendsRequest">
                     <i className="zmdi zmdi-account-add" />
                     添加好友
                 </a>
+            </div>
+            
+            </div>
+            <div className="form-group input-group-lg search mb-3">
+                <i className="zmdi zmdi-search"></i>
+                <i className="zmdi zmdi-dialpad"></i>
+                <input className="form-control" type="text" placeholder="搜索..."></input>
             </div>
             <ul className="chat-list">
                 {requestStore.requestsList.map(({ message, reqId, senderId, content, state }) => (

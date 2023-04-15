@@ -60,10 +60,6 @@ const Menu = observer(() => {
                 className="nav flex-md-column nav-pills flex-grow-2"
                 role="tablist"
                 aria-orientation="vertical">
-                <a className="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="#" role="tab" onClick={authStore.logout}>
-                    {/* TODO-添加一个登出的图标 */}
-                    登出
-                </a>
                 {/* <a
                     className="mt-xl-3 mt-md-2 nav-link light-dark-toggle"
                     href="javascript:void(0);">
@@ -72,6 +68,10 @@ const Menu = observer(() => {
                 </a> */}
                 <a className="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="#" role="tab">
                     <i className="zmdi zmdi-settings"></i>
+                </a>
+                <a className="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="#" role="tab" onClick={authStore.logout}>
+                    {/* TODO-添加一个登出的图标 */}
+                    登出
                 </a>
             </div>
 
