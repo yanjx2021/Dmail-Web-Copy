@@ -316,6 +316,13 @@ export class ChatStore {
         MessageServer.on(Receive.CreateGroupChatResponse, this.ReceiveCreateGroupChatResponseHandler)
     }
 
+    reset() {
+        this.chats.clear()
+        this.setViewMessages = undefined
+        this.activeChatId = undefined
+        this.errors = ''
+    }
+
     get privateChatGroup() {
         const chats: Chat[] = []
         let groupCounts: number[] = Array(26).fill(0)

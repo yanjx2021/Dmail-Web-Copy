@@ -36,6 +36,12 @@ export class UserStore {
         MessageServer.on(Receive.GetUserInfoResponse, this.getUserInfoResponseHandler)
     }
 
+    reset() {
+        this.users.clear()
+        this.errors = ''
+    }
+
+
     getUserInfoResponseHandler(data: ReceiveGetUserInfoResponseData) {
         switch (data.state) {
             case ReceiveGetUserInfoResponseState.Success:

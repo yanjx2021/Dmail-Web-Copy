@@ -55,7 +55,7 @@ const Menu = observer(() => {
                     <i className="zmdi zmdi-layers"></i>
                 </a>
             </div>
-
+            
             <div
                 className="nav flex-md-column nav-pills flex-grow-2"
                 role="tablist"
@@ -68,6 +68,10 @@ const Menu = observer(() => {
                 </a> */}
                 <a className="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="#" role="tab">
                     <i className="zmdi zmdi-settings"></i>
+                </a>
+                <a className="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="#" role="tab" onClick={authStore.logout}>
+                    {/* TODO-添加一个登出的图标 */}
+                    登出
                 </a>
             </div>
 

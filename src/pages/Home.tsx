@@ -16,14 +16,16 @@ const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore; chatStore: ChatStore }) => {
         const [activeChatId, setActiveChatId] = useState<ChatId | null>(null)
         const navigate = useNavigate()
-        if (authStore.state !== AuthState.Logged) {
-            setTimeout(() => {
-                navigate('/login')
-            }, 1000)
-            return <div>未登录，即将跳转回登录界面</div>
-        }
 
-        return (
+        useEffect(action(() => {
+            if (authStore.state !== AuthState.Logged) {
+                navigate('/login')
+            }
+        }), [authStore.state])
+
+        
+
+        return authStore.state === AuthState.Logged ? (
             <>
                 {/* <button onClick={() => {navigate('/test')}}>测试</button> */}
                 {authStore.showError ? (
@@ -57,7 +59,7 @@ const Home = observer(
                     <ChatView chat={chatStore.getChat(activeChatId)} />
                 )}
             </>
-        )
+        ) : <></>
     }
 )
 

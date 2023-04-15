@@ -129,6 +129,14 @@ export class RequestStore {
         this.clientId++
     }
 
+    reset() {
+        this.errors = ''
+        this.message = ''
+        this.clientId = 0
+        this.requsetStash.clear()
+        this.requests.clear()
+    }
+
     get requestsList() {
         const unsolvedRequests : {message: string, reqId: number, senderId: number, content: RequestContent, state: RequestState}[] = []
         const waitintSolvedRequests : {message: string, reqId: number, senderId: number, content: RequestContent, state: RequestState}[] = []

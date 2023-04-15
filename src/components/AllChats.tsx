@@ -50,26 +50,28 @@ export const HoverOption = observer(({ chat }: { chat: Chat }) => {
     )
 })
 
-export const AllChatsItem = ({
-    chat,
-    activeChatId,
-    setActiveChatId,
-}: {
-    chat: Chat
-    activeChatId: ChatId | null
-    setActiveChatId: (chatId: ChatId) => any
-}) => {
-    return (
-        <li className={activeChatId && activeChatId === chat.chatId ? 'online active' : ''}>
-            <HoverOption chat={chat} />
-            <AllChatsCard
-                chat={chat}
-                activeChatId={activeChatId}
-                setActiveChatId={setActiveChatId}
-            />
-        </li>
-    )
-}
+export const AllChatsItem = observer(
+    ({
+        chat,
+        activeChatId,
+        setActiveChatId,
+    }: {
+        chat: Chat
+        activeChatId: ChatId | null
+        setActiveChatId: (chatId: ChatId) => any
+    }) => {
+        return (
+            <li className={activeChatId === chat.chatId ? 'online active' : ''}>
+                <HoverOption chat={chat} />
+                <AllChatsCard
+                    chat={chat}
+                    activeChatId={activeChatId}
+                    setActiveChatId={setActiveChatId}
+                />
+            </li>
+        )
+    }
+)
 
 export const AllChatContent = observer(
     ({
@@ -122,10 +124,15 @@ export const AllChatList = ({
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h3 className="mb-0 text-primary">通讯录</h3>
                 </div>
-                <div>
+                <div className="form-group input-group-lg search mb-3">
+                <i className="zmdi zmdi-search"></i>
+                <i className="zmdi zmdi-dialpad"></i>
+                <input className="form-control" type="text" placeholder="搜索..."></input>
+            </div>
+                <div className="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <a
-                            className="btn btn-primary join-btn"
+                            className="btn btn-dark"
                             type="button"
                             data-toggle="modal"
                             data-target="#InviteFriendsAllChat">
@@ -135,7 +142,17 @@ export const AllChatList = ({
                     </div>
                     <div>
                         <a
-                            className="btn btn-primary join-btn"
+                            className="btn btn-dark"
+                            type="button"
+                            data-toggle="modal"
+                            data-target="#InviteFriendsAllChat">
+                            <i className="zmdi zmdi-account-add" />
+                            加入群聊
+                        </a>
+                    </div>
+                    <div>
+                        <a
+                            className="btn btn-dark"
                             type="button"
                             data-toggle="modal"
                             data-target="#CreateGroupAllChat">
@@ -144,6 +161,7 @@ export const AllChatList = ({
                         </a>
                     </div>
                 </div>
+                
                 <AllChatContent
                     chatStore={chatStore}
                     activeChatId={activeChatId}
