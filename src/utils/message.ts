@@ -1,6 +1,7 @@
 import { RequestState } from "../stores/requestStore"
 
 import { ChatId } from "../stores/chatStore"
+import { UserId } from "../stores/authStore"
 
 /*--------------------Receive数据类型----------------------*/
 export enum SetConnectionPubKeyState {
@@ -170,6 +171,11 @@ export interface ReceiveCreateGroupChatResponse {
     chatId?: number
 }
 
+export interface ReceivePullUserSettingResponseData {
+    state: 'Success' | 'UserNotFound' | 'ServerError'
+    content?: string
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -195,6 +201,7 @@ export enum Receive {
     UpdateMessage = 'UpdateMessage',
     RequestStateUpdate = 'RequestStateUpdate',
     CreateGroupChatResponse = 'CreateGroupChatResponse',
+    PullUserSettingResponse = 'PullUserSettingResponse',
 
 }
 
@@ -269,6 +276,8 @@ export enum Send {
     CreateGroupChat = 'CreateGroupChat',
     GetMessages = 'GetMessages',
     GetChatInfo = 'GetChatInfo',
+    SendUserSetting = 'SendUserSetting',
+    PullUserSetting = 'PullUserSetting',
 }
 
 // COMMAND和DATA类型捆绑
@@ -295,6 +304,7 @@ export interface MessageReceiveData {
     [Receive.GetUserInfoResponse]: ReceiveGetUserInfoResponseData
     [Receive.RequestStateUpdate]: ReceiveRequestStateUpdateData
     [Receive.CreateGroupChatResponse]: ReceiveCreateGroupChatResponse
+    [Receive.PullUserSettingResponse]: ReceivePullUserSettingResponseData
 }
 
 export interface MessageSendData {
@@ -312,6 +322,8 @@ export interface MessageSendData {
     [Send.CreateGroupChat]: SendCreateGroupChatData
     [Send.GetMessages]: SendGetMessagesData
     [Send.GetChatInfo] : ChatId
+    [Send.SendUserSetting]: string
+    [Send.PullUserSetting]: UserId
 }
 
 // 封装消息包

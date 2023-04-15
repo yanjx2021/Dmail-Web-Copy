@@ -9,8 +9,9 @@ import { NoneActiveChatBody } from '../components/NoneActiveChatBody'
 import { ChatView } from '../components/ChatView/ChatView'
 import { action, autorun } from 'mobx'
 import { requestStore } from '../stores/requestStore'
-import { ErrorBox } from '../components/ErrorBox'
+import { ErrorBox } from '../components/Box/ErrorBox'
 import { MessageServer } from '../utils/networkWs'
+import { LocalDatabase } from '../stores/localData'
 
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore; chatStore: ChatStore }) => {
@@ -23,11 +24,12 @@ const Home = observer(
             }
         }), [authStore.state])
 
-        
+        useEffect(action(() => {
+            LocalDatabase.loadUserSetting()
+        }), [])
 
         return authStore.state === AuthState.Logged ? (
             <>
-                {/* <button onClick={() => {navigate('/test')}}>测试</button> */}
                 {authStore.showError ? (
                     <ErrorBox
                         title="连接错误"

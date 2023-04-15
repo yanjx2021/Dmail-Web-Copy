@@ -4,6 +4,9 @@ import { Send, SerializedReceiveChatMessage } from '../utils/message'
 import { MessageServer } from '../utils/networkWs'
 import { Request, requestStore } from './requestStore'
 import { User, userStore } from './userStore'
+import { UserSetting, userSettingStore } from './userSettingStore'
+
+const userSettingIndex = 'userSetting'
 
 export class LocalDatabase {
     private static database: LocalForage = localforage.createInstance({
@@ -25,6 +28,21 @@ export class LocalDatabase {
     }
     static requestIndex(reqId: number) {
         return `request:${reqId}`
+    }
+
+    static async saveUserSetting(userSetting: string) {
+        localforage.setItem(userSettingIndex, userSetting)
+    }
+
+    static async loadUserSetting() {
+        localforage.getItem(userSettingIndex).then((value) => {
+            if (value === null) {
+                // 从后端拉取userSetting
+            } else {
+                const userSetting = JSON.parse(value as string) as UserSetting
+                userSettingStore.setUserSetting(userSetting)
+            }
+        })
     }
 
     static async saveUserInfo(userId: number, user: User) {

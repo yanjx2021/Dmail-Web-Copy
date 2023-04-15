@@ -102,7 +102,7 @@ export class ChatMessage {
         if (this.senderId === 0) {
             tip += '系统消息'
         } else {
-            tip += userStore.getUser(this.senderId).name
+            tip += userStore.getUser(this.senderId).showName
             tip += ' ' + new Date(this.timestamp).toLocaleString()
         }
 
@@ -168,7 +168,7 @@ export class Chat {
         if (this.chatType === ChatType.Unknown) {
             return `群聊${this.chatId}`
         } else if (this.chatType === ChatType.Private) {
-            return this.bindUser!.name
+            return this.bindUser!.showName
         }
         return this.groupName!
     }

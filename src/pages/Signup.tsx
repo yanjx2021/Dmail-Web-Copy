@@ -7,7 +7,7 @@ import { SHA256 } from 'crypto-js'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { emailTester, passwordTester } from '../constants/passwordFormat'
-import { ErrorBox } from '../components/ErrorBox'
+import { ErrorBox } from '../components/Box/ErrorBox'
 import '../styles/Login.css'
 
 export {}

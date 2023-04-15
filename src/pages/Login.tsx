@@ -4,7 +4,7 @@ import { action, autorun } from 'mobx'
 import { EmailCodeInput } from '../components/EmailCodeInput'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
-import { ErrorBox } from '../components/ErrorBox'
+import { ErrorBox } from '../components/Box/ErrorBox'
 import '../styles/Login.css'
 
 const EmailInput = observer(({ authStore }: { authStore: AuthStore }) => {

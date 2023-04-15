@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
-import '../styles/ErrorBox.css'
+import '../../styles/ErrorBox.css'
 //TODO-yjx
 const timeout = 3000
 export const ErrorBox = ({

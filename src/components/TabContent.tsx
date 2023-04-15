@@ -2,7 +2,7 @@ import { action } from "mobx"
 import { ChatId, chatStore } from "../stores/chatStore"
 import { requestStore } from "../stores/requestStore"
 import { AllChatList } from "./AllChats"
-import { ErrorBox } from "./ErrorBox"
+import { ErrorBox } from "./Box/ErrorBox"
 import { RecentChats } from "./RecentChats"
 import RecentRequests from "./RecentRequests"
 

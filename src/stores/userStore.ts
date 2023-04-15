@@ -5,26 +5,45 @@ import { Receive, ReceiveGetUserInfoResponseData, ReceiveGetUserInfoResponseStat
 import { LocalDatabase } from './localData'
 
 export class User {
-    name = '加载中...'
+    userId: number = 0
+    private name = '加载中...'
+    private nickname = ''
     avaterPath = ''
 
     setToSelf(user: User) {
+        this.userId = user.userId
         this.name = user.name
         this.avaterPath = user.avaterPath
+        this.nickname = user.nickname
+    }
+
+    setNickname(nickname: string) {
+        this.nickname = nickname
+    }
+    setName(name: string) {
+        this.name = name
+    }
+
+    get showName() {
+        return this.nickname === '' ? this.name : this.nickname
     }
 
     serialized() {
         const user = {
+            userId: this.userId,
             name: this.name,
-            avaterPath: this.avaterPath
+            avaterPath: this.avaterPath,
+            nickname: this.nickname
         }
         return JSON.stringify(user)
     }
 
-    constructor(name: string, avater_path: string) {
+    constructor(userId: number, name: string, avater_path: string, nickname: string = '') {
         makeAutoObservable(this, {}, { autoBind: true })
+        this.userId = userId
         this.name = name
         this.avaterPath = avater_path
+        this.nickname = nickname
     }
 }
 
@@ -47,28 +66,40 @@ export class UserStore {
             case ReceiveGetUserInfoResponseState.Success:
                 console.log(`接受用户${data.userId}的信息`)
                 this.setUser(data.userId!, data.userName!, data.avaterPath!)
-                LocalDatabase.saveUserInfo(data.userId!, this.createUser(data.userName!, data.avaterPath!))
+                LocalDatabase.saveUserInfo(data.userId!, this.createUser(data.userId!, data.userName!, data.avaterPath!))
                 break
             default:
                 this.errors = '服务器跑路了'
         }
     }
 
-    createUser(name: string, avater_path: string) {
-        return new User(name, avater_path)
+    setUserNickname(userId: number, nickname: string) {
+        const user = this.users.get(userId)
+        if (user === undefined) {
+            this.users.set(userId, this.createUser(userId, '加载中...', '', nickname))
+            LocalDatabase.loadUserInfo(userId)
+        } else {
+            user.setNickname(nickname)
+            this.users.get(userId)?.setToSelf(user)
+        }
     }
 
-    createLoadingUser() {
-        return new User('加载中...', '')
+    createUser(userId: number, name: string, avater_path: string, nickname: string = '') {
+        return new User(userId, name, avater_path, nickname)
     }
 
-    setUser(useId: number, name: string, avater_path: string) {
+    createLoadingUser(userId: number) {
+        return new User(userId, '加载中...', '', '')
+    }
+
+    setUser(useId: number, name: string, avater_path: string, nickname?: string) {
         const user = this.users.get(useId)
         if (user === undefined) {
-            this.users.set(useId, this.createUser(name, avater_path))
+            this.users.set(useId, this.createUser(useId, name, avater_path, ''))
         } else {
-            user.name = name
+            user.setName(name)
             user.avaterPath = avater_path
+            nickname && user.setNickname(nickname)
             this.users.get(useId)?.setToSelf(user)
         }
     }
@@ -76,7 +107,7 @@ export class UserStore {
     getUser(userId: UserId) {
         const user = this.users.get(userId)
         if (user === undefined) {
-            this.users.set(userId, this.createLoadingUser())
+            this.users.set(userId, this.createLoadingUser(userId))
             //TODO pull_user_info
             LocalDatabase.loadUserInfo(userId)
             return this.users.get(userId)!

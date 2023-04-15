@@ -1,10 +1,13 @@
 import { observer } from 'mobx-react-lite'
 import { Chat, ChatId, ChatStore, ChatType } from '../stores/chatStore'
 import { action } from 'mobx'
-import { AddFriendBox, CreateGroupChatBox } from './RecentRequests'
+import { CreateGroupChatBox } from './Box/CreateGroupChatBox'
+import { AddFriendBox } from './Box/AddFriendBox'
 import '../styles/RecentRequests.css'
 import { GroupedVirtuoso, Virtuoso } from 'react-virtuoso'
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useImmer } from 'use-immer'
+import { userSettingStore } from '../stores/userSettingStore'
 
 export const AllChatsCard = observer(
     ({
@@ -16,6 +19,37 @@ export const AllChatsCard = observer(
         activeChatId: ChatId | null
         setActiveChatId: (chatId: ChatId) => any
     }) => {
+        const [editName, setEditName] = useImmer(false)
+        const [nickname, setNickname] = useImmer(chat.name)
+        const inputRef: any = useRef(null)
+
+        const onKeyDown = useCallback(
+            action((e: KeyboardEvent) => {
+                if (e.key === 'Enter') {
+                    userSettingStore.setUserNickName(chat.bindUser!.userId, nickname)
+                    setEditName(false)
+                }
+            }),
+            [nickname]
+        )
+        const handleOnBlur = () => setEditName(false)
+        const handleDoubleClick = action(() => {
+            if (chat.chatType === ChatType.Private) {
+                setEditName(true)
+            }
+        })
+
+        useEffect(() => {
+            if (editName) inputRef.current.focus()
+        }, [editName])
+
+        useEffect(() => {
+            if (editName) {
+                window.addEventListener('keydown', onKeyDown)
+                return () => window.removeEventListener('keydown', onKeyDown)
+            }
+        }, [editName, onKeyDown])
+
         return (
             <a className="card" onClick={action(() => setActiveChatId(chat.chatId))}>
                 <div className="card-body">
@@ -26,10 +60,21 @@ export const AllChatsCard = observer(
                                 <span>{chat.name.slice(0, Math.min(2, chat.name.length))}</span>
                             </div>
                         </div>
-                        <div className="media-body overflow-hidden">
-                            <div className="d-flex align-items-center mb-1">
-                                <h6 className="text-truncate mb-0 me-auto">{chat.name}</h6>
-                            </div>
+                        <div
+                            className="media-body overflow-hidden"
+                            onDoubleClick={handleDoubleClick}>
+                            {editName ? (
+                                <input
+                                    value={nickname}
+                                    onChange={(e) => setNickname(e.target.value)}
+                                    ref={inputRef}
+                                    onBlur={handleOnBlur}
+                                />
+                            ) : (
+                                <div className="d-flex align-items-center mb-1">
+                                    <h6 className="text-truncate mb-0 me-auto">{chat.name}</h6>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -125,10 +170,10 @@ export const AllChatList = ({
                     <h3 className="mb-0 text-primary">通讯录</h3>
                 </div>
                 <div className="form-group input-group-lg search mb-3">
-                <i className="zmdi zmdi-search"></i>
-                <i className="zmdi zmdi-dialpad"></i>
-                <input className="form-control" type="text" placeholder="搜索..."></input>
-            </div>
+                    <i className="zmdi zmdi-search"></i>
+                    <i className="zmdi zmdi-dialpad"></i>
+                    <input className="form-control" type="text" placeholder="搜索..."></input>
+                </div>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <a
@@ -161,7 +206,7 @@ export const AllChatList = ({
                         </a>
                     </div>
                 </div>
-                
+
                 <AllChatContent
                     chatStore={chatStore}
                     activeChatId={activeChatId}

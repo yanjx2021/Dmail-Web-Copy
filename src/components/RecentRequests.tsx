@@ -12,9 +12,10 @@ import { useEffect } from 'react'
 import { authStore } from '../stores/authStore'
 import '../styles/RecentRequests.css'
 import { userStore } from '../stores/userStore'
-import { ErrorBox } from './ErrorBox'
+import { ErrorBox } from './Box/ErrorBox'
 import { MessageServer } from '../utils/networkWs'
 import { Send } from '../utils/message'
+import { AddFriendBox } from './Box/AddFriendBox'
 
 const RequestItemStatus = observer(
     ({ senderId, state, reqId }: { senderId: number; state: RequestState; reqId: number }) => {
@@ -85,8 +86,8 @@ const RequestFriendItem = observer(
                                 <div className="d-flex align-items-center mb-1">
                                     <h6 className="text-truncate mb-0 me-auto">
                                         {senderId === authStore.userId
-                                            ? userStore.getUser(receiverId).name
-                                            : userStore.getUser(senderId).name}
+                                            ? userStore.getUser(receiverId).showName
+                                            : userStore.getUser(senderId).showName}
                                     </h6>
                                 </div>
                                 <div className="text-truncate">{message}</div>
@@ -151,7 +152,7 @@ const RequestItem = observer(
         content: RequestContent
         state: RequestState
     }) => {
-        const userName = userStore.getUser(senderId).name
+        const userName = userStore.getUser(senderId).showName
         switch (content.type) {
             case RequestContentType.MakeFriend:
                 return (
@@ -179,117 +180,6 @@ const RequestItem = observer(
         }
     }
 )
-
-export const AddFriendBox = observer(({id} : {id : string}) => {
-    const [reqId, setReqId] = useImmer<string>('')
-    return (
-        <div className="modal fade" id={id} tabIndex={9999} aria-hidden="true">
-            <div className="modal-dialog">
-                <div className="modal-content">
-                    <div className="modal-header">
-                        <h5 className="modal-title">添加好友</h5>
-                        <button
-                            type="button"
-                            className="close"
-                            data-dismiss="modal"
-                            aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div className="modal-body">
-                        <form>
-                            <div className="form-group">
-                                <label>用户ID</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={reqId}
-                                    onChange={(e) => {
-                                        const input = e.target.value.replace(/[^0-9]/g, '')
-                                        setReqId(input)
-                                    }}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>验证消息</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={requestStore.message}
-                                    onChange={action(
-                                        (e) => (requestStore.message = e.target.value)
-                                    )}
-                                />
-                            </div>
-                        </form>
-                        <div className="mb-2 mt-4">
-                            <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={() => {
-                                    requestStore.sendMakeFriendRequest(parseInt(reqId) ? parseInt(reqId) : null)
-                                    setReqId('')
-                                }}>
-                                发送请求
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-})
-
-export const CreateGroupChatBox = ({id} : {id : string}) => {
-    const [groupName, setGroupName] = useImmer<string>('')
-    return (
-        <div className="modal fade" id={id} tabIndex={9999} aria-hidden="true">
-            <div className="modal-dialog">
-                <div className="modal-content">
-                    <div className="modal-header">
-                        <h5 className="modal-title">创建群聊</h5>
-                        <button
-                            type="button"
-                            className="close"
-                            data-dismiss="modal"
-                            aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div className="modal-body">
-                        <form>
-                            <div className="form-group">
-                                <label>群聊名称</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={groupName}
-                                    onChange={(e) => {
-                                        setGroupName(e.target.value)
-                                    }}
-                                />
-                            </div>
-                        </form>
-                        <div className="mb-2 mt-4">
-                            <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={() => {
-                                    MessageServer.Instance().send<Send.CreateGroupChat>(Send.CreateGroupChat, {
-                                        name: groupName,
-                                        avaterPath: ''
-                                    })
-                                    setGroupName('')
-                                }}>
-                                创建群聊
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
 
 const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore }) => {
     return (
