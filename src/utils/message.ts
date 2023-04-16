@@ -176,6 +176,10 @@ export interface ReceivePullUserSettingResponseData {
     content?: string
 }
 
+export interface ReceiveUpdateUserInfoResponseData {
+    state: 'Success' | 'UserNameFormatError' | 'PasswordFormatError' | 'AvaterPathFormatError' | 'ServerError'
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -202,7 +206,7 @@ export enum Receive {
     RequestStateUpdate = 'RequestStateUpdate',
     CreateGroupChatResponse = 'CreateGroupChatResponse',
     PullUserSettingResponse = 'PullUserSettingResponse',
-
+    UpdateUserInfoResponse = 'UpdateUserInfoResponse'
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -258,6 +262,23 @@ export interface SendGetMessagesData {
     endId : number
 }
 
+export interface UpdateUserName {
+    type: 'UserName',
+    newName: string,
+}
+export interface UpdateAvaterPath {
+    type: 'AvaterPath',
+    newPath: string,
+}
+
+export interface UpdatePassword {
+    type: 'Password',
+    newPassword: string,
+    emailCode: number
+}
+
+export type SendUpdateUserInfoData = UpdateUserName | UpdatePassword | UpdateAvaterPath
+
 
 /*--------------------Send数据类型----------------------*/
 
@@ -278,6 +299,7 @@ export enum Send {
     GetChatInfo = 'GetChatInfo',
     SendUserSetting = 'SendUserSetting',
     PullUserSetting = 'PullUserSetting',
+    UpdateUserInfo = 'UpdateUserInfo',
 }
 
 // COMMAND和DATA类型捆绑
@@ -305,6 +327,7 @@ export interface MessageReceiveData {
     [Receive.RequestStateUpdate]: ReceiveRequestStateUpdateData
     [Receive.CreateGroupChatResponse]: ReceiveCreateGroupChatResponse
     [Receive.PullUserSettingResponse]: ReceivePullUserSettingResponseData
+    [Receive.UpdateUserInfoResponse]: ReceiveUpdateUserInfoResponseData
 }
 
 export interface MessageSendData {
@@ -323,7 +346,10 @@ export interface MessageSendData {
     [Send.GetMessages]: SendGetMessagesData
     [Send.GetChatInfo] : ChatId
     [Send.SendUserSetting]: string
+    //
     [Send.PullUserSetting]: UserId
+    //
+    [Send.UpdateUserInfo]: SendUpdateUserInfoData
 }
 
 // 封装消息包

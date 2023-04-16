@@ -33,7 +33,6 @@ export class User {
             userId: this.userId,
             name: this.name,
             avaterPath: this.avaterPath,
-            nickname: this.nickname
         }
         return JSON.stringify(user)
     }

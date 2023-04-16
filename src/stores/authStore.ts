@@ -1,6 +1,6 @@
 import { action, makeAutoObservable } from 'mobx'
 import localforage from 'localforage'
-import { LoginResponseState, Receive, ReceiveLoginResponseData, Send } from '../utils/message'
+import { LoginResponseState, Receive, ReceiveLoginResponseData, ReceiveUpdateUserInfoResponseData, Send } from '../utils/message'
 import { MessageServer } from '../utils/networkWs'
 import { passwordTester } from '../constants/passwordFormat'
 import { SHA256 } from 'crypto-js'
@@ -9,6 +9,7 @@ import { emailTester } from '../constants/passwordFormat'
 import { chatStore } from './chatStore'
 import { requestStore } from './requestStore'
 import { userStore } from './userStore'
+import { updateUserStore } from './updateUserStore'
 
 export type UserId = number
 
@@ -32,15 +33,17 @@ export class AuthStore {
     userId: number = 0
     email: string = ''
     password: string = ''
+
     emailCode: string = ''
+
+    get userSelf() {
+        return userStore.getUser(this.userId)
+    }
 
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
-
         MessageServer.on(Receive.LoginResponse, this.loginResponseHandler)
     }
-
-
 
     reset() {
         this.state = AuthState.Started
@@ -50,6 +53,7 @@ export class AuthStore {
         this.emailCode = ''
         this.password = ''
         this.errors = ''
+        
     }
 
     logout() {
@@ -92,6 +96,8 @@ export class AuthStore {
     private onLoginSuccess(userId: UserId) {
         this.state = AuthState.Logged
         this.userId = userId
+
+
         LocalDatabase.createUserInstance(userId)
         console.log('登录成功')
 
