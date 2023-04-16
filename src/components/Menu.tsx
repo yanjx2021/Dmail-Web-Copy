@@ -69,10 +69,6 @@ const Menu = observer(() => {
                 <a className="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="#" role="tab">
                     <i className="zmdi zmdi-settings"></i>
                 </a>
-                <a className="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="#" role="tab" onClick={authStore.logout}>
-                    {/* TODO-添加一个登出的图标 */}
-                    登出
-                </a>
             </div>
 
             <button type="submit" className="btn sidebar-toggle-btn shadow-sm">

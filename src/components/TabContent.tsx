@@ -5,6 +5,7 @@ import { AllChatList } from "./AllChats"
 import { ErrorBox } from "./Box/ErrorBox"
 import { RecentChats } from "./RecentChats"
 import RecentRequests from "./RecentRequests"
+import { UserProfile } from "./UserProfile"
 
 export const TabContent = ({activeChatId, setActiveChatId}: { activeChatId: ChatId | null, setActiveChatId: (chatId: ChatId) => any}) => {
     return (
@@ -13,6 +14,7 @@ export const TabContent = ({activeChatId, setActiveChatId}: { activeChatId: Chat
                 <RecentChats chatStore={chatStore} activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
                 <RecentRequests requestStore={requestStore}/>
                 <AllChatList chatStore={chatStore} activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
+                <UserProfile />
             </div>
         </div>
     )
