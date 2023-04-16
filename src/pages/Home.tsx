@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AuthState, AuthStore, authStore } from '../stores/authStore'
 import { observer } from 'mobx-react-lite'
@@ -10,34 +10,55 @@ import { ChatView } from '../components/ChatView/ChatView'
 import { action } from 'mobx'
 import { LocalDatabase } from '../stores/localData'
 import { ErrorContainer } from '../components/Box/ErrorContainer'
+import { secureAuthStore } from '../stores/secureAuthStore'
 
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore; chatStore: ChatStore }) => {
         const [activeChatId, setActiveChatId] = useState<ChatId | null>(null)
         const navigate = useNavigate()
 
-        useEffect(action(() => {
-            if (authStore.state !== AuthState.Logged) {
-                navigate('/login')
-            }
-        }), [authStore.state])
+        const checkAndSetActivateChat = useCallback(
+            action((chatId: number) => {
+                if (!secureAuthStore.isAccessible(chatId)) {
+                    secureAuthStore.showSecureBox = true
+                    secureAuthStore.chatId = chatId
+                }
+                setActiveChatId(chatId)
+            }),
+            [setActiveChatId]
+        )
 
-        useEffect(action(() => {
-            LocalDatabase.loadUserSetting()
-        }), [])
+        useEffect(
+            action(() => {
+                if (authStore.state !== AuthState.Logged) {
+                    navigate('/login')
+                }
+            }),
+            [authStore.state]
+        )
+
+        useEffect(
+            action(() => {
+                LocalDatabase.loadUserSetting()
+            }),
+            []
+        )
 
         return authStore.state === AuthState.Logged ? (
             <>
                 <ErrorContainer />
                 <Menu />
-                <TabContent activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
+                <TabContent activeChatId={activeChatId} setActiveChatId={checkAndSetActivateChat} />
                 {activeChatId === null ? (
                     <NoneActiveChatBody />
                 ) : (
+                    secureAuthStore.showSecureBox ? <div>PlaceHolder</div> :
                     <ChatView chat={chatStore.getChat(activeChatId)} />
                 )}
             </>
-        ) : <></>
+        ) : (
+            <></>
+        )
     }
 )
 
