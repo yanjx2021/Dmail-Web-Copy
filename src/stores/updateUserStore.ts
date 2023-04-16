@@ -8,6 +8,8 @@ import { LocalDatabase } from './localData'
 export class UpdateUserStore {
     updateType: 'Password' | 'UserName' | 'AvaterPath' = 'UserName'
 
+    waitResponse: boolean = false
+
     newPassword: string = ''
     newUserName: string = ''
     newAvaterPath: string = ''
@@ -20,11 +22,13 @@ export class UpdateUserStore {
         this.newUserName = ''
         this.newPassword = ''
         this.newAvaterPath = ''
+        this.emailCode = ''
     }
 
     sendUpdateUserInfo() {
         switch (this.updateType) {
             case 'UserName':
+                if (this.newUserName === userStore.getUser(authStore.userId).showName) break
                 MessageServer.Instance().send<Send.UpdateUserInfo>(Send.UpdateUserInfo, {
                     type: 'UserName',
                     newName: this.newUserName,
@@ -44,6 +48,7 @@ export class UpdateUserStore {
                 })
                 break
         }
+        this.waitResponse = true
     }
 
     writeToStore() {
@@ -71,6 +76,8 @@ export class UpdateUserStore {
     }
 
     updateUserInfoResponseHandler(data: ReceiveUpdateUserInfoResponseData) {
+        this.waitResponse = false
+
         switch (data.state) {
             case 'Success':
                 this.writeToStore()
