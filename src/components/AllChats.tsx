@@ -35,6 +35,7 @@ export const AllChatsCard = observer(
         const handleOnBlur = () => setEditName(false)
         const handleDoubleClick = action(() => {
             if (chat.chatType === ChatType.Private) {
+                setNickname(chat.name)
                 setEditName(true)
             }
         })

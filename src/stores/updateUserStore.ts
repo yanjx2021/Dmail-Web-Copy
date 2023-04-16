@@ -4,6 +4,8 @@ import { Receive, ReceiveUpdateUserInfoResponseData, Send } from '../utils/messa
 import { userStore } from './userStore'
 import { authStore } from './authStore'
 import { LocalDatabase } from './localData'
+import { passwordTester } from '../constants/passwordFormat'
+import { SHA256 } from 'crypto-js'
 
 export class UpdateUserStore {
     updateType: 'Password' | 'UserName' | 'AvaterPath' = 'UserName'
@@ -29,6 +31,10 @@ export class UpdateUserStore {
         switch (this.updateType) {
             case 'UserName':
                 if (this.newUserName === userStore.getUser(authStore.userId).showName) break
+                if (this.newUserName === '') {
+                    this.errors = '用户名不能为空'
+                    break
+                }
                 MessageServer.Instance().send<Send.UpdateUserInfo>(Send.UpdateUserInfo, {
                     type: 'UserName',
                     newName: this.newUserName,
@@ -41,9 +47,18 @@ export class UpdateUserStore {
                 })
                 break
             case 'Password':
+                if (!passwordTester.test(this.newPassword)) {
+                    this.errors = '密码格式错误: 请输入长度为8-20, 包含数字和字母的密码'
+                    this.newPassword = ''
+                    break
+                }
+                if (this.emailCode === '') {
+                    this.errors = '验证码不能为空'
+                    break
+                }
                 MessageServer.Instance().send<Send.UpdateUserInfo>(Send.UpdateUserInfo, {
                     type: 'Password',
-                    newPassword: this.newPassword,
+                    newPassword: SHA256(this.newPassword + 'dmail' + authStore.email).toString(),
                     emailCode: parseInt(this.emailCode),
                 })
                 break
@@ -61,6 +76,7 @@ export class UpdateUserStore {
             case 'Password':
                 authStore.password = this.newPassword
                 this.newPassword = ''
+                this.emailCode = ''
                 break
             case 'AvaterPath':
                 userStore.getUser(authStore.userId).avaterPath = this.newAvaterPath
@@ -77,7 +93,6 @@ export class UpdateUserStore {
 
     updateUserInfoResponseHandler(data: ReceiveUpdateUserInfoResponseData) {
         this.waitResponse = false
-
         switch (data.state) {
             case 'Success':
                 this.writeToStore()
@@ -98,7 +113,15 @@ export class UpdateUserStore {
                 this.errors = '服务器异常'
                 this.reset()
                 break
+            case 'EmailCodeError':
+                this.errors = '邮箱验证码错误'
+                this.emailCode = ''
+                break
         }
+    }
+
+    get showError() {
+        return this.errors !== ''
     }
 }
 

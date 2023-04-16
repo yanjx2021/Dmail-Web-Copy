@@ -3,9 +3,8 @@ import Crypto from './cipher'
 import { AuthMethod, AuthState, authStore } from '../stores/authStore'
 import { requestStore } from '../stores/requestStore'
 import { action, runInAction } from 'mobx'
-import { SHA256 } from 'crypto-js'
 
-const server_address = 'ws://43.143.134.180:8080/ws'
+const server_address = 'ws://127.0.0.1:8080/ws'
 // 43.143.134.180
 export type Callback = (e: Event) => void
 export type MessageCallback = (msg: DataType<Receive>) => void

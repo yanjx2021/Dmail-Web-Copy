@@ -171,13 +171,12 @@ export interface ReceiveCreateGroupChatResponse {
     chatId?: number
 }
 
-export interface ReceivePullUserSettingResponseData {
-    state: 'Success' | 'UserNotFound' | 'ServerError'
-    content?: string
+export interface ReceiveUpdateUserInfoResponseData {
+    state: 'Success' | 'UserNameFormatError' | 'PasswordFormatError' | 'AvaterPathFormatError' | 'ServerError' | 'EmailCodeError'
 }
 
-export interface ReceiveUpdateUserInfoResponseData {
-    state: 'Success' | 'UserNameFormatError' | 'PasswordFormatError' | 'AvaterPathFormatError' | 'ServerError'
+export interface ReceiveSetUserSettingResponseData {
+    state: 'Success' | any
 }
 
 /*--------------------Receive数据类型----------------------*/
@@ -205,8 +204,9 @@ export enum Receive {
     UpdateMessage = 'UpdateMessage',
     RequestStateUpdate = 'RequestStateUpdate',
     CreateGroupChatResponse = 'CreateGroupChatResponse',
-    PullUserSettingResponse = 'PullUserSettingResponse',
-    UpdateUserInfoResponse = 'UpdateUserInfoResponse'
+    UserSetting = 'UserSetting',
+    SetUserSettingResponse = 'SetUserSettingResponse',
+    UpdateUserInfoResponse = 'UpdateUserInfoResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -297,7 +297,7 @@ export enum Send {
     CreateGroupChat = 'CreateGroupChat',
     GetMessages = 'GetMessages',
     GetChatInfo = 'GetChatInfo',
-    SendUserSetting = 'SendUserSetting',
+    SetUserSetting = 'SetUserSetting',
     PullUserSetting = 'PullUserSetting',
     UpdateUserInfo = 'UpdateUserInfo',
 }
@@ -326,8 +326,9 @@ export interface MessageReceiveData {
     [Receive.GetUserInfoResponse]: ReceiveGetUserInfoResponseData
     [Receive.RequestStateUpdate]: ReceiveRequestStateUpdateData
     [Receive.CreateGroupChatResponse]: ReceiveCreateGroupChatResponse
-    [Receive.PullUserSettingResponse]: ReceivePullUserSettingResponseData
     [Receive.UpdateUserInfoResponse]: ReceiveUpdateUserInfoResponseData
+    [Receive.UserSetting]: string
+    [Receive.SetUserSettingResponse]: ReceiveSetUserSettingResponseData
 }
 
 export interface MessageSendData {
@@ -345,7 +346,7 @@ export interface MessageSendData {
     [Send.CreateGroupChat]: SendCreateGroupChatData
     [Send.GetMessages]: SendGetMessagesData
     [Send.GetChatInfo] : ChatId
-    [Send.SendUserSetting]: string
+    [Send.SetUserSetting]: string
     //
     [Send.PullUserSetting]: UserId
     //

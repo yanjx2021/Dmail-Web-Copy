@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { updateUserStore } from '../stores/updateUserStore'
 import { useImmer } from 'use-immer'
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { ChangePasswordBox } from './Box/ChangePasswordBox'
 
 export const ProfileHeader = () => {
     return (
@@ -51,6 +52,7 @@ export const UserName = ({ userName }: { userName: string }) => {
     const onKeyDown = useCallback(
         action((e: KeyboardEvent) => {
             if (e.key === 'Enter') {
+                updateUserStore.updateType = 'UserName'
                 updateUserStore.sendUpdateUserInfo()
                 setEditName(false)
             }
@@ -166,7 +168,7 @@ export const SoundNotification = () => {
 export const ChangePassword = () => {
     return (
         <li className="list-group-item border-0 mt-2">
-            <a className="link" href="#">
+            <a className="link" type='button' data-target='#ChangePasswordBox' data-toggle='modal'>
                 <i className="zmdi zmdi-chevron-right me-2"></i>
                 {'  修改密码'}
             </a>
@@ -196,6 +198,7 @@ export const UserProfile = observer(() => {
             <ProfileHeader />
             <ProfileCard user={userStore.getUser(authStore.userId)} />
             <ProfileSetting />
+            <ChangePasswordBox id='ChangePasswordBox'/>
         </div>
     )
 })

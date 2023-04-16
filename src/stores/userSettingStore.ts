@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx"
 import { MessageServer } from "../utils/networkWs"
-import { Receive, ReceivePullUserSettingResponseData, Send } from "../utils/message"
+import { Receive, ReceiveSetUserSettingResponseData, Send } from "../utils/message"
 import { userStore } from "./userStore"
 import { LocalDatabase } from "./localData"
 
@@ -10,10 +10,6 @@ export interface UserSetting {
     userNickname: [number, string][] // [userId, nickname]格式存储用户昵称
 }
 
-
-
-
-
 export class UserSettingStore {
     userSetting: UserSetting = {
         secondaryCheckChats: [],
@@ -22,7 +18,25 @@ export class UserSettingStore {
     errors: string = ''
     constructor() {
         makeAutoObservable(this, {}, {autoBind: true})
-        MessageServer.on(Receive.PullUserSettingResponse, this.pullUserSettingResponseHandler)
+        MessageServer.on(Receive.UserSetting, this.ReceiveUserSettingHandler)
+        MessageServer.on(Receive.SetUserSettingResponse, this.UserSettingResponseHandler)
+    }
+
+    UserSettingResponseHandler(data: ReceiveSetUserSettingResponseData) {
+        if (data.state === 'Success') {
+            LocalDatabase.saveUserSetting(JSON.stringify(this.userSetting))
+        }
+    }
+
+    ReceiveUserSettingHandler(content: string) {
+        try {
+            if (content === '') return
+            const userSetting = JSON.parse(content)
+            LocalDatabase.saveUserSetting(content)
+            this.setUserSetting(userSetting)
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     setUserSetting(userSetting: UserSetting) {
@@ -37,25 +51,8 @@ export class UserSettingStore {
         //TODO
     }
 
-    pullUserSettingResponseHandler(data: ReceivePullUserSettingResponseData) {
-        switch (data.state) {
-            case 'Success':
-                this.userSetting = JSON.parse(data.content!)
-                this.initialDistribute()
-                break
-            case 'ServerError':
-                this.errors = '服务器异常'
-                break
-            case 'UserNotFound':
-                this.errors = '找不到该用户'
-                break
-            default:
-                this.errors = '数据异常'
-        }
-    }
-
     sendUserSetting() {
-        MessageServer.Instance().send<Send.SendUserSetting>(Send.SendUserSetting, JSON.stringify(this.userSetting))
+        MessageServer.Instance().send<Send.SetUserSetting>(Send.SetUserSetting, JSON.stringify(this.userSetting))
     }
 
     setSecondaryCheckChat(chatId: number, secondaryPassword: string) {
@@ -89,8 +86,7 @@ export class UserSettingStore {
             }
         }
         userStore.setUserNickname(userId, nickname)
-        LocalDatabase.saveUserSetting(JSON.stringify(this.userSetting))
-        // this.sendUserSetting()
+        this.sendUserSetting()
     }
 }
 

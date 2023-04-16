@@ -7,11 +7,9 @@ import { ChatId, ChatStore, chatStore } from '../stores/chatStore'
 import { TabContent } from '../components/TabContent'
 import { NoneActiveChatBody } from '../components/NoneActiveChatBody'
 import { ChatView } from '../components/ChatView/ChatView'
-import { action, autorun } from 'mobx'
-import { requestStore } from '../stores/requestStore'
-import { ErrorBox } from '../components/Box/ErrorBox'
-import { MessageServer } from '../utils/networkWs'
+import { action } from 'mobx'
 import { LocalDatabase } from '../stores/localData'
+import { ErrorContainer } from '../components/Box/ErrorContainer'
 
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore; chatStore: ChatStore }) => {
@@ -30,29 +28,7 @@ const Home = observer(
 
         return authStore.state === AuthState.Logged ? (
             <>
-                {authStore.showError ? (
-                    <ErrorBox
-                        title="连接错误"
-                        error={authStore.errors}
-                        setError={action((error) => (authStore.errors = error))}
-                        onError={action(() => {
-                            console.log('error')
-                            authStore.state = AuthState.Started
-                            navigate('/login')
-                        })}
-                    />
-                ) : (
-                    <></>
-                )}
-                {requestStore.showError ? (
-                    <ErrorBox
-                        title="请求失败"
-                        error={requestStore.errors}
-                        setError={action((error) => (requestStore.errors = error))}
-                    />
-                ) : (
-                    <></>
-                )}
+                <ErrorContainer />
                 <Menu />
                 <TabContent activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
                 {activeChatId === null ? (
