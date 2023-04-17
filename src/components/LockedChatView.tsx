@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { useImmer } from 'use-immer'
 import { secureAuthStore } from '../stores/secureAuthStore'
 
-export const LockedChatView = (() => {
+export const LockedChatView = () => {
     const [code, setCode] = useImmer<string>('')
 
     return (
@@ -21,19 +21,28 @@ export const LockedChatView = (() => {
                             <span className="a-bg-2"></span>
                         </div>
                         <h5 className="font-weight-bold">请输入聊天密码</h5>
-                        <input
-                            className="form-control form-control-lg"
-                            type="password"
-                            value={code}
-                            onChange={(e) => setCode(e.target.value)}
-                        />
-                        <button onClick={action(() => {
-                            secureAuthStore.verifyChat(code)
-                            setCode('')
-                        })}>解锁</button>
+                        <div>
+                            <div>
+                                <input
+                                    className="form-control"
+                                    type="password"
+                                    value={code}
+                                    onChange={(e) => setCode(e.target.value)}
+                                />
+                            </div>
+
+                            <button
+                                className="btn btn-dark"
+                                onClick={action(() => {
+                                    secureAuthStore.verifyChat(code)
+                                    setCode('')
+                                })}>
+                                解锁
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     )
-})
+}
