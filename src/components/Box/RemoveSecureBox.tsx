@@ -8,7 +8,7 @@ import { userSettingStore } from '../../stores/userSettingStore'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 import { secondaryCodeHash } from '../../constants/passwordHash'
 
-export const RemoveSecureBox = observer(({ id }: { id: string }) => {
+export const RemoveSecureBox = ({ id }: { id: string }) => {
     const [code, setCode] = useImmer<string>('')
 
     return (
@@ -42,19 +42,20 @@ export const RemoveSecureBox = observer(({ id }: { id: string }) => {
                                 type="button"
                                 className="btn btn-primary"
                                 onClick={action(() => {
-                                    if (userSettingStore.getSecondaryCode(secureAuthStore.chatId) !== secondaryCodeHash(code)) {
+                                    if (
+                                        userSettingStore.getSecondaryCode(
+                                            secureAuthStore.chatId
+                                        ) !== secondaryCodeHash(code)
+                                    ) {
                                         secureAuthStore.errors = '原密码错误，无权取消二级密码'
                                         setCode('')
                                         return
                                     }
 
-                                    userSettingStore.setChatVerify(
-                                        secureAuthStore.chatId,
-                                        ''
-                                    )
+                                    userSettingStore.setChatVerify(secureAuthStore.chatId, '')
                                     setCode('')
                                 })}>
-                                设置
+                                确认取消
                             </button>
                         </div>
                     </div>
@@ -62,4 +63,4 @@ export const RemoveSecureBox = observer(({ id }: { id: string }) => {
             </div>
         </div>
     )
-})
+}

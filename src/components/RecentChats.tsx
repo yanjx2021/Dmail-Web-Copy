@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite'
 import { Chat, ChatId, ChatStore } from '../stores/chatStore'
 import { action } from 'mobx'
 import { ChatDropDown } from './DropDown/ChatDropDown'
+import { HoverOption } from './AllChats'
 
 const RecentChatItem = observer(
     ({
@@ -15,42 +16,35 @@ const RecentChatItem = observer(
     }) => {
         return (
             <li className={activeChatId === chat.chatId ? 'online active' : ''}>
-                <div className="d-flex">
-                    <a className="card" onClick={action(() => setActiveChatId(chat.chatId))}>
-                        <div className="card-body">
-                            <div className="media">
-                                <div className="avatar me-3">
-                                    <span className="rounded-circle"></span>
-                                    <div className="avatar rounded-circle no-image timber">
-                                        <span>
-                                            {chat.name.slice(0, Math.min(2, chat.name.length))}
-                                        </span>
-                                    </div>
+                <HoverOption chat={chat} />
+
+                <a className="card" onClick={action(() => setActiveChatId(chat.chatId))}>
+                    <div className="card-body">
+                        <div className="media">
+                            <div className="avatar me-3">
+                                <span className="rounded-circle"></span>
+                                <div className="avatar rounded-circle no-image timber">
+                                    <span>{chat.name.slice(0, Math.min(2, chat.name.length))}</span>
                                 </div>
-                                <div className="media-body overflow-hidden">
-                                    <div className="d-flex align-items-center mb-1">
-                                        <h6 className="text-truncate mb-0 me-auto">{chat.name}</h6>
-                                        <p className="small text-muted text-nowrap ms-4 mb-0">
-                                            {chat.lastMessage !== undefined ? (
-                                                new Date(
-                                                    chat.lastMessage.timestamp
-                                                ).toLocaleString()
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </p>
-                                    </div>
-                                    <div className="text-truncate">
-                                        {chat.lastMessage !== undefined
-                                            ? chat.lastMessage.text
-                                            : ''}
-                                    </div>
+                            </div>
+                            <div className="media-body overflow-hidden">
+                                <div className="d-flex align-items-center mb-1">
+                                    <h6 className="text-truncate mb-0 me-auto">{chat.name}</h6>
+                                    <p className="small text-muted text-nowrap ms-4 mb-0">
+                                        {chat.lastMessage !== undefined ? (
+                                            new Date(chat.lastMessage.timestamp).toLocaleString()
+                                        ) : (
+                                            <></>
+                                        )}
+                                    </p>
+                                </div>
+                                <div className="text-truncate">
+                                    {chat.lastMessage !== undefined ? chat.lastMessage.text : ''}
                                 </div>
                             </div>
                         </div>
-                    </a>
-                    <ChatDropDown chatId={chat.chatId}/>
-                </div>
+                    </div>
+                </a>
             </li>
         )
     }

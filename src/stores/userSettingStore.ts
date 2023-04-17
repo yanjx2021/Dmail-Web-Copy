@@ -23,6 +23,13 @@ export class UserSettingStore {
         MessageServer.on(Receive.SetUserSettingResponse, this.UserSettingResponseHandler)
     }
 
+    reset() {
+        this.userSetting = {
+            secondaryCheckChats: [],
+            userNickname: []
+        }
+    }
+
     UserSettingResponseHandler(data: ReceiveSetUserSettingResponseData) {
         if (data.state === 'Success') {
             LocalDatabase.saveUserSetting(JSON.stringify(this.userSetting))

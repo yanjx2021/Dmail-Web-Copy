@@ -8,6 +8,7 @@ import { GroupedVirtuoso, Virtuoso } from 'react-virtuoso'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useImmer } from 'use-immer'
 import { userSettingStore } from '../stores/userSettingStore'
+import { ChatDropDown } from './DropDown/ChatDropDown'
 
 export const AllChatsCard = observer(
     ({
@@ -89,9 +90,7 @@ export const HoverOption = observer(({ chat }: { chat: Chat }) => {
     const type = chat.chatType === ChatType.Private ? 'private' : 'group' // 用于导航到对应的infoBox
     return (
         <div className="hover_action">
-            <button type="button" className="btn btn btn-link">
-                {type === 'private' ? '用户主页' : '群聊信息'}
-            </button>
+            <ChatDropDown chatId={chat.chatId}/>
         </div>
     )
 })

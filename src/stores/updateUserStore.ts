@@ -25,6 +25,7 @@ export class UpdateUserStore {
         this.newPassword = ''
         this.newAvaterPath = ''
         this.emailCode = ''
+        this.waitResponse = false
     }
 
     sendUpdateUserInfo() {
@@ -77,6 +78,7 @@ export class UpdateUserStore {
                 authStore.password = this.newPassword
                 this.newPassword = ''
                 this.emailCode = ''
+                authStore.logout()
                 break
             case 'AvaterPath':
                 userStore.getUser(authStore.userId).avaterPath = this.newAvaterPath

@@ -10,6 +10,7 @@ import { chatStore } from './chatStore'
 import { requestStore } from './requestStore'
 import { userStore } from './userStore'
 import { updateUserStore } from './updateUserStore'
+import { secureAuthStore } from './secureAuthStore'
 
 export type UserId = number
 
@@ -64,7 +65,10 @@ export class AuthStore {
         this.reset()
         chatStore.reset()
         requestStore.reset()
+        secureAuthStore.reset()
+        updateUserStore.reset()
         userStore.reset()
+
         MessageServer.destroyInstance()
     }
 

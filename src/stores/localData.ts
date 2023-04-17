@@ -31,11 +31,11 @@ export class LocalDatabase {
     }
 
     static async saveUserSetting(userSetting: string) {
-        localforage.setItem(userSettingIndex, userSetting)
+        this.database.setItem(userSettingIndex, userSetting)
     }
 
     static async loadUserSetting() {
-        localforage.getItem(userSettingIndex).then((value) => {
+        this.database.getItem(userSettingIndex).then((value) => {
             if (value === null) {
                 // 从后端拉取userSetting
             } else {
@@ -47,11 +47,11 @@ export class LocalDatabase {
 
     static async saveUserInfo(userId: number, user: User) {
         const userInfo = user.serialized()
-        localforage.setItem(this.userInfoIndex(userId), userInfo).catch((err) => console.error(err))
+        this.database.setItem(this.userInfoIndex(userId), userInfo).catch((err) => console.error(err))
     }
 
     static async loadUserInfo(userId: number) {
-        localforage.getItem<string>(this.userInfoIndex(userId)).then((value) => {
+        this.database.getItem<string>(this.userInfoIndex(userId)).then((value) => {
             if (value === null) {
                 // 请求用户信息
                 MessageServer.Instance().send<Send.GetUserInfo>(Send.GetUserInfo, userId)
@@ -65,11 +65,11 @@ export class LocalDatabase {
     static async saveRequest(reqId: number, req: Request) {
         // 保存request
         const serialized = req.serialized()
-        localforage.setItem(this.requestIndex(reqId), serialized).catch((err) => console.error(err))
+        this.database.setItem(this.requestIndex(reqId), serialized).catch((err) => console.error(err))
     }
 
     static async loadRequest(reqId: number) {
-        localforage.getItem<string>(this.requestIndex(reqId)).then((value) => {
+        this.database.getItem<string>(this.requestIndex(reqId)).then((value) => {
             if (value === null) {
                 //TODO 目前还没有拉取的接口
                 console.log('还没有主动获取Request的接口')
@@ -80,11 +80,11 @@ export class LocalDatabase {
     }
 
     static async saveChatInfo(chatId: number, chatInfo: ChatInfo) {
-        localforage.setItem(this.chatInfoIndex(chatId), JSON.stringify(chatInfo)).catch((err) => console.error(err))
+        this.database.setItem(this.chatInfoIndex(chatId), JSON.stringify(chatInfo)).catch((err) => console.error(err))
     }
 
     static async loadChatInfo(chatId: number) {
-        return localforage.getItem<string>(this.chatInfoIndex(chatId)).then((serialized) => {
+        return this.database.getItem<string>(this.chatInfoIndex(chatId)).then((serialized) => {
             if (serialized == null) {
                 MessageServer.Instance().send<Send.GetChatInfo>(Send.GetChatInfo, chatId)
                 return
@@ -96,7 +96,7 @@ export class LocalDatabase {
 
     static async saveMessage(chatId: number, msg: ChatMessage) {
         const serialized = msg.serialized(chatId)
-        return localforage
+        return this.database
             .setItem(this.messageIndex(chatId, msg.inChatId!), serialized)
             .catch((err) => {
                 console.log('localForage错误 ' + err)
@@ -111,7 +111,7 @@ export class LocalDatabase {
         const chat = chatStore.getChat(chatId)
 
         for (let i = start; i <= end; i++) {
-            const promise = localforage
+            const promise = this.database
                 .getItem<SerializedReceiveChatMessage>(this.messageIndex(chatId, i))
                 .then((value) => {
                     if (value == null) {

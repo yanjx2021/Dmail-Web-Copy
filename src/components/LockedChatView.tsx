@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { useImmer } from 'use-immer'
 import { secureAuthStore } from '../stores/secureAuthStore'
 
-export const LockedChatView = observer(() => {
+export const LockedChatView = (() => {
     const [code, setCode] = useImmer<string>('')
 
     return (
