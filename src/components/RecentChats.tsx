@@ -49,7 +49,7 @@ const RecentChatItem = observer(
                             </div>
                         </div>
                     </a>
-                    <ChatDropDown />
+                    <ChatDropDown chatId={chat.chatId}/>
                 </div>
             </li>
         )

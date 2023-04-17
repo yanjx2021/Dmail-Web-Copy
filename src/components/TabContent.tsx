@@ -6,6 +6,8 @@ import { ErrorBox } from "./Box/ErrorBox"
 import { RecentChats } from "./RecentChats"
 import RecentRequests from "./RecentRequests"
 import { UserProfile } from "./UserProfile"
+import { SetSecureBox } from "./Box/SetSecureBox"
+import { RemoveSecureBox } from "./Box/RemoveSecureBox"
 
 export const TabContent = ({activeChatId, setActiveChatId}: { activeChatId: ChatId | null, setActiveChatId: (chatId: ChatId) => any}) => {
     return (
@@ -16,6 +18,8 @@ export const TabContent = ({activeChatId, setActiveChatId}: { activeChatId: Chat
                 <AllChatList chatStore={chatStore} activeChatId={activeChatId} setActiveChatId={setActiveChatId} />
                 <UserProfile />
             </div>
+            <SetSecureBox id="SetSecureCode"/>
+            <RemoveSecureBox id="RemoveSecureCode"/>
         </div>
     )
 }

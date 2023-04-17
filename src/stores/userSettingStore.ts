@@ -63,20 +63,6 @@ export class UserSettingStore {
         MessageServer.Instance().send<Send.SetUserSetting>(Send.SetUserSetting, JSON.stringify(this.userSetting))
     }
 
-    setSecondaryCheckChat(chatId: number, secondaryPassword: string) {
-        const secondaryCheckTupleIndex = this.userSetting.secondaryCheckChats.findIndex(([_chatId, _]) => _chatId === chatId)
-        if (secondaryCheckTupleIndex === -1) {
-            if (secondaryPassword === '') return
-            this.userSetting.secondaryCheckChats.push([chatId, secondaryPassword])
-        } else {
-            if (secondaryPassword === '') {
-                this.userSetting.secondaryCheckChats.splice(secondaryCheckTupleIndex, 1)
-            } else {
-                this.userSetting.secondaryCheckChats[secondaryCheckTupleIndex][1] = secondaryPassword
-            }
-        }
-    }
-
     setChatVerify(chatId: number, code: string) {
         const chatTupleIndex = this.userSetting.secondaryCheckChats.findIndex(([chat, _]) => {
             return chat === chatId

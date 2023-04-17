@@ -5,6 +5,7 @@ import { requestStore } from '../../stores/requestStore'
 import { ErrorBox } from './ErrorBox'
 import { updateUserStore } from '../../stores/updateUserStore'
 import { observer } from 'mobx-react-lite'
+import { secureAuthStore } from '../../stores/secureAuthStore'
 
 export const ErrorContainer = observer(() => {
     const navigate = useNavigate()
@@ -37,6 +38,15 @@ export const ErrorContainer = observer(() => {
                     title="更新用户信息失败"
                     error={updateUserStore.errors}
                     setError={action((error) => (updateUserStore.errors = error))}
+                />
+            ) : (
+                <></>
+            )}
+            {secureAuthStore.showError ? (
+                <ErrorBox
+                    title="更新用户信息失败"
+                    error={secureAuthStore.errors}
+                    setError={action((error) => (secureAuthStore.errors = error))}
                 />
             ) : (
                 <></>

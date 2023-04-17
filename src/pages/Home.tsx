@@ -11,6 +11,7 @@ import { action } from 'mobx'
 import { LocalDatabase } from '../stores/localData'
 import { ErrorContainer } from '../components/Box/ErrorContainer'
 import { secureAuthStore } from '../stores/secureAuthStore'
+import { LockedChatView } from '../components/LockedChatView'
 
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore; chatStore: ChatStore }) => {
@@ -19,10 +20,7 @@ const Home = observer(
 
         const checkAndSetActivateChat = useCallback(
             action((chatId: number) => {
-                if (!secureAuthStore.isAccessible(chatId)) {
-                    secureAuthStore.showSecureBox = true
-                    secureAuthStore.chatId = chatId
-                }
+                secureAuthStore.chatId = chatId
                 setActiveChatId(chatId)
             }),
             [setActiveChatId]
@@ -52,7 +50,7 @@ const Home = observer(
                 {activeChatId === null ? (
                     <NoneActiveChatBody />
                 ) : (
-                    secureAuthStore.showSecureBox ? <div>PlaceHolder</div> :
+                    secureAuthStore.showSecureBox ? <LockedChatView /> :
                     <ChatView chat={chatStore.getChat(activeChatId)} />
                 )}
             </>

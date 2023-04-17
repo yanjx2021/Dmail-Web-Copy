@@ -2,37 +2,55 @@ import { SHA256 } from 'crypto-js'
 import { makeAutoObservable } from 'mobx'
 import { Updater } from 'use-immer'
 import { userSettingStore } from './userSettingStore'
+import { secondaryCodeHash } from '../constants/passwordHash'
 
 export class SecureAuthStore {
-    chatVerify: Map<number, boolean> = new Map()
+    chatVerify: Map<number, boolean> = new Map() // true表示有权限访问
     chatId: number = 0
-    showSecureBox: boolean = false
+    errors: string = ''
 
 
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
     }
 
+    get showError() {
+        return this.errors !== ''
+    }
+
+    get hasSetCode() {
+        if (this.chatVerify.get(this.chatId) === undefined) return false
+        return true
+    }
+
+    hasSetChatCode(chatId: number) {
+        if (this.chatVerify.get(chatId) === undefined) return false
+        return true
+    }
+
     clearVerify(chatId: number) {
         this.chatVerify.delete(chatId)
     }
 
-    setVerifyState(chatId: number, checked: boolean) {
-        this.chatVerify.set(chatId, checked)
+    setVerifyState(chatId: number, check: boolean) {
+        this.chatVerify.set(chatId, check)
     }
 
-    isAccessible(chatId: number) {
-        const check = this.chatVerify.get(chatId)
-        if (check === undefined) return true
-        return check
+    get showSecureBox() {
+        console.log(this.chatId)
+        const check = this.chatVerify.get(this.chatId)
+        console.log(check)
+        if (check === undefined) return false
+        return !check
     }
 
-    verifyChat(chatId: number, unserializedCode: string) {
-        const code = SHA256('tombDisco' + unserializedCode + 'dmail').toString()
-        if (code === userSettingStore.getSecondaryCode(chatId)) {
-            return true
+    verifyChat(unserializedCode: string) {
+        const code = secondaryCodeHash(unserializedCode)
+        if (code === userSettingStore.getSecondaryCode(this.chatId)) {
+            this.setVerifyState(this.chatId, true)
+            return
         }
-        return false
+        this.errors = '密码错误，无权访问'
     }
 
     reset() {
