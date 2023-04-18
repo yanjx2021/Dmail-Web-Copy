@@ -1,13 +1,36 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from 'react'
+import '../../styles/ChatViewFooter.css'
+
+//针对输入框数值的一些常数
+const lineHeight = 15,
+    borderTop = 1,
+    borderBottom = 1
 
 export const ChatViewFooter = (props: { handleSend: Function }) => {
     // 消息发送在父组件处理
     // 接受ChatId
     const [text, setText] = useState<string>('')
+    const inputRef: any = useRef<HTMLTextAreaElement>(null)
 
+    const handleValueChange = () => {
+        let height = parseInt(getComputedStyle(inputRef!.current).height.slice(0, -2), 10)
+        if (inputRef!.current.scrollHeight > height) {
+            inputRef!.current.style.height = `${
+                inputRef!.current.scrollHeight + borderTop + borderBottom
+            }px`
+        } else {
+            while (height >= inputRef!.current.scrollHeight) {
+                inputRef!.current.style.height = `${height - lineHeight}px`
+                height -= lineHeight
+            }
+            inputRef!.current.style.height = `${height + lineHeight}px`
+        }
+        setText(inputRef!.current.value)
+    }
     const handleSend = () => {
         props.handleSend(text)
         setText('')
+        inputRef!.current.style.height = `0px`
     }
     const onKeyDown = (e: any) => {
         if (e.key === 'Enter' && !checktext()) {
@@ -32,17 +55,14 @@ export const ChatViewFooter = (props: { handleSend: Function }) => {
                 <div className="row">
                     <div className="col-12">
                         <div className="input-group align-items-center">
-                            <input
-                                type="text"
+                            <textarea
                                 className="form-control border-0 pl-0"
                                 placeholder="请输入您的消息..."
                                 id="textinputer"
-                                onChange={(e) => {
-                                    setText(e.target.value)
-                                }}
+                                onChange={() => handleValueChange()}
                                 value={text}
+                                ref={inputRef}
                             />
-
                             <div className="input-group-append d-none d-sm-block">
                                 <span className="input-group-text border-0">
                                     <button
@@ -50,7 +70,10 @@ export const ChatViewFooter = (props: { handleSend: Function }) => {
                                         data-toggle="tooltip"
                                         title="清空"
                                         type="button"
-                                        onClick={() => setText('')}>
+                                        onClick={() => {
+                                            setText('')
+                                            inputRef!.current.style.height = `0px`
+                                        }}>
                                         <i className="zmdi zmdi-refresh font-22"></i>
                                     </button>
                                 </span>

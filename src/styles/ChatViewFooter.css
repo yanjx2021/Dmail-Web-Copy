@@ -1,0 +1,19 @@
+.chat-footer .fade-textarea
+{
+  visibility: hidden;
+}
+.chat-footer textarea
+{
+  height: auto;
+  outline: none;
+  resize: none;
+  border: none;
+  padding: 0;
+  box-sizing: content-box;
+  overflow: hidden;
+}
+.chat-footer textarea::-webkit-scrollbar 
+{
+  width: 0px;
+  background-color: var(--font-eee);
+}
