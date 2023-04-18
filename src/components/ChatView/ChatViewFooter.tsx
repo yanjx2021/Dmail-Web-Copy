@@ -15,15 +15,19 @@ export const ChatViewFooter = (props: { handleSend: Function }) => {
     const handleValueChange = () => {
         let height = parseInt(getComputedStyle(inputRef!.current).height.slice(0, -2), 10)
         if (inputRef!.current.scrollHeight > height) {
-            inputRef!.current.style.height = `${
-                inputRef!.current.scrollHeight + borderTop + borderBottom
-            }px`
+            if (inputRef!.current.scrollHeight + borderTop + borderBottom > 320)
+                inputRef!.current.style.height = `320px`
+            else
+                inputRef!.current.style.height = `${
+                    inputRef!.current.scrollHeight + borderTop + borderBottom
+                }px`
         } else {
             while (height >= inputRef!.current.scrollHeight) {
                 inputRef!.current.style.height = `${height - lineHeight}px`
                 height -= lineHeight
             }
-            inputRef!.current.style.height = `${height + lineHeight}px`
+            if (height + lineHeight > 320) inputRef!.current.style.height = `320px`
+            else inputRef!.current.style.height = `${height + lineHeight}px`
         }
         setText(inputRef!.current.value)
     }
