@@ -8,9 +8,10 @@ p
   box-shadow: none;
 }
 
-.card-body .tect-center button:focus 
+.card-body .text-center button:focus 
 {
   outline: none;
+  border:none;
 }
 
 .link

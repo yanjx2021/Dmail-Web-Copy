@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useImmer } from 'use-immer'
 import { userSettingStore } from '../stores/userSettingStore'
 import { ChatDropDown } from './DropDown/ChatDropDown'
+import "../styles/AllChats.css"
 import { modalStore } from '../stores/modalStore'
 
 export const AllChatsCard = observer(
@@ -66,6 +67,7 @@ export const AllChatsCard = observer(
                             onDoubleClick={handleDoubleClick}>
                             {editName ? (
                                 <input
+                                    className="form-control form-control-sm"
                                     value={nickname}
                                     onChange={(e) => setNickname(e.target.value)}
                                     ref={inputRef}

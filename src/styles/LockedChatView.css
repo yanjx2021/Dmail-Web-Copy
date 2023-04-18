@@ -1,0 +1,17 @@
+.chat-body .chat .container-xxl.container-secret
+{
+  width:75%;
+  border-radius: 6%;
+}
+.chat-body .chat .container-xxl .form-control.form-secret
+{
+  margin-top:35px;
+  margin-bottom:35px;
+  border-color: var(--font-ccc);
+  background-color: transparent;
+}
+.chat-body .chat .container-xxl .form-control.form-secret:focus
+{
+  background-color:#f3f2ef;;
+  border-color: #21AA93;
+}
