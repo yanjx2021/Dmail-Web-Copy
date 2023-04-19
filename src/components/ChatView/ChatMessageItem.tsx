@@ -2,7 +2,7 @@
 import { observer } from 'mobx-react-lite'
 import React, { useEffect, useRef, useState } from 'react'
 import { useImmer } from 'use-immer'
-import { ChatMessage } from '../../stores/chatStore'
+import { ChatMessage, ChatMessageType } from '../../stores/chatStore'
 import { authStore } from '../../stores/authStore'
 import "../../styles/ChatMessageItem.css"
 import { userStore } from '../../stores/userStore'
@@ -41,6 +41,21 @@ const MessageTool = () => {
         </div>
     )
 }
+
+export const ChatMessageItemContent = observer(
+    ({ msg }: { msg: ChatMessage }) => {
+        const isRight = msg.senderId === authStore.userId
+        if (msg.type === ChatMessageType.Text) {
+            return <div className={'message-content p-3' + (isRight ? ' border' : '')}>{msg.content}</div>
+        } else if (msg.type === ChatMessageType.Image) {
+            return <img className="rounded mt-1" src="assets/images/image-file/one-page-work-1.jpg" alt=""></img>
+        } else if (msg.type === ChatMessageType.File) {
+            return <div></div>
+        }
+        return <div></div>
+    }
+)
+
 export const ChatMessageItem = observer(React.forwardRef(({msg}: { msg: ChatMessage}, ref : any) => {
     const isRight = msg.senderId === authStore.userId
     return (
@@ -63,9 +78,7 @@ export const ChatMessageItem = observer(React.forwardRef(({msg}: { msg: ChatMess
                         'message-row d-flex align-items-center' +
                         (isRight ? ' justify-content-end' : '')
                     }>
-                    <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                        {msg.text}
-                    </div>
+                    <ChatMessageItemContent msg={msg}/>
                 </div>
             </div>
         </li>

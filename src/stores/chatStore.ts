@@ -54,8 +54,15 @@ export enum ChatMessageState {
     Arrived = '已送达',
 }
 
+export enum ChatMessageType {
+    File,
+    Text,
+    Image
+}
+
 export class ChatMessage {
-    text: string
+    type : ChatMessageType
+    content: string
     timestamp: number
     inChatId?: ChatId
     senderId: UserId
@@ -66,7 +73,8 @@ export class ChatMessage {
 
     static getLoadingMessage(inChatId: ChatId) {
         return new ChatMessage({
-            text: `消息${inChatId}`,
+            type : ChatMessageType.Text,
+            content: `消息${inChatId}`,
             inChatId: inChatId,
             timestamp: 0,
             senderId: 0,
@@ -76,7 +84,8 @@ export class ChatMessage {
 
     static createFromReciveMessage(receiveMessage: ReceiveChatMessage) {
         return new ChatMessage({
-            text: receiveMessage.text,
+            type : receiveMessage.type,
+            content: receiveMessage.content,
             timestamp: receiveMessage.timestamp,
             inChatId: receiveMessage.inChatId,
             senderId: receiveMessage.senderId,
@@ -85,20 +94,23 @@ export class ChatMessage {
     }
 
     constructor({
-        text,
+        type,
+        content,
         timestamp,
         inChatId,
         senderId,
         state,
     }: {
-        text: string
+        type : ChatMessageType
+        content: string
         timestamp: number
         inChatId: MessageId | undefined
         senderId: UserId
         state: ChatMessageState
     }) {
         makeAutoObservable(this, { inChatId: observable.ref })
-        this.text = text
+        this.type = type
+        this.content = content
         this.timestamp = timestamp
         this.inChatId = inChatId
         this.senderId = senderId
@@ -117,7 +129,7 @@ export class ChatMessage {
         return tip
     }
     setToSelf(msg: ChatMessage) {
-        this.text = msg.text
+        this.content = msg.content
         this.timestamp = msg.timestamp
         this.inChatId = msg.inChatId
         this.senderId = msg.senderId
@@ -129,7 +141,7 @@ export class ChatMessage {
             chatId: chatId,
             senderId: this.senderId,
             inChatId: this.inChatId!,
-            text: this.text,
+            text: this.content,
             timestamp: this.timestamp,
         }
         return JSON.stringify(receiveMessage)
@@ -297,16 +309,30 @@ export class Chat {
         return msgs
     }
 
-    sendMessage(text: string) {
+    sendTextMessage(text : string) {
+        return this.sendMessage(ChatMessageType.Text, text)
+    }
+
+    sendFileMessage(hash : string, name : string, size : number) {
+        return this.sendMessage(ChatMessageType.File, JSON.stringify({hash : hash, name : name, size : size}))
+    }
+
+    sendImageMessage(hash : string) {
+        return this.sendMessage(ChatMessageType.Image, hash)
+    }
+
+    sendMessage(type : ChatMessageType,content: string) {
         const timestamp = Date.now()
         const data: SendSendMessageData = {
+            type,
             clientId: ++this.lastClientId,
-            text: text,
+            content,
             chatId: this.chatId,
             timestamp,
         }
         let msg = new ChatMessage({
-            text: text,
+            type,
+            content,
             timestamp,
             inChatId: undefined,
             senderId: authStore.userId,

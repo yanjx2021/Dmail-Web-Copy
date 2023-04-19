@@ -29,6 +29,9 @@ export class LocalDatabase {
     static requestIndex(reqId: number) {
         return `request:${reqId}`
     }
+    static imageBlobIndex(hash : string) {
+        return `image:${hash}`
+    }
 
     static async saveUserSetting(userSetting: string) {
         this.database.setItem(userSettingIndex, userSetting)
@@ -42,6 +45,20 @@ export class LocalDatabase {
                 const userSetting = JSON.parse(value as string) as UserSetting
                 userSettingStore.setUserSetting(userSetting)
             }
+        })
+    }
+
+    static async saveImageBlob(hash : string, blob : Blob) {
+        this.database.setItem(LocalDatabase.imageBlobIndex(hash), blob)
+    }
+
+    static async loadImageBlob(hash : string) {
+        this.database.getItem(hash).then((blob) => {
+            if (blob === null) {
+                // TODO ""
+                return
+            }
+
         })
     }
 

@@ -1,6 +1,6 @@
 import { RequestState } from '../stores/requestStore'
 
-import { ChatId } from "../stores/chatStore"
+import { ChatId, ChatMessageType } from "../stores/chatStore"
 import { UserId } from "../stores/authStore"
 import { UploadId } from "../stores/fileStore"
 
@@ -119,10 +119,11 @@ export interface ReceiveChatInfo {
 export type SerializedReceiveChatInfo = string
 
 export interface ReceiveChatMessage {
+    type : ChatMessageType
     chatId: number
     senderId: number
     inChatId: number
-    text: string
+    content: string
     timestamp: number
 }
 
@@ -264,10 +265,11 @@ export interface SendLoginData {
     emailCode?: number
 }
 export interface SendSendMessageData {
+    type : ChatMessageType
     clientId: number
     chatId: number
-    timestamp: number
-    text: string
+    timestamp : number
+    content: string
 }
 
 export interface SendPullData {
@@ -345,6 +347,7 @@ export enum Send {
     SetUserSetting = 'SetUserSetting',
     PullUserSetting = 'PullUserSetting',
     UpdateUserInfo = 'UpdateUserInfo',
+    GetFileUrl = 'GetFileUrl'
     UploadFileRequest = 'UploadFileRequest',
     FileUploaded = 'FileUploaded'
     Unfriend = 'Unfriend',
@@ -401,6 +404,8 @@ export interface MessageSendData {
     [Send.GetMessages]: SendGetMessagesData
     [Send.GetChatInfo]: ChatId
     [Send.SetUserSetting]: string
+    [Send.GetFileUrl]: string
+    //
     [Send.PullUserSetting]: UserId
     [Send.Unfriend]: UserId
     [Send.UpdateUserInfo]: SendUpdateUserInfoData

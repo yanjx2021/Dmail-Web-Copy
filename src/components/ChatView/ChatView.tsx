@@ -12,15 +12,17 @@ import { UserSidebar } from './UserSidebar'
 import { chatSideStore } from '../../stores/chatSideStore'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 
-export const ChatView = observer(({ chat }: { chat: Chat }) => {
-    const [messages, setMessages] = useImmer<ChatMessage[]>([])
-
-    const sendMessageHanlder = useCallback(
-        (text: string) => {
-            const msg = chat.sendMessage(text)
-            setMessages([...messages, msg])
-        },
-        [chat, messages, setMessages]
+export const ChatView = 
+    ({chat}: { chat: Chat}) => {
+        const [messages, setMessages] = useImmer<ChatMessage[]>([])
+        
+        const sendMessageHanlder = useCallback(
+            (text : string) => {
+                const msg = chat.sendTextMessage(text)
+                setMessages([...messages, msg])
+            }
+        }),
+        [chat, secureAuthStore.showSecureBox]
     )
 
     useEffect(
