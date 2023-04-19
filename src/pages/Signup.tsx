@@ -7,8 +7,10 @@ import { SHA256 } from 'crypto-js'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { emailTester, passwordTester } from '../constants/passwordFormat'
-import { ErrorBox } from '../components/Box/ErrorBox'
+import { message } from 'antd'
 import '../styles/Login.css'
+import { requestStore } from '../stores/requestStore'
+import { duration } from '../constants/messageContent'
 
 export {}
 
@@ -28,7 +30,6 @@ class RegisterStore {
     errors: string = ''
     timer: any
     timeout: number = 3000
-
 
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
@@ -95,10 +96,13 @@ class RegisterStore {
             this.errors = '验证码不能为空'
             return
         }
-        this.timer = setTimeout(action(() => {
-            this.state = RegisterState.Started
-            this.errors = '网络连接超时，请检查网络状况'
-        }), this.timeout)
+        this.timer = setTimeout(
+            action(() => {
+                this.state = RegisterState.Started
+                this.errors = '网络连接超时，请检查网络状况'
+            }),
+            this.timeout
+        )
         MessageServer.Instance().send<Send.Register>(Send.Register, {
             userName: this.userName,
             email: this.email,
@@ -111,7 +115,6 @@ class RegisterStore {
     get showError(): boolean {
         return this.errors !== ''
     }
-
 }
 
 const registerStore = new RegisterStore()
@@ -180,9 +183,6 @@ const UserNameInput = observer(({ registerStore }: { registerStore: RegisterStor
     )
 })
 
-
-
-
 const SignupCard = observer(({ registerStore }: { registerStore: RegisterStore }) => {
     return (
         <div className="card-body">
@@ -217,9 +217,7 @@ const SignupCard = observer(({ registerStore }: { registerStore: RegisterStore }
                 />
                 <div className="text-center mt-5">
                     <button onClick={registerStore.signup} className="btn btn-lg btn-primary">
-                        {registerStore.state === RegisterState.Signuping
-                            ? '注册中...'
-                            : '注册'}
+                        {registerStore.state === RegisterState.Signuping ? '注册中...' : '注册'}
                     </button>
                 </div>
             </form>
@@ -233,8 +231,22 @@ const SignupCard = observer(({ registerStore }: { registerStore: RegisterStore }
     )
 })
 
-export const SignupPage = observer(() => {
+export const SignupPage = () => {
     const navigate = useNavigate()
+
+    useEffect(() => {
+        const disposer = autorun(() => {
+            if (registerStore.errors !== '') {
+                message.error({
+                    content: registerStore.errors,
+                    duration: duration,
+                    onClose: action(() => (registerStore.errors = '')),
+                })
+            }
+        })
+        return disposer
+    }, [])
+
     useEffect(() => {
         autorun(() => {
             if (registerStore.state === RegisterState.Signuped) {
@@ -242,7 +254,6 @@ export const SignupPage = observer(() => {
             }
         })
     }, [navigate])
-    //TODO-yjx
     return (
         <div id="layout" className="theme-cyan">
             <div className="authentication">
@@ -251,8 +262,6 @@ export const SignupPage = observer(() => {
                         <div className="col-12 col-md-7 col-lg-5 col-xl-4 py-md-11">
                             <div className="card border-0 shadow-sm">
                                 <SignupCard registerStore={registerStore} />
-                                {registerStore.showError ? <ErrorBox title='注册失败' error={registerStore.errors} setError={action((error) => registerStore.errors = error)} />  : <></>}
-                                
                             </div>
                         </div>
                     </div>
@@ -260,4 +269,4 @@ export const SignupPage = observer(() => {
             </div>
         </div>
     )
-})
+}

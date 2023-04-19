@@ -28,6 +28,10 @@ export class User {
         return this.nickname === '' ? this.name : this.nickname
     }
 
+    get originName() {
+        return this.name
+    }
+
     serialized() {
         const user = {
             userId: this.userId,

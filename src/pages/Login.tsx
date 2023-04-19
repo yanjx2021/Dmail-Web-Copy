@@ -4,8 +4,10 @@ import { action, autorun } from 'mobx'
 import { EmailCodeInput } from '../components/EmailCodeInput'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
-import { ErrorBox } from '../components/Box/ErrorBox'
+import useMessage from 'antd/es/message/useMessage'
+import { message } from 'antd'
 import '../styles/Login.css'
+import { duration } from '../constants/messageContent'
 
 const EmailInput = observer(({ authStore }: { authStore: AuthStore }) => {
     return (
@@ -107,8 +109,22 @@ const LoginCard = observer(({ authStore }: { authStore: AuthStore }) => {
     )
 })
 
-export const LoginPage = observer(() => {
+export const LoginPage = () => {
     const navigate = useNavigate()
+
+    useEffect(() => {
+        const disposer = autorun(() => {
+            if (authStore.errors !== '') {
+                message.error({
+                    content: authStore.errors,
+                    duration: duration,
+                    onClose: action(() => (authStore.errors = '')),
+                })
+            }
+        })
+        return disposer
+    }, [])
+
     useEffect(() => {
         autorun(() => {
             if (authStore.state === AuthState.Logged) {
@@ -124,15 +140,6 @@ export const LoginPage = observer(() => {
                         <div className="col-12 col-md-7 col-lg-5 col-xl-4 py-md-11">
                             <div className="card border-0 shadow-sm">
                                 <LoginCard authStore={authStore} />
-                                {authStore.showError ? (
-                                    <ErrorBox
-                                        title="登陆失败"
-                                        error={authStore.errors}
-                                        setError={action((error) => (authStore.errors = error))}
-                                    />
-                                ) : (
-                                    <></>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -140,4 +147,4 @@ export const LoginPage = observer(() => {
             </div>
         </div>
     )
-})
+}

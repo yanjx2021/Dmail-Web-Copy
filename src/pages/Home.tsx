@@ -9,7 +9,7 @@ import { NoneActiveChatBody } from '../components/NoneActiveChatBody'
 import { ChatView } from '../components/ChatView/ChatView'
 import { action } from 'mobx'
 import { LocalDatabase } from '../stores/localData'
-import { ErrorContainer } from '../components/Box/ErrorContainer'
+import { RegisterError } from '../components/Box/RegisterError'
 import { secureAuthStore } from '../stores/secureAuthStore'
 import { LockedChatView } from '../components/LockedChatView'
 
@@ -44,7 +44,7 @@ const Home = observer(
 
         return authStore.state === AuthState.Logged ? (
             <>
-                <ErrorContainer />
+                <RegisterError />
                 <Menu />
                 <TabContent activeChatId={activeChatId} setActiveChatId={checkAndSetActivateChat} />
                 {activeChatId === null ? (
