@@ -17,3 +17,6 @@
   width: 0px;
   background-color: var(--font-eee);
 }
+.text-footerform {
+  color: var(--font-color) !important
+}

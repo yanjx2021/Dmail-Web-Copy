@@ -60,7 +60,7 @@ export const ChatViewFooter = (props: { handleSend: Function }) => {
                     <div className="col-12">
                         <div className="input-group align-items-center">
                             <textarea
-                                className="form-control border-0 pl-0"
+                                className="form-control border-0 pl-0 text-footerform"
                                 placeholder="请输入您的消息..."
                                 id="textinputer"
                                 onChange={() => handleValueChange()}

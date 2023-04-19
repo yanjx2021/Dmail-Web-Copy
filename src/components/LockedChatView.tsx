@@ -25,7 +25,7 @@ export const LockedChatView = () => {
                         <div>
                             <div>
                                 <input
-                                    className="form-control form-secret"
+                                    className="form-control form-secret text-footerform"
                                     type="password"
                                     value={code}
                                     onChange={(e) => setCode(e.target.value)}

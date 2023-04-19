@@ -2,3 +2,8 @@
 {
   border:none;
 }
+.link.reset-password
+{
+  background: transparent;
+  color: var(--primary-color)!important;
+}

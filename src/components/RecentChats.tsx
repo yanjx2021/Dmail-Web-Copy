@@ -74,7 +74,7 @@ export const RecentChats = observer(
                 <div className="form-group input-group-lg search mb-3">
                     <i className="zmdi zmdi-search"></i>
                     <i className="zmdi zmdi-dialpad"></i>
-                    <input className="form-control" type="text" placeholder="搜索..."></input>
+                    <input className="form-control text-footerform" type="text" placeholder="搜索..."></input>
                 </div>
                 <ul className="chat-list">
                     <li className="header d-flex justify-content-between ps-3 pe-3 mb-1">

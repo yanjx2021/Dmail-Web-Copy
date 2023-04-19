@@ -67,7 +67,7 @@ export const AllChatsCard = observer(
                             onDoubleClick={handleDoubleClick}>
                             {editName ? (
                                 <input
-                                    className="form-control form-control-sm"
+                                    className="form-control form-control-sm text-footerform"
                                     value={nickname}
                                     onChange={(e) => setNickname(e.target.value)}
                                     ref={inputRef}
@@ -173,7 +173,7 @@ export const AllChatList = ({
                 <div className="form-group input-group-lg search mb-3">
                     <i className="zmdi zmdi-search"></i>
                     <i className="zmdi zmdi-dialpad"></i>
-                    <input className="form-control" type="text" placeholder="搜索..."></input>
+                    <input className="form-control text-footerform" type="text" placeholder="搜索..."></input>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <div>

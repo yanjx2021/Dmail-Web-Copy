@@ -12,6 +12,8 @@
 }
 .chat-body .chat .container-xxl .form-control.form-secret:focus
 {
-  background-color:#f3f2ef;;
-  border-color: #21AA93;
+  box-shadow: none;
+  outline: none;
+  border-color: var(--primary-color);
+  background-color: var(--sidebar-bg)
 }
