@@ -66,7 +66,7 @@ export const EmailCodeInput = (props: {
                 onChange={onEmailCodeInputChange}
             />
             <button
-                className="btn btn-lg btn-primary"
+                className="btn btn-lg"
                 disabled={curCoolDown > 0}
                 onClick={onSendEmailButtonClicked}>
                 {curCoolDown <= 0 ? '发送验证码' : curCoolDown + 's'}

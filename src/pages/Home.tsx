@@ -12,6 +12,7 @@ import { LocalDatabase } from '../stores/localData'
 import { RegisterError } from '../components/Box/RegisterError'
 import { secureAuthStore } from '../stores/secureAuthStore'
 import { LockedChatView } from '../components/LockedChatView'
+import { RegisterModal } from '../components/Box/Modal'
 
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore; chatStore: ChatStore }) => {
@@ -45,6 +46,7 @@ const Home = observer(
         return authStore.state === AuthState.Logged ? (
             <>
                 <RegisterError />
+                <RegisterModal />
                 <Menu />
                 <TabContent activeChatId={activeChatId} setActiveChatId={checkAndSetActivateChat} />
                 {activeChatId === null ? (

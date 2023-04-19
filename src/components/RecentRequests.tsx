@@ -14,7 +14,7 @@ import '../styles/RecentRequests.css'
 import { userStore } from '../stores/userStore'
 import { MessageServer } from '../utils/networkWs'
 import { Send } from '../utils/message'
-import { AddFriendBox } from './Box/AddFriendBox'
+import { modalStore } from '../stores/modalStore'
 
 const RequestItemStatus = observer(
     ({ senderId, state, reqId }: { senderId: number; state: RequestState; reqId: number }) => {
@@ -78,7 +78,9 @@ const RequestFriendItem = observer(
                             <div className="avatar me-3">
                                 <span className="rounded-circle"></span>
                                 <div className="avatar rounded-circle no-image timber">
-                                    <span>{senderId === authStore.userId ? receiverId : senderId}</span>
+                                    <span>
+                                        {senderId === authStore.userId ? receiverId : senderId}
+                                    </span>
                                 </div>
                             </div>
                             <div className="media-body overflow-hidden">
@@ -186,16 +188,17 @@ const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore 
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h3 className="mb-0 text-primary">请求列表</h3>
                 <div>
-                <a
-                    className="btn btn-dark"
-                    type="button"
-                    data-toggle="modal"
-                    data-target="#InviteFriendsRequest">
-                    <i className="zmdi zmdi-account-add" />
-                    添加好友
-                </a>
-            </div>
-            
+                    <a
+                        className="btn btn-dark"
+                        type="button"
+                        onClick={action(() => {
+                            modalStore.modalType = 'AddFriend'
+                            modalStore.isOpen = true
+                        })}>
+                        <i className="zmdi zmdi-account-add" />
+                        添加好友
+                    </a>
+                </div>
             </div>
             <div className="form-group input-group-lg search mb-3">
                 <i className="zmdi zmdi-search"></i>
@@ -214,7 +217,6 @@ const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore 
                     />
                 ))}
             </ul>
-            <AddFriendBox id='InviteFriendsRequest' />
         </div>
     )
 })

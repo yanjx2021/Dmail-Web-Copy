@@ -1,14 +1,13 @@
 import { observer } from 'mobx-react-lite'
 import { Chat, ChatId, ChatStore, ChatType } from '../stores/chatStore'
 import { action } from 'mobx'
-import { CreateGroupChatBox } from './Box/CreateGroupChatBox'
-import { AddFriendBox } from './Box/AddFriendBox'
 import '../styles/RecentRequests.css'
 import { GroupedVirtuoso, Virtuoso } from 'react-virtuoso'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useImmer } from 'use-immer'
 import { userSettingStore } from '../stores/userSettingStore'
 import { ChatDropDown } from './DropDown/ChatDropDown'
+import { modalStore } from '../stores/modalStore'
 
 export const AllChatsCard = observer(
     ({
@@ -90,7 +89,7 @@ export const HoverOption = observer(({ chat }: { chat: Chat }) => {
     const type = chat.chatType === ChatType.Private ? 'private' : 'group' // 用于导航到对应的infoBox
     return (
         <div className="hover_action">
-            <ChatDropDown chatId={chat.chatId}/>
+            <ChatDropDown chatId={chat.chatId} />
         </div>
     )
 })
@@ -179,8 +178,10 @@ export const AllChatList = ({
                         <a
                             className="btn btn-dark"
                             type="button"
-                            data-toggle="modal"
-                            data-target="#InviteFriendsAllChat">
+                            onClick={action(() => {
+                                modalStore.modalType = 'AddFriend'
+                                modalStore.isOpen = true
+                            })}>
                             <i className="zmdi zmdi-account-add" />
                             添加好友
                         </a>
@@ -189,8 +190,10 @@ export const AllChatList = ({
                         <a
                             className="btn btn-dark"
                             type="button"
-                            data-toggle="modal"
-                            data-target="#InviteFriendsAllChat">
+                            onClick={action(() => {
+                                modalStore.modalType = 'AddFriend'
+                                modalStore.isOpen = true
+                            })}>
                             <i className="zmdi zmdi-account-add" />
                             加入群聊
                         </a>
@@ -199,8 +202,10 @@ export const AllChatList = ({
                         <a
                             className="btn btn-dark"
                             type="button"
-                            data-toggle="modal"
-                            data-target="#CreateGroupAllChat">
+                            onClick={action(() => {
+                                modalStore.modalType = 'CreateGroup'
+                                modalStore.isOpen = true
+                            })}>
                             <i className="zmdi zmdi-account-add" />
                             创建群聊
                         </a>
@@ -213,8 +218,6 @@ export const AllChatList = ({
                     setActiveChatId={setActiveChatId}
                 />
             </div>
-            <AddFriendBox id="InviteFriendsAllChat" />
-            <CreateGroupChatBox id="CreateGroupAllChat" />
         </>
     )
 }

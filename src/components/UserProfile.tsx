@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { updateUserStore } from '../stores/updateUserStore'
 import { useImmer } from 'use-immer'
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { ChangePasswordBox } from './Box/ChangePasswordBox'
+import { modalStore } from '../stores/modalStore'
 
 export const ProfileHeader = () => {
     return (
@@ -168,7 +168,10 @@ export const SoundNotification = () => {
 export const ChangePassword = () => {
     return (
         <li className="list-group-item border-0 mt-2">
-            <a className="link" type='button' data-target='#ChangePasswordBox' data-toggle='modal'>
+            <a className="link" type='button' onClick={action(() => {
+                modalStore.modalType = 'ChangePassword'
+                modalStore.isOpen = true
+            })}>
                 <i className="zmdi zmdi-chevron-right me-2"></i>
                 {'  修改密码'}
             </a>
@@ -198,7 +201,6 @@ export const UserProfile = observer(() => {
             <ProfileHeader />
             <ProfileCard user={userStore.getUser(authStore.userId)} />
             <ProfileSetting />
-            <ChangePasswordBox id='ChangePasswordBox'/>
         </div>
     )
 })

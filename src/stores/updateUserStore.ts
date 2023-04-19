@@ -6,6 +6,7 @@ import { authStore } from './authStore'
 import { LocalDatabase } from './localData'
 import { passwordTester } from '../constants/passwordFormat'
 import { SHA256 } from 'crypto-js'
+import { modalStore } from './modalStore'
 
 export class UpdateUserStore {
     updateType: 'Password' | 'UserName' | 'AvaterPath' = 'UserName'
@@ -97,6 +98,7 @@ export class UpdateUserStore {
         this.waitResponse = false
         switch (data.state) {
             case 'Success':
+                modalStore.handleCancel()
                 this.writeToStore()
                 break
             case 'PasswordFormatError':

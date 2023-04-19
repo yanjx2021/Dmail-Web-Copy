@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 import { action } from 'mobx'
+import { modalStore } from '../../stores/modalStore'
 
 export const ChatDropDown = observer(({ chatId }: { chatId: number }) => {
     return (
@@ -18,16 +19,20 @@ export const ChatDropDown = observer(({ chatId }: { chatId: number }) => {
                 <a
                     className="dropdown-item"
                     type="button"
-                    data-toggle="modal"
-                    data-target="#SetSecureCode">
+                    onClick={action(() => {
+                        modalStore.modalType = 'SetSecure'
+                        modalStore.isOpen = true
+                    })}>
                     设置二次验证
                 </a>
                 {secureAuthStore.hasSetChatCode(chatId) ? (
                     <a
                         className="dropdown-item"
                         type="button"
-                        data-toggle="modal"
-                        data-target="#RemoveSecureCode">
+                        onClick={action(() => {
+                            modalStore.modalType = 'RemoveSecure'
+                            modalStore.isOpen = true
+                        })}>
                         取消二次验证
                     </a>
                 ) : (
