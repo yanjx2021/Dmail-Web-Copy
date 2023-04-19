@@ -43,8 +43,8 @@ export const ChatView = ({ chat }: { chat: Chat }) => {
         <div
             className={
                 'main px-xl-5 px-lg-4 px-3 ' +
-                (chatSide ? 'open-chat-sidebar' : '') +
-                (userSide ? 'open-user-sidebar' : '')
+                (chatSide ? 'open-chat-sidebar ' : '') +
+                (userSide ? 'open-user-sidebar ' : '')
             }>
             <div className="chat-body">
                 <ChatViewHeader chat={chat} sideHandler={sideBarHanlder}/>
