@@ -15,17 +15,19 @@ import { secondaryCodeHash } from '../../constants/passwordHash'
 
 export const ModalInput = ({
     label,
+    type,
     value,
     setValue,
 }: {
     label: string
+    type: 'text' | 'password'
     value: string
     setValue: any
 }) => {
     return (
         <div className="form-group">
             <label>{label}</label>
-            <input type="text" className="form-control" value={value} onChange={setValue} />
+            <input type={type} className="form-control" value={value} onChange={setValue} />
         </div>
     )
 }
@@ -50,6 +52,7 @@ export const AddFriendModalView = observer(({ title }: { title: string }) => {
             open={modalStore.isOpen}>
             <form>
                 <ModalInput
+                    type="text"
                     label="用户ID"
                     value={reqId}
                     setValue={(e: any) => {
@@ -58,6 +61,7 @@ export const AddFriendModalView = observer(({ title }: { title: string }) => {
                     }}
                 />
                 <ModalInput
+                    type="text"
                     label="验证消息"
                     value={requestStore.message}
                     setValue={action((e: any) => (requestStore.message = e.target.value))}
@@ -90,6 +94,7 @@ export const CreateGroupModalView = observer(({ title }: { title: string }) => {
             open={modalStore.isOpen}>
             <form>
                 <ModalInput
+                    type="text"
                     label="群聊名称"
                     value={groupName}
                     setValue={(e: any) => {
@@ -119,6 +124,7 @@ export const ChangePasswordModalView = observer(({ title }: { title: string }) =
             open={modalStore.isOpen}>
             <form>
                 <ModalInput
+                    type="password"
                     label="新密码"
                     value={updateUserStore.newPassword}
                     setValue={action((e: any) => {
@@ -180,6 +186,7 @@ export const SetSecureModalView = observer(({ title }: { title: string }) => {
             <form>
                 {secureAuthStore.hasSetCode ? (
                     <ModalInput
+                        type="password"
                         label="原密码"
                         value={oldCode}
                         setValue={action((e: any) => {
@@ -190,6 +197,7 @@ export const SetSecureModalView = observer(({ title }: { title: string }) => {
                     <></>
                 )}
                 <ModalInput
+                    type="password"
                     label={secureAuthStore.hasSetCode ? '新密码' : '设置密码'}
                     value={code}
                     setValue={action((e: any) => {
@@ -229,6 +237,7 @@ export const RemoveSecureModalView = observer(({ title }: { title: string }) => 
             open={modalStore.isOpen}>
             <form>
                 <ModalInput
+                    type="password"
                     label="原密码"
                     value={code}
                     setValue={action((e: any) => {
@@ -251,7 +260,7 @@ export const RegisterModal = observer(() => {
         case 'RemoveSecure':
             return <RemoveSecureModalView title="取消聊天密码" />
         case 'SetSecure':
-            return <SetSecureModalView title='设置聊天密码'/>
+            return <SetSecureModalView title="设置聊天密码" />
         default:
             return <></>
     }

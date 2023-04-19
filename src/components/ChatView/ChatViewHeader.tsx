@@ -1,16 +1,19 @@
 import { observer } from 'mobx-react-lite'
 import { Chat } from '../../stores/chatStore'
+import { chatSideStore } from '../../stores/chatSideStore'
+import { action } from 'mobx'
 
 export const ChatViewHeader = observer(
-    ({ chat,sideHandler }: { chat: Chat,sideHandler:Function }) => {
+    ({ chat }: { chat: Chat }) => {
         return (
             <div className="chat-header border-bottom py-xl-4 py-md-3 py-2">
                 <div className="container-xxl">
                     <div className="row align-items-center">
                         <div className="col-6 col-xl-4">
                             <div className="media">
-                                <div className="avatar me-3 show-user-detail"
-                                onClick={()=>sideHandler("openchatsidebar")}>
+                                <div
+                                    className="avatar me-3 show-user-detail"
+                                    onClick={action(() => chatSideStore.ChatSidebartoggle())}>
                                     <span className="status rounded-circle"></span>
                                     <div
                                         // 添加颜色
@@ -59,7 +62,9 @@ export const ChatViewHeader = observer(
                                         <i className="zmdi zmdi-phone-forwarded zmdi-hc-lg"></i>
                                     </a>
                                 </li>
-                                <li className="nav-item list-inline-item add-user-btn" onClick={()=>sideHandler("openusersidebar")}>
+                                <li
+                                    className="nav-item list-inline-item add-user-btn"
+                                    onClick={action(() => chatSideStore.UserSidebartoggle())}>
                                     <a href="#" className="nav-link text-muted px-3" title="新成员">
                                         <i className="zmdi zmdi-accounts-add zmdi-hc-lg"></i>
                                     </a>

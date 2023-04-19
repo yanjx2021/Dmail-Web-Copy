@@ -300,6 +300,7 @@ export enum Send {
     SetUserSetting = 'SetUserSetting',
     PullUserSetting = 'PullUserSetting',
     UpdateUserInfo = 'UpdateUserInfo',
+    Unfriend = 'Unfriend'
 }
 
 // COMMAND和DATA类型捆绑
@@ -349,7 +350,7 @@ export interface MessageSendData {
     [Send.SetUserSetting]: string
     //
     [Send.PullUserSetting]: UserId
-    //
+    [Send.Unfriend]: UserId
     [Send.UpdateUserInfo]: SendUpdateUserInfoData
 }
 

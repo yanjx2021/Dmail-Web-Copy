@@ -1,8 +1,11 @@
 import { observer } from 'mobx-react-lite'
 import { Chat } from '../../stores/chatStore'
+import { action } from 'mobx';
+import { chatSideStore } from '../../stores/chatSideStore';
 //这里面直接内置通讯录就行
+
 export const UserSidebar = observer(
-    ({ chat, sideHandler }: { chat: Chat; sideHandler: Function }) => {
+    ({ chat }: { chat: Chat }) => {
         return (
             <div className="addnew-user-sidebar py-xl-4 py-3 px-xl-4 px-3">
                 <div className="d-flex flex-column">
@@ -15,7 +18,7 @@ export const UserSidebar = observer(
                             <button
                                 className="btn btn-link text-muted close-chat-sidebar"
                                 type="button"
-                                onClick={() => sideHandler('closeusersidebar')}>
+                                onClick={action(() => chatSideStore.close())}>
                                 <i className="zmdi zmdi-close"></i>
                             </button>
                         </div>

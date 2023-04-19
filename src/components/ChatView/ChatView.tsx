@@ -7,13 +7,12 @@ import { ChatViewFooter } from './ChatViewFooter'
 import { authStore } from '../../stores/authStore'
 import { useImmer } from 'use-immer'
 import { action, runInAction } from 'mobx'
-import { ChatSidebar } from './ChatSidebar'
+import { ChatSidebar } from '../ChatProfile/ChatSidebar'
 import { UserSidebar } from './UserSidebar'
+import { chatSideStore } from '../../stores/chatSideStore'
 
-export const ChatView = ({ chat }: { chat: Chat }) => {
+export const ChatView = observer(({ chat }: { chat: Chat }) => {
     const [messages, setMessages] = useImmer<ChatMessage[]>([])
-    const [chatSide, setChatSide] = useImmer<boolean>(false)
-    const [userSide, setUserSide] = useImmer<boolean>(false)
 
     const sendMessageHanlder = useCallback(
         (text: string) => {
@@ -22,12 +21,6 @@ export const ChatView = ({ chat }: { chat: Chat }) => {
         },
         [chat, messages, setMessages]
     )
-    const sideBarHanlder = (text: string) => {
-        if (text === 'openchatsidebar') setChatSide(!chatSide)
-        if (text === 'openusersidebar') setUserSide(!userSide)
-        if (text === 'closechatsidebar') setChatSide(false)
-        if (text === 'closeusersidebar') setUserSide(false)
-    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(
@@ -40,19 +33,14 @@ export const ChatView = ({ chat }: { chat: Chat }) => {
     )
 
     return (
-        <div
-            className={
-                'main px-xl-5 px-lg-4 px-3 ' +
-                (chatSide ? 'open-chat-sidebar ' : '') +
-                (userSide ? 'open-user-sidebar ' : '')
-            }>
+        <div className={'main px-xl-5 px-lg-4 px-3 ' + chatSideStore.sidebarState}>
             <div className="chat-body">
-                <ChatViewHeader chat={chat} sideHandler={sideBarHanlder}/>
+                <ChatViewHeader chat={chat} />
                 <ChatMessageContent chat={chat} messages={messages} setMessages={setMessages} />
                 <ChatViewFooter handleSend={sendMessageHanlder} />
             </div>
-            <ChatSidebar chat={chat} sideHandler={sideBarHanlder} />
-            <UserSidebar chat={chat} sideHandler={sideBarHanlder} />
+            <ChatSidebar chat={chat} />
+            <UserSidebar chat={chat} />
         </div>
     )
-}
+})
