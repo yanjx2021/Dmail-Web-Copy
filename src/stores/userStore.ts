@@ -63,7 +63,6 @@ export class UserStore {
         this.errors = ''
     }
 
-
     getUserInfoResponseHandler(data: ReceiveGetUserInfoResponseData) {
         switch (data.state) {
             case ReceiveGetUserInfoResponseState.Success:

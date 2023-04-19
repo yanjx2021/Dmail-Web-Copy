@@ -5,6 +5,7 @@ import {
     Receive,
     ReceiveChatMessage,
     ReceivePullResponseData,
+    ReceiveUnfriendResponseData,
     Send,
     SendMessageResponseState,
     SendSendMessageData,
@@ -153,6 +154,7 @@ export class Chat {
     bindUser: User | null = null
 
     lastMessage: ChatMessage | undefined = undefined
+
     readCursor: number = 0
 
     constructor() {
@@ -332,6 +334,8 @@ export class ChatStore {
             Receive.CreateGroupChatResponse,
             this.ReceiveCreateGroupChatResponseHandler
         )
+        MessageServer.on(Receive.UnfriendResponse, this.UnfriendResponseHandler)
+        MessageServer.on(Receive.DeleteChat, this.DeleteChatHandler)
     }
 
     reset() {
@@ -423,6 +427,47 @@ export class ChatStore {
         LocalDatabase.loadChatInfo(chatId)
         return ret
     }
+    private removeChatInfo(chat: Chat) {
+        for (let inChatId = 1; inChatId <= chat.lastMessage!.inChatId!; inChatId++) { // 清除聊天记录
+            LocalDatabase.removeMessage(chat.chatId, inChatId).catch((err) => console.log(err))
+        }
+        LocalDatabase.removeChatInfo(chat.chatId)
+        this.chats.delete(chat.chatId)
+    }
+    private DeleteChatHandler(chatId: number) {
+        if (!this.chats.has(chatId)) {
+            this.errors = `清除聊天失败，聊天${chatId}不存在`
+            return 
+        }
+        const chat = this.chats.get(chatId)!
+        if (chat.chatType === ChatType.Private) { // 删除私聊
+            LocalDatabase.removeUserInfo(chat.bindUser!.userId).catch((err) => console.log(err)) // 清除用户
+        } 
+        this.removeChatInfo(chat)
+    }
+
+    private UnfriendResponseHandler(response: ReceiveUnfriendResponseData) {
+        switch (response.state) {
+            case 'Success':
+                if (!this.chats.has(response.chatId!)) {
+                    this.errors = `清除聊天失败，聊天${response.chatId!}不存在`
+                    return
+                }
+                // 清理缓存
+                const chat = this.chats.get(response.chatId!)!
+                LocalDatabase.removeUserInfo(chat.bindUser!.userId).catch((err) => console.log(err)) // 清除用户
+
+                this.removeChatInfo(chat)
+                console.log('成功删除好友')
+                break
+            case 'ServerError':
+                this.errors = '服务器异常，请稍后再试'
+                break
+            default:
+                this.errors = '未知的错误'
+        }
+    }
+
 
     private ReceiveSendMessageResponseHandler(response: ReceiveSendMessageResponseData) {
         this.getChat(response.chatId).handleSendMessageResponse(

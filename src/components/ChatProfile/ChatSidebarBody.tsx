@@ -17,7 +17,7 @@ const ChatSidebarAvatar = ({ chatId }: { chatId: number }) => {
     )
 }
 
-const UserSidebarName = ({ name, type }: { name: string; type: ChatType }) => {
+const ChatSidebarName = ({ name, type }: { name: string; type: ChatType }) => {
     return (
         <div className="text-center mt-3 mb-5">
             <h4>{name}</h4>
@@ -36,7 +36,7 @@ const UserSidebarName = ({ name, type }: { name: string; type: ChatType }) => {
     )
 }
 
-export const RemoveFriendButton = observer(({ userId }: { userId: number }) => {
+export const RemoveFriendButton = ({ userId }: { userId: number }) => {
     return (
         <div className="text-center mt-3 mb-5">
             <Popconfirm
@@ -50,14 +50,14 @@ export const RemoveFriendButton = observer(({ userId }: { userId: number }) => {
             </Popconfirm>
         </div>
     )
-})
+}
 
 export const ChatSidebarBody = observer(({ chat }: { chat: Chat }) => {
     // TODO-后续群聊和用户可以复用
     return (
         <div className="body mt-4">
             <ChatSidebarAvatar chatId={chat.chatType === ChatType.Private ? chat.bindUser!.userId : chat.chatId} />
-            <UserSidebarName name={chat.sidebarName} type={chat.chatType} />
+            <ChatSidebarName name={chat.sidebarName} type={chat.chatType} />
             {chat.chatType === ChatType.Private ? (
                 <RemoveFriendButton userId={chat.bindUser!.userId} />
             ) : (

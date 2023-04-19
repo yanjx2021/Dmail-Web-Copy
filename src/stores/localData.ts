@@ -79,6 +79,16 @@ export class LocalDatabase {
         })
     }
 
+    static async removeChatInfo(chatId: number) {
+        this.database.removeItem(this.chatInfoIndex(chatId)).catch((err) => console.log(err))
+    }
+    static async removeMessage(chatId: number, inChatId: number) {
+        this.database.removeItem(this.messageIndex(chatId, inChatId)).catch((err) => console.log(err))
+    }
+    static async removeUserInfo(userId: number) {
+        this.database.removeItem(this.userInfoIndex(userId)).catch((err) => console.log(err))
+    }
+
     static async saveChatInfo(chatId: number, chatInfo: ChatInfo) {
         this.database.setItem(this.chatInfoIndex(chatId), JSON.stringify(chatInfo)).catch((err) => console.error(err))
     }

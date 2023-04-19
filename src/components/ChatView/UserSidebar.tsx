@@ -12,7 +12,7 @@ export const UserSidebar = observer(
                     <div className="header border-bottom pb-4 d-flex justify-content-between">
                         <div>
                             <h6 className="mb-0 font-weight-bold">添加群成员</h6>
-                            <span className="text-muted">Update your profile details</span>
+                            <span className="text-muted">{chat.chatId}</span>
                         </div>
                         <div>
                             <button

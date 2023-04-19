@@ -179,6 +179,11 @@ export interface ReceiveSetUserSettingResponseData {
     state: 'Success' | any
 }
 
+export interface ReceiveUnfriendResponseData {
+    state: 'Success' | 'ServerError' 
+    chatId?: number
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -207,6 +212,8 @@ export enum Receive {
     UserSetting = 'UserSetting',
     SetUserSettingResponse = 'SetUserSettingResponse',
     UpdateUserInfoResponse = 'UpdateUserInfoResponse',
+    UnfriendResponse = 'UnfriendResponse',
+    DeleteChat = 'DeleteChat'
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -330,6 +337,8 @@ export interface MessageReceiveData {
     [Receive.UpdateUserInfoResponse]: ReceiveUpdateUserInfoResponseData
     [Receive.UserSetting]: string
     [Receive.SetUserSettingResponse]: ReceiveSetUserSettingResponseData
+    [Receive.UnfriendResponse]: ReceiveUnfriendResponseData
+    [Receive.DeleteChat]: number
 }
 
 export interface MessageSendData {
