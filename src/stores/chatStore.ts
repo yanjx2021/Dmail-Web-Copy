@@ -21,6 +21,7 @@ import { User, UserStore, userStore } from './userStore'
 import { timeStamp } from 'console'
 import { pinyin } from 'pinyin-pro'
 import { ReceiveCreateGroupChatResponse } from '../utils/message'
+import { chineseRegex } from '../constants/chineseAndLetter'
 
 export type ChatId = number
 
@@ -44,9 +45,9 @@ export interface GroupChatInfo {
 export type ChatInfo = PrivateChatInfo | GroupChatInfo
 
 export enum ChatMessageState {
-    Sending = "发送中...",
-    Getting = "拉取中...",
-    Arrived = "已送达",
+    Sending = '发送中...',
+    Getting = '拉取中...',
+    Arrived = '已送达',
 }
 
 export class ChatMessage {
@@ -162,6 +163,20 @@ export class Chat {
         let ret = new Chat()
         ret.chatId = chatId
         return ret
+    }
+
+    get sidebarTitle() {
+        if (this.chatType === ChatType.Private) return '用户信息'
+        return '群聊信息'
+    }
+
+    get sidebarName() {
+        if (this.chatType === ChatType.Unknown) {
+            return `群聊${this.chatId}`
+        } else if (this.chatType === ChatType.Private) {
+            return this.bindUser!.originName
+        }
+        return this.groupName!
     }
 
     get name() {
@@ -313,7 +328,10 @@ export class ChatStore {
         MessageServer.on(Receive.SendMessageResponse, this.ReceiveSendMessageResponseHandler)
         MessageServer.on(Receive.Messages, this.ReceiveMessagesHandler)
         MessageServer.on(Receive.Chat, this.ReceiveChatInfoHandler)
-        MessageServer.on(Receive.CreateGroupChatResponse, this.ReceiveCreateGroupChatResponseHandler)
+        MessageServer.on(
+            Receive.CreateGroupChatResponse,
+            this.ReceiveCreateGroupChatResponseHandler
+        )
     }
 
     reset() {
@@ -325,13 +343,20 @@ export class ChatStore {
 
     get privateChatGroup() {
         const chats: Chat[] = []
-        let groupCounts: number[] = Array(26).fill(0)
+        const nonChineseChats: Chat[] = []
+        let groupCounts: number[] = Array(27).fill(0)
         const groups: string[] = []
-        const firstLetter = (chat: Chat) => pinyin(chat.name[0].toLowerCase(), {pattern: 'initial', toneType: 'none'})
+        const firstLetter = (chat: Chat) =>
+            pinyin(chat.name[0].toLowerCase(), { pattern: 'initial', toneType: 'none' })
 
         this.chats.forEach((chat, _) => {
             if (chat.chatType === ChatType.Private) {
-                chats.push(chat)
+                if (chineseRegex.test(chat.name[0])) {
+                    chats.push(chat)
+                } else {
+                    groupCounts[26]++
+                    nonChineseChats.push(chat)
+                }
             }
         })
         chats.sort((a, b) => {
@@ -340,12 +365,17 @@ export class ChatStore {
         })
         chats.forEach((chat, _) => {
             const index = firstLetter(chat).toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0)
-            if (groupCounts[index] === 0) { // 首次计算
+            if (groupCounts[index] === 0) {
+                // 首次计算
                 groups.push(firstLetter(chat).toUpperCase())
             }
             groupCounts[index]++
         })
+        // 在chat最后添加非中文和英文开头的聊天
+        nonChineseChats.forEach((chat, _) => chats.push(chat))
         groups.sort((a, b) => a.charCodeAt(0) - b.charCodeAt(0))
+        //为特殊字符添加编号#
+        groupCounts[26] !== 0 && groups.push('#')
         groupCounts = groupCounts.filter((value, _) => value !== 0)
         return {
             chats: chats,

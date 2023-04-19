@@ -13,6 +13,7 @@ export const CreateGroupChatBox = ({id} : {id : string}) => {
                 <div className="modal-content">
                     <div className="modal-header">
                         <h5 className="modal-title">创建群聊</h5>
+                        
                         <button
                             type="button"
                             className="close"

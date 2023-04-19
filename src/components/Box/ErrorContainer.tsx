@@ -44,7 +44,7 @@ export const ErrorContainer = observer(() => {
             )}
             {secureAuthStore.showError ? (
                 <ErrorBox
-                    title="更新用户信息失败"
+                    title="二次验证失败"
                     error={secureAuthStore.errors}
                     setError={action((error) => (secureAuthStore.errors = error))}
                 />
