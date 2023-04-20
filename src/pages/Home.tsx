@@ -55,7 +55,6 @@ const Home = observer(
                     secureAuthStore.showSecureBox ? <LockedChatView /> :
                     <ChatView chat={chatStore.getChat(activeChatId)} />
                 )}
-                
             </>
         ) : (
             <></>

@@ -59,6 +59,8 @@ export class ChatMessage {
     state: ChatMessageState
     clientId?: ClientId
 
+
+
     static getLoadingMessage(inChatId: ChatId) {
         return new ChatMessage({
             text: `消息${inChatId}`,
@@ -172,6 +174,22 @@ export class Chat {
         return '群聊信息'
     }
 
+    setReadCuser() {
+        let inChatId = 0
+        if (this.lastMessage !== undefined) {
+            if (this.lastMessage.inChatId) {
+                inChatId = this.lastMessage.inChatId
+                this.readCursor = inChatId
+            } else {
+                inChatId = this.readCursor
+            }
+        }
+        MessageServer.Instance().send<Send.SetAlreadyRead>(Send.SetAlreadyRead, {
+            chatId: this.chatId,
+            inChatId: inChatId
+        })
+    }
+
     get sidebarName() {
         if (this.chatType === ChatType.Unknown) {
             return `群聊${this.chatId}`
@@ -179,6 +197,13 @@ export class Chat {
             return this.bindUser!.originName
         }
         return this.groupName!
+    }
+
+    get unreadMessageCount() {
+        if (this.lastMessage === undefined) {
+            return 0
+        }
+        return this.lastMessage.inChatId! - this.readCursor
     }
 
     get name() {
@@ -336,6 +361,7 @@ export class ChatStore {
         )
         MessageServer.on(Receive.UnfriendResponse, this.UnfriendResponseHandler)
         MessageServer.on(Receive.DeleteChat, this.DeleteChatHandler)
+        MessageServer.on(Receive.ReadCursors, this.ReadCusersHandler)
     }
 
     reset() {
@@ -427,6 +453,14 @@ export class ChatStore {
         LocalDatabase.loadChatInfo(chatId)
         return ret
     }
+
+    private ReadCusersHandler(cusers: [number, number][]) {
+        cusers.forEach(([chatId, cuser]) => {
+            this.getChat(chatId)
+            this.chats.get(chatId)!.readCursor = cuser
+        })
+    }
+
     private removeChatInfo(chat: Chat) {
         for (let inChatId = 1; inChatId <= chat.lastMessage!.inChatId!; inChatId++) { // 清除聊天记录
             LocalDatabase.removeMessage(chat.chatId, inChatId).catch((err) => console.log(err))

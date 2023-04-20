@@ -17,12 +17,13 @@ const ChatSidebarAvatar = ({ chatId }: { chatId: number }) => {
     )
 }
 
-const ChatSidebarName = ({ name, type }: { name: string; type: ChatType }) => {
+const ChatSidebarName = observer(({ chat }: { chat: Chat }) => {
     return (
         <div className="text-center mt-3 mb-5">
-            <h4>{name}</h4>
-            {type === ChatType.Private ? (
+            <h4>{chat.name}</h4>
+            {chat.chatType === ChatType.Private ? (
                 <span className="text-muted">
+                    {chat.bindUser!.nickname === '' ? <></> : <p>{`[用户名]: ${chat.bindUser!.name}`}</p>}
                     <a
                         className="__cf_email__"
                         data-cfemail="f4999d979c91989891da938691919ab49399959d98da979b99">
@@ -34,7 +35,7 @@ const ChatSidebarName = ({ name, type }: { name: string; type: ChatType }) => {
             )}
         </div>
     )
-}
+})
 
 export const RemoveFriendButton = ({ userId }: { userId: number }) => {
     return (
@@ -57,7 +58,7 @@ export const ChatSidebarBody = observer(({ chat }: { chat: Chat }) => {
     return (
         <div className="body mt-4">
             <ChatSidebarAvatar chatId={chat.chatType === ChatType.Private ? chat.bindUser!.userId : chat.chatId} />
-            <ChatSidebarName name={chat.sidebarName} type={chat.chatType} />
+            <ChatSidebarName chat={chat} />
             {chat.chatType === ChatType.Private ? (
                 <RemoveFriendButton userId={chat.bindUser!.userId} />
             ) : (

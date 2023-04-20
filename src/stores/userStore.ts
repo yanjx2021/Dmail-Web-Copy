@@ -6,8 +6,8 @@ import { LocalDatabase } from './localData'
 
 export class User {
     userId: number = 0
-    private name = '加载中...'
-    private nickname = ''
+    name = '加载中...'
+    nickname = ''
     avaterPath = ''
 
     setToSelf(user: User) {

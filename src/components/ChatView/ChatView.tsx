@@ -10,6 +10,7 @@ import { action, runInAction } from 'mobx'
 import { ChatSidebar } from '../ChatProfile/ChatSidebar'
 import { UserSidebar } from './UserSidebar'
 import { chatSideStore } from '../../stores/chatSideStore'
+import { secureAuthStore } from '../../stores/secureAuthStore'
 
 export const ChatView = observer(({ chat }: { chat: Chat }) => {
     const [messages, setMessages] = useImmer<ChatMessage[]>([])
@@ -20,6 +21,15 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
             setMessages([...messages, msg])
         },
         [chat, messages, setMessages]
+    )
+
+    useEffect(
+        action(() => {
+            if (!secureAuthStore.showSecureBox) {
+                chat.setReadCuser()
+            }
+        }),
+        [chat, secureAuthStore.showSecureBox]
     )
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

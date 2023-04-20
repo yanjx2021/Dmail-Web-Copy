@@ -213,7 +213,8 @@ export enum Receive {
     SetUserSettingResponse = 'SetUserSettingResponse',
     UpdateUserInfoResponse = 'UpdateUserInfoResponse',
     UnfriendResponse = 'UnfriendResponse',
-    DeleteChat = 'DeleteChat'
+    DeleteChat = 'DeleteChat',
+    ReadCursors = 'ReadCursors',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -286,6 +287,11 @@ export interface UpdatePassword {
 
 export type SendUpdateUserInfoData = UpdateUserName | UpdatePassword | UpdateAvaterPath
 
+export interface SendSetAlreadyReadData {
+    chatId: number
+    inChatId: number
+}
+
 
 /*--------------------Send数据类型----------------------*/
 
@@ -307,7 +313,8 @@ export enum Send {
     SetUserSetting = 'SetUserSetting',
     PullUserSetting = 'PullUserSetting',
     UpdateUserInfo = 'UpdateUserInfo',
-    Unfriend = 'Unfriend'
+    Unfriend = 'Unfriend',
+    SetAlreadyRead = 'SetAlreadyRead',
 }
 
 // COMMAND和DATA类型捆绑
@@ -339,6 +346,7 @@ export interface MessageReceiveData {
     [Receive.SetUserSettingResponse]: ReceiveSetUserSettingResponseData
     [Receive.UnfriendResponse]: ReceiveUnfriendResponseData
     [Receive.DeleteChat]: number
+    [Receive.ReadCursors]: [number, number][]
 }
 
 export interface MessageSendData {
@@ -361,6 +369,7 @@ export interface MessageSendData {
     [Send.PullUserSetting]: UserId
     [Send.Unfriend]: UserId
     [Send.UpdateUserInfo]: SendUpdateUserInfoData
+    [Send.SetAlreadyRead]: SendSetAlreadyReadData
 }
 
 // 封装消息包

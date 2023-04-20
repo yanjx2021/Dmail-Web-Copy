@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite'
 import { Chat, ChatId, ChatStore } from '../stores/chatStore'
 import { action } from 'mobx'
 import { ChatDropDown } from './DropDown/ChatDropDown'
+import { Badge } from 'antd'
 import { HoverOption } from './AllChats'
 
 const RecentChatItem = observer(
@@ -22,11 +23,16 @@ const RecentChatItem = observer(
                     <div className="card-body">
                         <div className="media">
                             <div className="avatar me-3">
-                                <span className="rounded-circle"></span>
-                                <div className="avatar rounded-circle no-image timber">
-                                    <span>{chat.name.slice(0, Math.min(2, chat.name.length))}</span>
-                                </div>
+                                <Badge count={chat.unreadCount}>
+                                    <span className="rounded-circle"></span>
+                                    <div className="avatar rounded-circle no-image timber">
+                                        <span>
+                                            {chat.name.slice(0, Math.min(2, chat.name.length))}
+                                        </span>
+                                    </div>
+                                </Badge>
                             </div>
+
                             <div className="media-body overflow-hidden">
                                 <div className="d-flex align-items-center mb-1">
                                     <h6 className="text-truncate mb-0 me-auto">{chat.name}</h6>
