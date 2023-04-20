@@ -12,6 +12,7 @@ import { userStore } from './userStore'
 import { updateUserStore } from './updateUserStore'
 import { secureAuthStore } from './secureAuthStore'
 import { modalStore } from './modalStore'
+import { chatSideStore } from './chatSideStore'
 
 export type UserId = number
 
@@ -70,6 +71,7 @@ export class AuthStore {
         updateUserStore.reset()
         userStore.reset()
         modalStore.reset()
+        chatSideStore.reset()
         MessageServer.destroyInstance()
     }
 

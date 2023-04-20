@@ -6,6 +6,11 @@ export class ChatSideStore {
     open: boolean = false
     type: '' | 'chat' | 'user' = ''
 
+    reset() {
+        this.open = false
+        this.type = ''
+    }
+
     ChatSidebartoggle() { // 聊天
         if (this.open === false) {
             this.type = 'chat'
