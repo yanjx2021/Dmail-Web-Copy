@@ -4,7 +4,7 @@ import { AuthMethod, AuthState, authStore } from '../stores/authStore'
 import { requestStore } from '../stores/requestStore'
 import { action, runInAction } from 'mobx'
 
-const server_address = 'ws://43.143.134.180:8080/ws'
+const server_address = 'ws://127.0.0.1:8080/ws'
 // 43.143.134.180
 export type Callback = (e: Event) => void
 export type MessageCallback = (msg: DataType<Receive>) => void
@@ -103,10 +103,14 @@ export class MessageServer {
             }, 50)
         } else {
             const [command, data]: [T, MessageSendData[T]] | [T] = args
-            console.log('Send', {
-                command,
-                data,
-            })
+            
+            if (command !== Send.Ping) {
+                console.log('Send', {
+                    command,
+                    data,
+                })
+            }
+
             this.websocket?.send(
                 this.cipher.encryptAES({
                     command,

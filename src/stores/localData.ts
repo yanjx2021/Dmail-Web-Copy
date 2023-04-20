@@ -5,6 +5,9 @@ import { MessageServer } from '../utils/networkWs'
 import { Request, requestStore } from './requestStore'
 import { User, userStore } from './userStore'
 import { UserSetting, userSettingStore } from './userSettingStore'
+import { fileStore } from './fileStore'
+import axios from 'axios'
+import { imageStore } from './imageStore'
 
 const userSettingIndex = 'userSetting'
 
@@ -55,10 +58,17 @@ export class LocalDatabase {
     static async loadImageBlob(hash : string) {
         this.database.getItem(hash).then((blob) => {
             if (blob === null) {
-                // TODO ""
+                fileStore.getFileUrl(hash, (getUrl) => {
+                    axios.get(getUrl, {responseType : 'blob'}).then((response) => {
+                        this.saveImageBlob(hash, response.data)
+                        const localUrl = URL.createObjectURL(response.data)
+                        imageStore.setImageUrl(hash, localUrl)
+                    })
+                })
                 return
             }
-
+            const localUrl = URL.createObjectURL(blob as Blob)
+            imageStore.setImageUrl(hash, localUrl)
         })
     }
 

@@ -18,11 +18,9 @@ const getInfo = action((chat: Chat) => {
 
 export const ChatSidebar = observer(({ chat }: { chat: Chat }) => {
     useEffect(() => {
-        console.log('123')
         getInfo(chat)
     }, [chat])
     
-    console.log(1234)
     return (
         <div className="user-detail-sidebar py-xl-4 py-3 px-xl-4 px-3">
             <div className="d-flex flex-column">

@@ -13,6 +13,7 @@ import { RegisterError } from '../components/Box/RegisterError'
 import { secureAuthStore } from '../stores/secureAuthStore'
 import { LockedChatView } from '../components/LockedChatView'
 import { RegisterModal } from '../components/Box/Modal'
+import { FileTest } from '../components/FileTest'
 
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore; chatStore: ChatStore }) => {

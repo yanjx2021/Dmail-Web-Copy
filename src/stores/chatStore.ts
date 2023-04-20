@@ -1,5 +1,5 @@
 import localforage from 'localforage'
-import { makeAutoObservable, observable, override, runInAction } from 'mobx'
+import { action, makeAutoObservable, observable, override, runInAction } from 'mobx'
 import { UserId, authStore } from './authStore'
 import {
     Receive,
@@ -26,6 +26,12 @@ import { ReceiveCreateGroupChatResponse } from '../utils/message'
 import { chineseRegex } from '../constants/chineseAndLetter'
 import { secureAuthStore } from './secureAuthStore'
 import { userSettingStore } from './userSettingStore'
+import { ChatMessageContent } from '../components/ChatView/ChatViewContent'
+import { UploadingFile } from './fileStore'
+import { fileStore } from './fileStore'
+import { FileChangeInfo } from 'fs/promises'
+import { text } from 'stream/consumers'
+import { Content } from 'antd/es/layout/layout'
 
 export type ChatId = number
 
@@ -55,21 +61,31 @@ export enum ChatMessageState {
 }
 
 export enum ChatMessageType {
-    File,
-    Text,
-    Image
+    File = "File",
+    Text = "Text",
+    Image = "Image"
 }
+
+export type ChatMessageContentType = string | ChatMessageFileInfo | ImageHash
+
+export interface ChatMessageFileInfo {
+    hash : string,
+    name : string,
+    size : number
+}
+
+export type ImageHash = string
 
 export class ChatMessage {
     type : ChatMessageType
-    content: string
+    content: ChatMessageContentType
     timestamp: number
     inChatId?: ChatId
     senderId: UserId
     state: ChatMessageState
     clientId?: ClientId
-
-
+    
+    bindUploading? : UploadingFile
 
     static getLoadingMessage(inChatId: ChatId) {
         return new ChatMessage({
@@ -83,15 +99,29 @@ export class ChatMessage {
     }
 
     static createFromReciveMessage(receiveMessage: ReceiveChatMessage) {
+        
         return new ChatMessage({
             type : receiveMessage.type,
-            content: receiveMessage.content,
+            content : JSON.parse(receiveMessage.serializedContent),
             timestamp: receiveMessage.timestamp,
             inChatId: receiveMessage.inChatId,
             senderId: receiveMessage.senderId,
             state: ChatMessageState.Arrived,
         })
     }
+
+    serialized(chatId: number): SerializedReceiveChatMessage {
+        const receiveMessage : ReceiveChatMessage = {
+            type: this.type,
+            chatId: chatId,
+            senderId: this.senderId,
+            inChatId: this.inChatId!,
+            timestamp: this.timestamp,
+            serializedContent: JSON.stringify(this.content),
+        }
+        return JSON.stringify(receiveMessage)
+    }
+
 
     constructor({
         type,
@@ -102,7 +132,7 @@ export class ChatMessage {
         state,
     }: {
         type : ChatMessageType
-        content: string
+        content: ChatMessageContentType
         timestamp: number
         inChatId: MessageId | undefined
         senderId: UserId
@@ -128,24 +158,24 @@ export class ChatMessage {
         tip += ' ' + this.state
         return tip
     }
+    get asShort() {
+        if (this.type === ChatMessageType.Text) {
+            return this.content as string
+        } else {
+            return "文件/图片消息"
+        }
+    }
+
     setToSelf(msg: ChatMessage) {
         this.content = msg.content
         this.timestamp = msg.timestamp
         this.inChatId = msg.inChatId
         this.senderId = msg.senderId
         this.state = msg.state
+        this.content = msg.content
     }
 
-    serialized(chatId: number): SerializedReceiveChatMessage {
-        const receiveMessage = {
-            chatId: chatId,
-            senderId: this.senderId,
-            inChatId: this.inChatId!,
-            text: this.content,
-            timestamp: this.timestamp,
-        }
-        return JSON.stringify(receiveMessage)
-    }
+    
 }
 
 export enum ChatType {
@@ -309,30 +339,55 @@ export class Chat {
         return msgs
     }
 
-    sendTextMessage(text : string) {
-        return this.sendMessage(ChatMessageType.Text, text)
+    sendFileMessage(type : ChatMessageType, file : File, contentProducer : (hash : string, file : File) => any) {
+        const timestamp = Date.now()
+        let msg = new ChatMessage({
+            type,
+            content : "",
+            timestamp,
+            inChatId: undefined,
+            senderId: authStore.userId,
+            state: ChatMessageState.Sending,
+        })
+        msg.clientId = ++this.lastClientId
+
+        const sendingMessages = this.sendingMessages
+        const chatId = this.chatId
+        
+        const uploading = fileStore.requestUpload(file, action((uploading : UploadingFile) => {
+            const content = contentProducer(uploading.hash!, file)
+
+            const data: SendSendMessageData = {
+                type,
+                clientId: msg.clientId!,
+                serializedContent: JSON.stringify(content),
+                chatId: chatId,
+                timestamp,
+            }
+
+            sendingMessages.push(msg)
+            MessageServer.Instance().send<Send.SendMessage>(Send.SendMessage, data)
+            
+            msg.bindUploading = undefined
+            msg.content = content
+        }))
+
+        msg.bindUploading = uploading
+        return msg
     }
 
-    sendFileMessage(hash : string, name : string, size : number) {
-        return this.sendMessage(ChatMessageType.File, JSON.stringify({hash : hash, name : name, size : size}))
-    }
-
-    sendImageMessage(hash : string) {
-        return this.sendMessage(ChatMessageType.Image, hash)
-    }
-
-    sendMessage(type : ChatMessageType,content: string) {
+    sendTextMessage(text: string) {
         const timestamp = Date.now()
         const data: SendSendMessageData = {
-            type,
+            type : ChatMessageType.Text,
             clientId: ++this.lastClientId,
-            content,
+            serializedContent : JSON.stringify(text),
             chatId: this.chatId,
             timestamp,
         }
         let msg = new ChatMessage({
-            type,
-            content,
+            type :ChatMessageType.Text,
+            content : text,
             timestamp,
             inChatId: undefined,
             senderId: authStore.userId,
@@ -480,7 +535,6 @@ export class ChatStore {
         if (this.chats.has(chatId)) {
             return this.chats.get(chatId)!
         }
-        console.log('chatID ', chatId)
         const ret = Chat.getLoadingChat(chatId)
         this.chats.set(chatId, ret)
 
@@ -558,6 +612,7 @@ export class ChatStore {
 
         const msg = ChatMessage.createFromReciveMessage(receiveMessage)
 
+
         if (receiveMessage.chatId === this.activeChatId && this.setViewMessages) {
             this.setViewMessages((draft) => {
                 draft.push(msg)
@@ -571,10 +626,13 @@ export class ChatStore {
         let chat: Chat | undefined = undefined
         for (let i = 0; i < serializeds.length; i++) {
             const receiveMessage: ReceiveChatMessage = JSON.parse(serializeds[i])
+            
+            
 
             if (chat === undefined || chat!.chatId !== receiveMessage.chatId) {
                 chat = this.getChat(receiveMessage.chatId)
             }
+
 
             const msg = ChatMessage.createFromReciveMessage(receiveMessage)
 

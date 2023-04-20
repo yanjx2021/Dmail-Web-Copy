@@ -45,7 +45,7 @@ const RecentChatItem = observer(
                                     </p>
                                 </div>
                                 <div className="text-truncate">
-                                    {chat.lastMessage !== undefined ? chat.lastMessage.content : ''}
+                                    {chat.lastMessage !== undefined ? chat.lastMessage.asShort : ''}
                                 </div>
                             </div>
                         </div>

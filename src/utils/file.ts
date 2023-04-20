@@ -6,12 +6,13 @@ export const getFileExtension = (file : File) => {
     return suffix ? '.' + suffix : "" 
 }
 
-export const uploadFileByAxios = (file: File, url: string) => {
+export const uploadFileByAxios = (file: File, url: string, setProgress : (progress : number) => void) => {
   return axios
     .put(url, file, {
       headers: {
         'Content-Type': file.type,
       },
+      onUploadProgress: progressEvent => setProgress(progressEvent.loaded)
     })
 }
 
@@ -45,4 +46,21 @@ export const computeChecksumMd5 = (file: File) : Promise<string> => {
 
     processChunk(0);
   });
+}
+
+export const createDownload = (url : string, filename : string) => {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.target = "_blank"
+  link.click();
+}
+
+
+export const isImage = (file : File) => {
+    if (!/\.(jpg|jpeg|png|GIF|JPG|PNG)$/.test(file.name) ) { 
+      return  false;     
+    } else{
+      return true; 
+    }
 }

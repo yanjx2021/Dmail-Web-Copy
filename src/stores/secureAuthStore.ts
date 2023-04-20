@@ -37,9 +37,7 @@ export class SecureAuthStore {
     }
 
     get showSecureBox() {
-        console.log(this.chatId)
         const check = this.chatVerify.get(this.chatId)
-        console.log(check)
         if (check === undefined) return false
         return !check
     }

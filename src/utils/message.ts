@@ -1,6 +1,6 @@
 import { RequestState } from '../stores/requestStore'
 
-import { ChatId, ChatMessageType } from "../stores/chatStore"
+import { ChatId, ChatMessageFileInfo, ChatMessageType } from "../stores/chatStore"
 import { UserId } from "../stores/authStore"
 import { UploadId } from "../stores/fileStore"
 
@@ -123,7 +123,7 @@ export interface ReceiveChatMessage {
     chatId: number
     senderId: number
     inChatId: number
-    content: string
+    serializedContent: string
     timestamp: number
 }
 
@@ -214,6 +214,17 @@ export interface ReceiveUserUploadFileRequestResponse {
     uploadId?: UploadId,
 }
 
+export interface ReceiveUserFileUploadedResponse {
+    uploadId : number,
+    state : 'Success' | 'FileHashError' | 'FileSizeError' | 'NotUploader' | 'ReqeustNotFound' | 'DatabaseError' | 'ObjectNotFound' | 'OSSError'
+    url? : string
+}
+
+export interface ReceiveGetFileUrlResponse {
+    hash : string,
+    state : 'Success' | 'FileNotExisted' | 'OSSError',
+    url? : string
+}
 
 
 /*--------------------Receive数据类型----------------------*/
@@ -244,7 +255,9 @@ export enum Receive {
     UserSetting = 'UserSetting',
     SetUserSettingResponse = 'SetUserSettingResponse',
     UpdateUserInfoResponse = 'UpdateUserInfoResponse',
-    UploadFileRequestResponse = "UploadFileRequestResponse"
+    UploadFileRequestResponse = "UploadFileRequestResponse",
+    FileUploadedResponse = "FileUploadedResponse",
+    GetFileUrlResponse = "GetFileUrlResponse",
     UnfriendResponse = 'UnfriendResponse',
     DeleteChat = 'DeleteChat',
     ReadCursors = 'ReadCursors',
@@ -269,7 +282,7 @@ export interface SendSendMessageData {
     clientId: number
     chatId: number
     timestamp : number
-    content: string
+    serializedContent: string
 }
 
 export interface SendPullData {
@@ -347,9 +360,9 @@ export enum Send {
     SetUserSetting = 'SetUserSetting',
     PullUserSetting = 'PullUserSetting',
     UpdateUserInfo = 'UpdateUserInfo',
-    GetFileUrl = 'GetFileUrl'
+    GetFileUrl = 'GetFileUrl',
     UploadFileRequest = 'UploadFileRequest',
-    FileUploaded = 'FileUploaded'
+    FileUploaded = 'FileUploaded',
     Unfriend = 'Unfriend',
     SetAlreadyRead = 'SetAlreadyRead',
 }
@@ -382,10 +395,12 @@ export interface MessageReceiveData {
     [Receive.UserSetting]: string
     [Receive.SetUserSettingResponse]: ReceiveSetUserSettingResponseData
     [Receive.UploadFileRequestResponse] : ReceiveUserUploadFileRequestResponse
+    [Receive.FileUploadedResponse] : ReceiveUserFileUploadedResponse
     [Receive.UnfriendResponse]: ReceiveUnfriendResponseData
     [Receive.DeleteChat]: number
     [Receive.ReadCursors]: [number, number][]
     [Receive.SetAlreadyReadResponse]: ReceiveSetAlreadyReadResponseData
+    [Receive.GetFileUrlResponse] : ReceiveGetFileUrlResponse
 }
 
 export interface MessageSendData {

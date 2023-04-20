@@ -1,11 +1,11 @@
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { computeChecksumMd5 } from "../utils/file";
-import { fileStore } from "../stores/fileStore";
+import { UploadingFile, fileStore } from "../stores/fileStore";
 
 
 
-export const FileTest = observer(
+export const FileTest = 
     () => {
         const [file, setFile] = useState<File>()
 
@@ -15,7 +15,9 @@ export const FileTest = observer(
 
         function handleUpload() {
             console.log(file)
-            file && fileStore.requestUpload(file).catch((err) => console.log(err))
+            file && fileStore.requestUpload(file, (uploadingFile : UploadingFile) => {
+                console.log(`下载链接:${uploadingFile.url!}` )
+            })
         }
 
         return (
@@ -25,4 +27,3 @@ export const FileTest = observer(
             </div>
         );
     }
-)
