@@ -1,7 +1,7 @@
-import { RequestState } from "../stores/requestStore"
+import { RequestState } from '../stores/requestStore'
 
-import { ChatId } from "../stores/chatStore"
-import { UserId } from "../stores/authStore"
+import { ChatId } from '../stores/chatStore'
+import { UserId } from '../stores/authStore'
 
 /*--------------------Receive数据类型----------------------*/
 export enum SetConnectionPubKeyState {
@@ -40,7 +40,7 @@ export enum RegisterResponseState {
     EmailRegistered = 'EmailRegistered',
     ServerError = 'ServerError',
     EmailCodeError = 'EmailCodeError',
-    EmailInvalid = 'EmailInvalid'
+    EmailInvalid = 'EmailInvalid',
 }
 export interface ReceiveRegisterResponseData {
     state: RegisterResponseState
@@ -59,7 +59,7 @@ export enum SendMessageResponseState {
 export interface ReceiveSendMessageResponseData {
     state: SendMessageResponseState
     clientId: number
-    chatId : number
+    chatId: number
     inChatId?: number
     timestamp?: number
 }
@@ -69,7 +69,12 @@ export interface RequestError {
 }
 
 export interface RequestErrorData {
-    errorType: "AlreadyBeFrineds" | 'SameUser' | 'AlreadyInGroup' | 'RequestExisted' | 'UserNotFound'
+    errorType:
+        | 'AlreadyBeFrineds'
+        | 'SameUser'
+        | 'AlreadyInGroup'
+        | 'RequestExisted'
+        | 'UserNotFound'
     type: 'MakeFriend' | 'JoinGroup'
 }
 
@@ -172,7 +177,13 @@ export interface ReceiveCreateGroupChatResponse {
 }
 
 export interface ReceiveUpdateUserInfoResponseData {
-    state: 'Success' | 'UserNameFormatError' | 'PasswordFormatError' | 'AvaterPathFormatError' | 'ServerError' | 'EmailCodeError'
+    state:
+        | 'Success'
+        | 'UserNameFormatError'
+        | 'PasswordFormatError'
+        | 'AvaterPathFormatError'
+        | 'ServerError'
+        | 'EmailCodeError'
 }
 
 export interface ReceiveSetUserSettingResponseData {
@@ -180,8 +191,12 @@ export interface ReceiveSetUserSettingResponseData {
 }
 
 export interface ReceiveUnfriendResponseData {
-    state: 'Success' | 'ServerError' 
+    state: 'Success' | 'ServerError'
     chatId?: number
+}
+
+export interface ReceiveSetAlreadyReadResponseData {
+    state: 'Success' | any
 }
 
 /*--------------------Receive数据类型----------------------*/
@@ -215,6 +230,7 @@ export enum Receive {
     UnfriendResponse = 'UnfriendResponse',
     DeleteChat = 'DeleteChat',
     ReadCursors = 'ReadCursors',
+    SetAlreadyReadResponse = 'SetAlreadyReadResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -233,7 +249,7 @@ export interface SendLoginData {
 export interface SendSendMessageData {
     clientId: number
     chatId: number
-    timestamp : number
+    timestamp: number
     text: string
 }
 
@@ -256,32 +272,32 @@ export interface SendUserSendRequestData {
 }
 
 export interface SendSolveRequestData {
-    reqId: number,
+    reqId: number
     answer: 'Refused' | 'Approved'
 }
 export interface SendCreateGroupChatData {
-    name: string,
+    name: string
     avaterPath: string
 }
 
 export interface SendGetMessagesData {
-    chatId: number,
-    startId : number,
-    endId : number
+    chatId: number
+    startId: number
+    endId: number
 }
 
 export interface UpdateUserName {
-    type: 'UserName',
-    newName: string,
+    type: 'UserName'
+    newName: string
 }
 export interface UpdateAvaterPath {
-    type: 'AvaterPath',
-    newPath: string,
+    type: 'AvaterPath'
+    newPath: string
 }
 
 export interface UpdatePassword {
-    type: 'Password',
-    newPassword: string,
+    type: 'Password'
+    newPassword: string
     emailCode: number
 }
 
@@ -291,7 +307,6 @@ export interface SendSetAlreadyReadData {
     chatId: number
     inChatId: number
 }
-
 
 /*--------------------Send数据类型----------------------*/
 
@@ -347,6 +362,7 @@ export interface MessageReceiveData {
     [Receive.UnfriendResponse]: ReceiveUnfriendResponseData
     [Receive.DeleteChat]: number
     [Receive.ReadCursors]: [number, number][]
+    [Receive.SetAlreadyReadResponse]: ReceiveSetAlreadyReadResponseData
 }
 
 export interface MessageSendData {
@@ -363,7 +379,7 @@ export interface MessageSendData {
     [Send.SolveRequest]: SendSolveRequestData
     [Send.CreateGroupChat]: SendCreateGroupChatData
     [Send.GetMessages]: SendGetMessagesData
-    [Send.GetChatInfo] : ChatId
+    [Send.GetChatInfo]: ChatId
     [Send.SetUserSetting]: string
     //
     [Send.PullUserSetting]: UserId

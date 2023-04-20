@@ -42,6 +42,15 @@ const Home = observer(
             }),
             []
         )
+        
+        useEffect(
+            action(
+                () => {
+                    chatStore.setActiveChatId = setActiveChatId
+                }
+            )
+            ,[setActiveChatId]
+        )
 
         return authStore.state === AuthState.Logged ? (
             <>
