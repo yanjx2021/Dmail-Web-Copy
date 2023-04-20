@@ -50,23 +50,21 @@ export const AddFriendModalView = observer(({ title }: { title: string }) => {
             onCancel={modalStore.handleCancel}
             title={title}
             open={modalStore.isOpen}>
-            <form>
-                <ModalInput
-                    type="text"
-                    label="用户ID"
-                    value={reqId}
-                    setValue={(e: any) => {
-                        const input = e.target.value.replace(/[^0-9]/g, '')
-                        setReqId(input)
-                    }}
-                />
-                <ModalInput
-                    type="text"
-                    label="验证消息"
-                    value={requestStore.message}
-                    setValue={action((e: any) => (requestStore.message = e.target.value))}
-                />
-            </form>
+            <ModalInput
+                type="text"
+                label="用户ID"
+                value={reqId}
+                setValue={(e: any) => {
+                    const input = e.target.value.replace(/[^0-9]/g, '')
+                    setReqId(input)
+                }}
+            />
+            <ModalInput
+                type="text"
+                label="验证消息"
+                value={requestStore.message}
+                setValue={action((e: any) => (requestStore.message = e.target.value))}
+            />
         </Modal>
     )
 })
@@ -92,16 +90,14 @@ export const CreateGroupModalView = observer(({ title }: { title: string }) => {
             onCancel={modalStore.handleCancel}
             title={title}
             open={modalStore.isOpen}>
-            <form>
-                <ModalInput
-                    type="text"
-                    label="群聊名称"
-                    value={groupName}
-                    setValue={(e: any) => {
-                        setGroupName(e.target.value)
-                    }}
-                />
-            </form>
+            <ModalInput
+                type="text"
+                label="群聊名称"
+                value={groupName}
+                setValue={(e: any) => {
+                    setGroupName(e.target.value)
+                }}
+            />
         </Modal>
     )
 })
@@ -122,25 +118,23 @@ export const ChangePasswordModalView = observer(({ title }: { title: string }) =
             onCancel={modalStore.handleCancel}
             title={title}
             open={modalStore.isOpen}>
-            <form>
-                <ModalInput
-                    type="password"
-                    label="新密码"
-                    value={updateUserStore.newPassword}
-                    setValue={action((e: any) => {
-                        updateUserStore.newPassword = e.target.value
-                    })}
+            <ModalInput
+                type="password"
+                label="新密码"
+                value={updateUserStore.newPassword}
+                setValue={action((e: any) => {
+                    updateUserStore.newPassword = e.target.value
+                })}
+            />
+            <div className="form-group">
+                <label>验证消息</label>
+                <EmailCodeInput
+                    email={authStore.email}
+                    emailCode={updateUserStore.emailCode}
+                    setErrors={action((error) => (updateUserStore.errors = error))}
+                    setEmailCode={action((data) => (updateUserStore.emailCode = data))}
                 />
-                <div className="form-group">
-                    <label>验证消息</label>
-                    <EmailCodeInput
-                        email={authStore.email}
-                        emailCode={updateUserStore.emailCode}
-                        setErrors={action((error) => (updateUserStore.errors = error))}
-                        setEmailCode={action((data) => (updateUserStore.emailCode = data))}
-                    />
-                </div>
-            </form>
+            </div>
         </Modal>
     )
 })
@@ -183,28 +177,26 @@ export const SetSecureModalView = observer(({ title }: { title: string }) => {
             onCancel={modalStore.handleCancel}
             title={title}
             open={modalStore.isOpen}>
-            <form>
-                {secureAuthStore.hasSetCode ? (
-                    <ModalInput
-                        type="password"
-                        label="原密码"
-                        value={oldCode}
-                        setValue={action((e: any) => {
-                            setOldCode(e.target.value)
-                        })}
-                    />
-                ) : (
-                    <></>
-                )}
+            {secureAuthStore.hasSetCode ? (
                 <ModalInput
                     type="password"
-                    label={secureAuthStore.hasSetCode ? '新密码' : '设置密码'}
-                    value={code}
+                    label="原密码"
+                    value={oldCode}
                     setValue={action((e: any) => {
-                        setCode(e.target.value)
+                        setOldCode(e.target.value)
                     })}
                 />
-            </form>
+            ) : (
+                <></>
+            )}
+            <ModalInput
+                type="password"
+                label={secureAuthStore.hasSetCode ? '新密码' : '设置密码'}
+                value={code}
+                setValue={action((e: any) => {
+                    setCode(e.target.value)
+                })}
+            />
         </Modal>
     )
 })
@@ -235,16 +227,14 @@ export const RemoveSecureModalView = observer(({ title }: { title: string }) => 
             onCancel={modalStore.handleCancel}
             title={title}
             open={modalStore.isOpen}>
-            <form>
-                <ModalInput
-                    type="password"
-                    label="原密码"
-                    value={code}
-                    setValue={action((e: any) => {
-                        setCode(e.target.value)
-                    })}
-                />
-            </form>
+            <ModalInput
+                type="password"
+                label="原密码"
+                value={code}
+                setValue={action((e: any) => {
+                    setCode(e.target.value)
+                })}
+            />
         </Modal>
     )
 })

@@ -5,6 +5,7 @@ import {
     Receive,
     ReceiveChatMessage,
     ReceivePullResponseData,
+    ReceiveSetAlreadyReadResponseData,
     ReceiveUnfriendResponseData,
     Send,
     SendMessageResponseState,
@@ -23,6 +24,8 @@ import { timeStamp } from 'console'
 import { pinyin } from 'pinyin-pro'
 import { ReceiveCreateGroupChatResponse } from '../utils/message'
 import { chineseRegex } from '../constants/chineseAndLetter'
+import { secureAuthStore } from './secureAuthStore'
+import { userSettingStore } from './userSettingStore'
 
 export type ChatId = number
 
@@ -251,6 +254,9 @@ export class Chat {
 
         if (this.lastMessage === undefined || updated_msg.inChatId! > this.lastMessage.inChatId!) {
             this.lastMessage = updated_msg
+            if (this.chatId === chatStore.activeChatId && !secureAuthStore.showSecureBox) {
+                this.setReadCuser()
+            }
         }
     }
 
@@ -344,6 +350,7 @@ export class ChatStore {
 
     activeChatId: undefined | ChatId = undefined
     setViewMessages: undefined | Updater<ChatMessage[]> = undefined
+    setActiveChatId: undefined | React.Dispatch<React.SetStateAction<number | null>> = undefined
 
     errors: string = ''
 
@@ -362,6 +369,7 @@ export class ChatStore {
         MessageServer.on(Receive.UnfriendResponse, this.UnfriendResponseHandler)
         MessageServer.on(Receive.DeleteChat, this.DeleteChatHandler)
         MessageServer.on(Receive.ReadCursors, this.ReadCusersHandler)
+        MessageServer.on(Receive.SetAlreadyReadResponse, this.SetAlreadyReadResponseHandler)
     }
 
     reset() {
@@ -454,6 +462,10 @@ export class ChatStore {
         return ret
     }
 
+    private SetAlreadyReadResponseHandler(response: ReceiveSetAlreadyReadResponseData) {
+        console.log(response.state)
+    }
+
     private ReadCusersHandler(cusers: [number, number][]) {
         cusers.forEach(([chatId, cuser]) => {
             this.getChat(chatId)
@@ -462,6 +474,9 @@ export class ChatStore {
     }
 
     private removeChatInfo(chat: Chat) {
+        chatStore.setActiveChatId && chatStore.setActiveChatId(null)
+        userSettingStore.setChatVerify(chat.chatId, '')
+        chat.bindUser && userSettingStore.setUserNickName(chat.bindUser.userId, '')
         for (let inChatId = 1; inChatId <= chat.lastMessage!.inChatId!; inChatId++) { // 清除聊天记录
             LocalDatabase.removeMessage(chat.chatId, inChatId).catch((err) => console.log(err))
         }
