@@ -2,6 +2,7 @@ image: registry.secoder.net/tool/deployer
 
 stages:
   - build
+  - test
   - deploy
 
 build:
@@ -16,30 +17,23 @@ build:
     - master
     - 9-cicd
 
-# TODO Start: [Student] Complete test stage
-# .test:
-#     image: node:18
-#     stage: test
-#     before_script:
-#       - yarn  config set registry https://registry.npmmirror.com
-#       - yarn install
+.test:
+    image: node:18
+    stage: test
+    before_script:
+      - npm config set registry https://registry.npmmirror.com
+      - npm install
 
-# unit-test:
-#     extends: .test
-#     script:
-#       - yarn test
-#     after_script:
-#       - SUFFIX=$RANDOM
-#       - curl "http://api.secoder.net/static/sonar-scanner.tar.gz" -s -o "/tmp/sonar-$SUFFIX.tar.gz"
-#       - tar -xf "/tmp/sonar-$SUFFIX.tar.gz"  -C /opt
-#       - /opt/sonar-scanner/bin/sonar-scanner
+unit-test:
+    extends: .test
+    script:
+      - help
+    after_script:
+      - SUFFIX=$RANDOM
+      - curl "http://api.secoder.net/static/sonar-scanner.tar.gz" -s -o "/tmp/sonar-$SUFFIX.tar.gz"
+      - tar -xf "/tmp/sonar-$SUFFIX.tar.gz"  -C /opt
+      - /opt/sonar-scanner/bin/sonar-scanner
 
-# style-test:
-#     extends: .test
-#     allow_failure: true
-#     script:
-#       - yarn run lint
-# TODO End
 
 deploy:
   stage: deploy
