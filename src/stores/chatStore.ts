@@ -77,6 +77,7 @@ export interface ChatMessageFileInfo {
 export type ImageHash = string
 
 export class ChatMessage {
+    chatId: number
     type : ChatMessageType
     content: ChatMessageContentType
     timestamp: number
@@ -87,7 +88,7 @@ export class ChatMessage {
     
     bindUploading? : UploadingFile
 
-    static getLoadingMessage(inChatId: ChatId) {
+    static getLoadingMessage(inChatId: ChatId, chatId: ChatId) {
         return new ChatMessage({
             type : ChatMessageType.Text,
             content: `消息${inChatId}`,
@@ -95,6 +96,7 @@ export class ChatMessage {
             timestamp: 0,
             senderId: 0,
             state: ChatMessageState.Getting,
+            chatId: chatId,
         })
     }
 
@@ -107,13 +109,14 @@ export class ChatMessage {
             inChatId: receiveMessage.inChatId,
             senderId: receiveMessage.senderId,
             state: ChatMessageState.Arrived,
+            chatId: receiveMessage.chatId,
         })
     }
 
-    serialized(chatId: number): SerializedReceiveChatMessage {
+    serialized(): SerializedReceiveChatMessage {
         const receiveMessage : ReceiveChatMessage = {
             type: this.type,
-            chatId: chatId,
+            chatId: this.chatId,
             senderId: this.senderId,
             inChatId: this.inChatId!,
             timestamp: this.timestamp,
@@ -130,6 +133,7 @@ export class ChatMessage {
         inChatId,
         senderId,
         state,
+        chatId,
     }: {
         type : ChatMessageType
         content: ChatMessageContentType
@@ -137,6 +141,7 @@ export class ChatMessage {
         inChatId: MessageId | undefined
         senderId: UserId
         state: ChatMessageState
+        chatId: number
     }) {
         makeAutoObservable(this, { inChatId: observable.ref })
         this.type = type
@@ -145,6 +150,7 @@ export class ChatMessage {
         this.inChatId = inChatId
         this.senderId = senderId
         this.state = state
+        this.chatId = chatId
     }
     get getMessageTip() {
         let tip = ''
@@ -173,9 +179,9 @@ export class ChatMessage {
         this.senderId = msg.senderId
         this.state = msg.state
         this.content = msg.content
+        this.type = msg.type
+        this.chatId = msg.chatId
     }
-
-    
 }
 
 export enum ChatType {
@@ -292,7 +298,7 @@ export class Chat {
             updated_msg.setToSelf(msg)
         }
 
-        LocalDatabase.saveMessage(this.chatId, msg)
+        LocalDatabase.saveMessage(msg)
 
         if (this.lastMessage === undefined || updated_msg.inChatId! > this.lastMessage.inChatId!) {
             this.lastMessage = updated_msg
@@ -306,7 +312,7 @@ export class Chat {
         if (this.messages.has(inChatId)) {
             return this.messages.get(inChatId)!
         }
-        const msg = ChatMessage.getLoadingMessage(inChatId)
+        const msg = ChatMessage.getLoadingMessage(inChatId, this.chatId)
         this.messages.set(inChatId, msg)
         // TODO : 从本地数据库拉取数据
 
@@ -329,7 +335,7 @@ export class Chat {
         for (let i = startId; i <= endId; i++) {
             // TODO : 这里可以少一次查询
             if (!this.messages.has(i)) {
-                this.messages.set(i, ChatMessage.getLoadingMessage(i))
+                this.messages.set(i, ChatMessage.getLoadingMessage(i, this.chatId))
             }
             msgs.push(this.messages.get(i)!)
         }
@@ -348,6 +354,7 @@ export class Chat {
             inChatId: undefined,
             senderId: authStore.userId,
             state: ChatMessageState.Sending,
+            chatId: this.chatId
         })
         msg.clientId = ++this.lastClientId
 
@@ -392,6 +399,7 @@ export class Chat {
             inChatId: undefined,
             senderId: authStore.userId,
             state: ChatMessageState.Sending,
+            chatId: this.chatId
         })
         msg.clientId = data.clientId
 

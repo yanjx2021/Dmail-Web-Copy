@@ -131,10 +131,10 @@ export class LocalDatabase {
         })
     }
 
-    static async saveMessage(chatId: number, msg: ChatMessage) {
-        const serialized = msg.serialized(chatId)
+    static async saveMessage(msg: ChatMessage) {
+        const serialized = msg.serialized()
         return this.database
-            .setItem(this.messageIndex(chatId, msg.inChatId!), serialized)
+            .setItem(this.messageIndex(msg.chatId, msg.inChatId!), serialized)
             .catch((err) => {
                 console.log('localForage错误 ' + err)
             })
