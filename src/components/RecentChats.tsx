@@ -53,7 +53,6 @@ const RecentChatItem = observer(
                         </div>
                     </div>
                 </a>
-                {messageSelectStore.showSelector ? <ChatSelector key={chat.chatId} chatId={chat.chatId}/> : <></>}
             </li>
         )
     }

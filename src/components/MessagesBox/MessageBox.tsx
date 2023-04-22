@@ -17,6 +17,7 @@ export const MessageBox = observer(({ msgs }: { msgs: ChatMessage[] }) => {
 
     return (
         <Virtuoso
+            style={{height: '900px'}}
             className="container-xxl list-unstyled py-4"
             ref={virtuosoRef}
             firstItemIndex={msgs.length}

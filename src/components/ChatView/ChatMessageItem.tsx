@@ -2,7 +2,7 @@
 import { observer } from 'mobx-react-lite'
 import React, { useEffect, useRef, useState } from 'react'
 import { useImmer } from 'use-immer'
-import { Chat, ChatMessage, ChatMessageFileInfo, ChatMessageType } from '../../stores/chatStore'
+import { Chat, ChatMessage, ChatMessageFileInfo, ChatMessageTransferInfo, ChatMessageType } from '../../stores/chatStore'
 import { authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
 import { userStore } from '../../stores/userStore'
@@ -12,6 +12,7 @@ import { action, makeAutoObservable } from 'mobx'
 import { imageStore } from '../../stores/imageStore'
 import { MessageDropDown } from '../DropDown/MessageDropDown'
 import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
+import { modalStore } from '../../stores/modalStore'
 
 const MessageAlert = () => {
     return (
@@ -98,6 +99,17 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                 </div>
             )
         }
+    } else if (msg.type === ChatMessageType.Transfer) {
+        console.log(222)
+        return (
+            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                <a onClick={action(() => {
+                    modalStore.transferInfo = msg.content as ChatMessageTransferInfo
+                    modalStore.modalType = 'TransferChatBox'
+                    modalStore.isOpen = true
+                })}>{'查看[聊天记录]'}</a>
+            </div>
+        )
     }
     return <div></div>
 })

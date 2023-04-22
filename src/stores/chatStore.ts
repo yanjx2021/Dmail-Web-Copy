@@ -32,6 +32,7 @@ import { fileStore } from './fileStore'
 import { FileChangeInfo } from 'fs/promises'
 import { text } from 'stream/consumers'
 import { Content } from 'antd/es/layout/layout'
+import { serialize } from 'v8'
 
 export type ChatId = number
 
@@ -63,10 +64,16 @@ export enum ChatMessageState {
 export enum ChatMessageType {
     File = "File",
     Text = "Text",
-    Image = "Image"
+    Image = "Image",
+    Transfer = 'Transfer'
 }
 
-export type ChatMessageContentType = string | ChatMessageFileInfo | ImageHash
+export type ChatMessageContentType = string | ChatMessageFileInfo | ImageHash | ChatMessageTransferInfo
+
+export interface ChatMessageTransferInfo {
+    userId: number,
+    messages: SerializedReceiveChatMessage[]
+}
 
 export interface ChatMessageFileInfo {
     hash : string,
@@ -165,10 +172,14 @@ export class ChatMessage {
         return tip
     }
     get asShort() {
+        console.log(this.type)
         if (this.type === ChatMessageType.Text) {
             return this.content as string
-        } else {
-            return "文件/图片消息"
+        } else if (this.type === ChatMessageType.Transfer) {
+            return '[聊天记录]'
+        } 
+        else {
+            return "[文件/图片消息]"
         }
     }
 
@@ -383,6 +394,41 @@ export class Chat {
         return msg
     }
 
+    sendTransferMessage(msgs: ChatMessage[]) {
+        const timestamp = Date.now()
+        const content = msgs.map((msg, _) => {
+            return msg.serialized()
+        })
+        const data: SendSendMessageData = {
+            type : ChatMessageType.Transfer,
+            clientId: ++this.lastClientId,
+            serializedContent : JSON.stringify({
+                userId: authStore.userId,
+                messages: content
+            }),
+            chatId: this.chatId,
+            timestamp,
+        }
+        let msg = new ChatMessage({
+            type :ChatMessageType.Transfer,
+            content : {
+                userId: authStore.userId,
+                messages: content
+            },
+            timestamp,
+            inChatId: undefined,
+            senderId: authStore.userId,
+            state: ChatMessageState.Sending,
+            chatId: this.chatId
+        })
+        msg.clientId = data.clientId
+
+        // TODO : Response超时
+        this.sendingMessages.push(msg)
+        MessageServer.Instance().send<Send.SendMessage>(Send.SendMessage, data)
+        return msg
+    }
+
     sendTextMessage(text: string) {
         const timestamp = Date.now()
         const data: SendSendMessageData = {
@@ -425,11 +471,9 @@ export class Chat {
             console.error(response.state)
             return
         }
-
         chatMsg.timestamp = response.timestamp!
         chatMsg.inChatId = response.inChatId
         chatMsg.state = ChatMessageState.Arrived
-
         this.setMessage(chatMsg)
     }
 }
@@ -635,12 +679,9 @@ export class ChatStore {
         for (let i = 0; i < serializeds.length; i++) {
             const receiveMessage: ReceiveChatMessage = JSON.parse(serializeds[i])
             
-            
-
             if (chat === undefined || chat!.chatId !== receiveMessage.chatId) {
                 chat = this.getChat(receiveMessage.chatId)
             }
-
 
             const msg = ChatMessage.createFromReciveMessage(receiveMessage)
 

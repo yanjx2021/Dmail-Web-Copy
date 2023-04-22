@@ -1,18 +1,25 @@
 import { makeAutoObservable } from "mobx"
-import { ChatMessage } from "../../stores/chatStore"
+import { Chat, ChatMessage } from "../../stores/chatStore"
 import { observer } from "mobx-react-lite"
+import { modalStore } from "../../stores/modalStore"
 
 export class MessageSelectStore {
     msgs: Map<number, ChatMessage> = new Map()
-    chatId: number = -1
+    chat: Chat | undefined = undefined
     showSelector: boolean = false
+    errors: string = ''
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
     }
 
     transfer() { // 转发
-        console.log(this.chatId)
-        console.log(this.msgsList)
+        if (this.chat === undefined) {
+            this.errors = '请选择一个聊天进行消息转发'
+            return
+        }
+        modalStore.handleCancel()
+        this.chat.sendTransferMessage(this.msgsList)
+        this.reset()
     }
 
     hasSelectMessage(inChatId: number) {
@@ -22,7 +29,8 @@ export class MessageSelectStore {
     reset() {
         this.showSelector = false
         this.msgs.clear()
-        this.chatId = -1
+        this.chat = undefined
+        this.errors = ''
     }
 
     toggleCheckMessage(msg: ChatMessage) {
@@ -41,25 +49,25 @@ export class MessageSelectStore {
         }
     }
 
-    hasSelectChat(chatId: number) {
-        return this.chatId === chatId
+    hasSelectChat(chat: Chat) {
+        return this.chat === chat
     }
 
-    toggleCheckChat(chatId: number) {
-        if (this.chatId === chatId) {
-            this.unCheckChat(chatId)
+    toggleCheckChat(chat: Chat) {
+        if (this.chat === chat) {
+            this.unCheckChat(chat)
         } else {
-            this.checkChat(chatId)
+            this.checkChat(chat)
         }
     }
 
-    checkChat(chatId: number) {
-        this.chatId = chatId
+    checkChat(chat: Chat) {
+        this.chat = chat
     }
 
-    unCheckChat(chatId: number) {
-        if (this.chatId === chatId) {
-            this.chatId = -1
+    unCheckChat(chat: Chat) {
+        if (this.chat === chat) {
+            this.chat = undefined
         }
     }
 
@@ -89,13 +97,13 @@ export const MessageSelector = observer(({ msg }: { msg: ChatMessage }) => {
     )
 })
 
-export const ChatSelector = observer(({ chatId }: { chatId: number }) => {
+export const ChatSelector = observer(({ chat }: { chat: Chat }) => {
     return (
         <label className="c_checkbox">
             <input
                 type="checkbox"
-                onChange={() => messageSelectStore.toggleCheckChat(chatId)}
-                checked={messageSelectStore.hasSelectChat(chatId)}
+                onChange={() => messageSelectStore.toggleCheckChat(chat)}
+                checked={messageSelectStore.hasSelectChat(chat)}
             />
             <span className="checkmark"></span>
         </label>

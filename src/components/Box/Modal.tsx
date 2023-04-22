@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { ModalStore, modalStore } from '../../stores/modalStore'
-import { Button, Modal } from 'antd'
+import { Button, Checkbox, Modal } from 'antd'
 import { useImmer } from 'use-immer'
 import { requestStore } from '../../stores/requestStore'
 import { action } from 'mobx'
@@ -12,6 +12,9 @@ import { authStore } from '../../stores/authStore'
 import { userSettingStore } from '../../stores/userSettingStore'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 import { secondaryCodeHash } from '../../constants/passwordHash'
+import { ChatSelector, messageSelectStore } from '../MessagesBox/Selector'
+import { Chat, chatStore } from '../../stores/chatStore'
+import { MessageBox } from '../MessagesBox/MessageBox'
 
 export const ModalInput = ({
     label,
@@ -239,6 +242,70 @@ export const RemoveSecureModalView = observer(({ title }: { title: string }) => 
     )
 })
 
+export const ChatSelectCard = observer(({ chat }: { chat: Chat }) => {
+    return (
+        <li>
+            <a className="card">
+                <div className="card-body">
+                    <div className="media">
+                        <div className="avatar me-3">
+                            <span className="rounded-circle"></span>
+                            <div className="avatar rounded-circle no-image timber">
+                                <span>{chat.name.slice(0, Math.min(2, chat.name.length))}</span>
+                            </div>
+                        </div>
+
+                        <div className="media-body overflow-hidden">
+                            <div className="d-flex align-items-center mb-1">
+                                <h6 className="text-truncate mb-0 me-auto">{chat.name}</h6>
+                            </div>
+                        </div>
+                        <Checkbox
+                            onChange={action(() => messageSelectStore.toggleCheckChat(chat))}
+                            checked={messageSelectStore.hasSelectChat(chat)}
+                        />
+                    </div>
+                </div>
+            </a>
+        </li>
+    )
+})
+
+export const TransferChatModalView = observer(({ title }: { title: string }) => {
+    return (
+        <Modal
+            footer={[
+                <Button
+                    key="transfer"
+                    onClick={action(() => {
+                        messageSelectStore.transfer()
+                    })}>
+                    确认转发
+                </Button>,
+            ]}
+            onCancel={modalStore.handleCancel}
+            title={title}
+            open={modalStore.isOpen}>
+            {chatStore.recentChatsView.map((chat) => (
+                <ChatSelectCard chat={chat} key={chat.chatId} />
+            ))}
+        </Modal>
+    )
+})
+
+export const TransferChatBoxModalView = observer(({ title }: { title: string }) => {
+    console.log('转发消息', modalStore.transferData)
+    return (
+        <Modal
+            footer={[]}
+            onCancel={modalStore.handleCancel}
+            title={title}
+            open={modalStore.isOpen}>
+            <MessageBox msgs={modalStore.transferData!.messages}/>
+        </Modal>
+    )
+})
+
 export const RegisterModal = observer(() => {
     switch (modalStore.modalType) {
         case 'AddFriend':
@@ -251,6 +318,10 @@ export const RegisterModal = observer(() => {
             return <RemoveSecureModalView title="取消聊天密码" />
         case 'SetSecure':
             return <SetSecureModalView title="设置聊天密码" />
+        case 'TransferChat':
+            return <TransferChatModalView title="选择要转发到的群聊" />
+        case 'TransferChatBox':
+            return <TransferChatBoxModalView title='聊天记录'/>
         default:
             return <></>
     }

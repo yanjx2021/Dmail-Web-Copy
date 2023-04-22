@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import '../../styles/ChatViewFooter.css'
 import { messageSelectStore } from '../MessagesBox/Selector'
+import { modalStore } from '../../stores/modalStore'
+import { action } from 'mobx'
 
 //针对输入框数值的一些常数
 const lineHeight = 15,
@@ -19,10 +21,21 @@ export const MessageSelectedFooter = () => {
                                     <button
                                         type="submit"
                                         className="btn btn-primary"
-                                        onClick={() => messageSelectStore.transfer()}>
+                                        onClick={action(() => {
+                                            modalStore.modalType = 'TransferChat'
+                                            modalStore.isOpen = true
+                                        })}>
                                         <span className="d-none d-md-inline-block me-2">转发</span>
                                         <i className="zmdi zmdi-mail-send"></i>
                                     </button>
+                                    <span className="input-group-text border-0 pr-0">
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary"
+                                        onClick={() => messageSelectStore.reset()}>
+                                        <span className="d-none d-md-inline-block me-2">取消多选</span>
+                                    </button>
+                                </span>
                                 </span>
                             </div>
                     </div>
