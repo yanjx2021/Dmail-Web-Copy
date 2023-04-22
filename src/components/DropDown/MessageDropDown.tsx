@@ -31,7 +31,10 @@ export const MessageDropDown = observer(({ msg }: { msg: ChatMessage }) => {
                 ) : (
                     <DropDownItem
                         text="多选"
-                        handleClick={action(() => (messageSelectStore.showSelector = true))}
+                        handleClick={action(() => {
+                            messageSelectStore.showSelector = true
+                            messageSelectStore.toggleCheckMessage(msg)
+                        })}
                     />
                 )}
             </div>

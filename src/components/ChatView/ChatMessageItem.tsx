@@ -100,14 +100,15 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             )
         }
     } else if (msg.type === ChatMessageType.Transfer) {
-        console.log(222)
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                <a onClick={action(() => {
+                <a 
+                type='button'
+                onClick={action(() => {
                     modalStore.transferInfo = msg.content as ChatMessageTransferInfo
                     modalStore.modalType = 'TransferChatBox'
                     modalStore.isOpen = true
-                })}>{'查看[聊天记录]'}</a>
+                })}>{'[聊天记录]'}</a>
             </div>
         )
     }

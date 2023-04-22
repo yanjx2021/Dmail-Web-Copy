@@ -301,7 +301,7 @@ export const TransferChatBoxModalView = observer(({ title }: { title: string }) 
             onCancel={modalStore.handleCancel}
             title={title}
             open={modalStore.isOpen}>
-            <MessageBox msgs={modalStore.transferData!.messages}/>
+            <MessageBox msgs={modalStore.transferData!.messages} userId={modalStore.transferData!.userId}/>
         </Modal>
     )
 })

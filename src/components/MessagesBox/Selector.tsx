@@ -1,7 +1,9 @@
 import { makeAutoObservable } from "mobx"
-import { Chat, ChatMessage } from "../../stores/chatStore"
+import { Chat, ChatMessage, ChatMessageState, ChatMessageType, chatStore } from "../../stores/chatStore"
 import { observer } from "mobx-react-lite"
 import { modalStore } from "../../stores/modalStore"
+import { SendSendMessageData } from "../../utils/message"
+import { authStore } from "../../stores/authStore"
 
 export class MessageSelectStore {
     msgs: Map<number, ChatMessage> = new Map()
@@ -18,7 +20,12 @@ export class MessageSelectStore {
             return
         }
         modalStore.handleCancel()
-        this.chat.sendTransferMessage(this.msgsList)
+        const msg = this.chat.sendTransferMessage(this.msgsList)
+        if (this.chat.chatId === chatStore.activeChatId && chatStore.setViewMessages) {
+            chatStore.setViewMessages((draft) => {
+                draft.push(msg)
+            })
+        }
         this.reset()
     }
 

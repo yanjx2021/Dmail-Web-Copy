@@ -132,7 +132,6 @@ export class ChatMessage {
         return JSON.stringify(receiveMessage)
     }
 
-
     constructor({
         type,
         content,
@@ -159,6 +158,18 @@ export class ChatMessage {
         this.state = state
         this.chatId = chatId
     }
+
+    get getMessageBoxTip() {
+        let tip = ''
+        if (this.senderId === 0) {
+            tip += '系统消息'
+        } else {
+            tip += userStore.getUser(this.senderId).showName
+            tip += ' ' + new Date(this.timestamp).toLocaleString()
+        }
+        return tip
+    }
+
     get getMessageTip() {
         let tip = ''
         if (this.senderId === 0) {
@@ -396,7 +407,7 @@ export class Chat {
 
     sendTransferMessage(msgs: ChatMessage[]) {
         const timestamp = Date.now()
-        const content = msgs.map((msg, _) => {
+        const content = msgs.map((msg, _) => { 
             return msg.serialized()
         })
         const data: SendSendMessageData = {
@@ -422,7 +433,6 @@ export class Chat {
             chatId: this.chatId
         })
         msg.clientId = data.clientId
-
         // TODO : Response超时
         this.sendingMessages.push(msg)
         MessageServer.Instance().send<Send.SendMessage>(Send.SendMessage, data)
@@ -508,6 +518,7 @@ export class ChatStore {
     reset() {
         this.chats.clear()
         this.setViewMessages = undefined
+        this.setActiveChatId = undefined
         this.activeChatId = undefined
         this.errors = ''
     }

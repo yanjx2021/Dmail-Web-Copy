@@ -25,7 +25,7 @@ export const MessageSelectedFooter = () => {
                                             modalStore.modalType = 'TransferChat'
                                             modalStore.isOpen = true
                                         })}>
-                                        <span className="d-none d-md-inline-block me-2">转发</span>
+                                        <span className="d-none d-md-inline-block me-2">合并转发</span>
                                         <i className="zmdi zmdi-mail-send"></i>
                                     </button>
                                     <span className="input-group-text border-0 pr-0">
@@ -102,6 +102,11 @@ export const ChatViewFooter = (props: { handleSend: Function }) => {
                                 className="form-control border-0 pl-0 text-footerform"
                                 placeholder="请输入您的消息..."
                                 id="textinputer"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault()
+                                    }
+                                }}
                                 onChange={() => handleValueChange()}
                                 value={text}
                                 ref={inputRef}
