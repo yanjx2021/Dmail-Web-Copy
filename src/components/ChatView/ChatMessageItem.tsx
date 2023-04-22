@@ -2,7 +2,13 @@
 import { observer } from 'mobx-react-lite'
 import React, { useEffect, useRef, useState } from 'react'
 import { useImmer } from 'use-immer'
-import { Chat, ChatMessage, ChatMessageFileInfo, ChatMessageTransferInfo, ChatMessageType } from '../../stores/chatStore'
+import {
+    Chat,
+    ChatMessage,
+    ChatMessageFileInfo,
+    ChatMessageTransferInfo,
+    ChatMessageType,
+} from '../../stores/chatStore'
 import { authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
 import { userStore } from '../../stores/userStore'
@@ -102,13 +108,15 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
     } else if (msg.type === ChatMessageType.Transfer) {
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                <a 
-                type='button'
-                onClick={action(() => {
-                    modalStore.transferInfo = msg.content as ChatMessageTransferInfo
-                    modalStore.modalType = 'TransferChatBox'
-                    modalStore.isOpen = true
-                })}>{'[聊天记录]'}</a>
+                <a
+                    type="button"
+                    onClick={action(() => {
+                        modalStore.transferInfo = msg.content as ChatMessageTransferInfo
+                        modalStore.modalType = 'TransferChatBox'
+                        modalStore.isOpen = true
+                    })}>
+                    {'[聊天记录]'}
+                </a>
             </div>
         )
     }
@@ -117,9 +125,18 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
 
 export const ChatMessageItem = observer(
     React.forwardRef(
-        ({ msg, enableDropDown }: { msg: ChatMessage; enableDropDown: boolean }, ref: any) => {
+        (
+            {
+                msg,
+                indexInView,
+                enableDropDown,
+            }: { msg: ChatMessage; indexInView: number; enableDropDown: boolean },
+            ref: any
+        ) => {
             const isRight = msg.senderId === authStore.userId
-            return (
+            return msg.type === ChatMessageType.Deleted ? (
+                <div style={{ height: '1px' }}></div>
+            ) : (
                 <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
                     {!isRight ? (
                         <div className="avatar mr-lg-3 me-2">
@@ -141,15 +158,23 @@ export const ChatMessageItem = observer(
                             }>
                             {isRight ? (
                                 <>
-                                    {enableDropDown && <MessageDropDown msg={msg} />}
+                                    {enableDropDown && (
+                                        <MessageDropDown msg={msg} indexInView={indexInView} />
+                                    )}
                                     <ChatMessageItemContent msg={msg} />
-                                    {enableDropDown && messageSelectStore.showSelector && <MessageSelector msg={msg} />}
+                                    {enableDropDown && messageSelectStore.showSelector && (
+                                        <MessageSelector msg={msg} />
+                                    )}
                                 </>
                             ) : (
                                 <>
-                                    {enableDropDown && messageSelectStore.showSelector && <MessageSelector msg={msg} />}
+                                    {enableDropDown && messageSelectStore.showSelector && (
+                                        <MessageSelector msg={msg} />
+                                    )}
                                     <ChatMessageItemContent msg={msg} />
-                                    {enableDropDown && <MessageDropDown msg={msg} />}
+                                    {enableDropDown && (
+                                        <MessageDropDown msg={msg} indexInView={indexInView} />
+                                    )}
                                 </>
                             )}
                         </div>

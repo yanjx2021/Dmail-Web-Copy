@@ -6,7 +6,13 @@ import { DropDownItem } from './ChatDropDown'
 import { ChatMessage } from '../../stores/chatStore'
 import { messageSelectStore } from '../MessagesBox/Selector'
 
-export const MessageDropDown = observer(({ msg }: { msg: ChatMessage }) => {
+export const MessageDropDown = ({
+    msg,
+    indexInView,
+}: {
+    msg: ChatMessage
+    indexInView: number
+}) => {
     // TODO-在这里添加删除消息的函数
     return (
         <div className="dropdown">
@@ -20,7 +26,12 @@ export const MessageDropDown = observer(({ msg }: { msg: ChatMessage }) => {
             </a>
 
             <div className="dropdown-menu dropdown-menu-right">
-                <DropDownItem text="删除" handleClick={() => {}} />
+                <DropDownItem
+                    text="删除"
+                    handleClick={() => {
+                        msg.deleteLocal(indexInView)
+                    }}
+                />
                 {messageSelectStore.showSelector ? (
                     <DropDownItem
                         text="取消多选"
@@ -40,4 +51,4 @@ export const MessageDropDown = observer(({ msg }: { msg: ChatMessage }) => {
             </div>
         </div>
     )
-})
+}

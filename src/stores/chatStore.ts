@@ -62,42 +62,47 @@ export enum ChatMessageState {
 }
 
 export enum ChatMessageType {
-    File = "File",
-    Text = "Text",
-    Image = "Image",
-    Transfer = 'Transfer'
+    File = 'File',
+    Text = 'Text',
+    Image = 'Image',
+    Deleted = 'Deleted',
+    Transfer = 'Transfer',
 }
 
-export type ChatMessageContentType = string | ChatMessageFileInfo | ImageHash | ChatMessageTransferInfo
+export type ChatMessageContentType =
+    | string
+    | ChatMessageFileInfo
+    | ImageHash
+    | ChatMessageTransferInfo
 
 export interface ChatMessageTransferInfo {
-    userId: number,
+    userId: number
     messages: SerializedReceiveChatMessage[]
 }
 
 export interface ChatMessageFileInfo {
-    hash : string,
-    name : string,
-    size : number
+    hash: string
+    name: string
+    size: number
 }
 
 export type ImageHash = string
 
 export class ChatMessage {
     chatId: number
-    type : ChatMessageType
+    type: ChatMessageType
     content: ChatMessageContentType
     timestamp: number
     inChatId?: ChatId
     senderId: UserId
     state: ChatMessageState
     clientId?: ClientId
-    
-    bindUploading? : UploadingFile
+
+    bindUploading?: UploadingFile
 
     static getLoadingMessage(inChatId: ChatId, chatId: ChatId) {
         return new ChatMessage({
-            type : ChatMessageType.Text,
+            type: ChatMessageType.Text,
             content: `消息${inChatId}`,
             inChatId: inChatId,
             timestamp: 0,
@@ -108,10 +113,9 @@ export class ChatMessage {
     }
 
     static createFromReciveMessage(receiveMessage: ReceiveChatMessage) {
-        
         return new ChatMessage({
-            type : receiveMessage.type,
-            content : JSON.parse(receiveMessage.serializedContent),
+            type: receiveMessage.type,
+            content: JSON.parse(receiveMessage.serializedContent),
             timestamp: receiveMessage.timestamp,
             inChatId: receiveMessage.inChatId,
             senderId: receiveMessage.senderId,
@@ -121,7 +125,7 @@ export class ChatMessage {
     }
 
     serialized(): SerializedReceiveChatMessage {
-        const receiveMessage : ReceiveChatMessage = {
+        const receiveMessage: ReceiveChatMessage = {
             type: this.type,
             chatId: this.chatId,
             senderId: this.senderId,
@@ -141,7 +145,7 @@ export class ChatMessage {
         state,
         chatId,
     }: {
-        type : ChatMessageType
+        type: ChatMessageType
         content: ChatMessageContentType
         timestamp: number
         inChatId: MessageId | undefined
@@ -188,9 +192,10 @@ export class ChatMessage {
             return this.content as string
         } else if (this.type === ChatMessageType.Transfer) {
             return '[聊天记录]'
-        } 
-        else {
-            return "[文件/图片消息]"
+        } else if (this.type === ChatMessageType.Deleted) {
+            return '[已删除]'
+        } else {
+            return '[文件/图片消息]'
         }
     }
 
@@ -201,8 +206,20 @@ export class ChatMessage {
         this.senderId = msg.senderId
         this.state = msg.state
         this.content = msg.content
-        this.type = msg.type
+        this.type = this.type === ChatMessageType.Deleted ? ChatMessageType.Deleted : msg.type
         this.chatId = msg.chatId
+    }
+
+    deleteLocal(indexInView?: number) {
+        this.content = ''
+        this.type = ChatMessageType.Deleted
+        LocalDatabase.saveMessage(this)
+
+        if (chatStore.setViewMessages && indexInView && chatStore.activeChatId === this.chatId) {
+            chatStore.setViewMessages((draft) => {
+                draft.splice(indexInView, 1)
+            })
+        }
     }
 }
 
@@ -259,7 +276,7 @@ export class Chat {
         }
         MessageServer.Instance().send<Send.SetAlreadyRead>(Send.SetAlreadyRead, {
             chatId: this.chatId,
-            inChatId: inChatId
+            inChatId: inChatId,
         })
     }
 
@@ -308,7 +325,7 @@ export class Chat {
         LocalDatabase.saveChatInfo(this.chatId, info)
     }
 
-    setMessage(msg: ChatMessage) {
+    async setMessage(msg: ChatMessage) {
         const message_opt = this.messages.get(msg.inChatId!)
         let updated_msg = undefined
 
@@ -330,21 +347,19 @@ export class Chat {
         }
     }
 
-    getMessage(inChatId: MessageId) {
-        if (this.messages.has(inChatId)) {
-            return this.messages.get(inChatId)!
-        }
-        const msg = ChatMessage.getLoadingMessage(inChatId, this.chatId)
-        this.messages.set(inChatId, msg)
-        // TODO : 从本地数据库拉取数据
+    // TODO : 单独拉取数据
+    // getMessage(inChatId: MessageId) {
+    //     if (this.messages.has(inChatId)) {
+    //         return this.messages.get(inChatId)!
+    //     }
+    //     const msg = ChatMessage.getLoadingMessage(inChatId, this.chatId)
+    //     this.messages.set(inChatId, msg)
+    //     // TODO : 从本地数据库拉取数据
 
-        return msg
-    }
+    //     return msg
+    // }
 
-    getMessages(endId: MessageId, count: number): ChatMessage[] {
-        if (count === 1) {
-            return [this.getMessage(endId)]
-        }
+    async getMessages(endId: MessageId, count: number) {
         const startId = Math.max(endId - count + 1, 1)
         endId = this.lastMessage === undefined ? 0 : Math.min(endId, this.lastMessage.inChatId!)
 
@@ -354,52 +369,106 @@ export class Chat {
 
         const msgs: ChatMessage[] = []
 
+        const unknown: number[] = []
+        const promises = []
+
         for (let i = startId; i <= endId; i++) {
-            // TODO : 这里可以少一次查询
-            if (!this.messages.has(i)) {
-                this.messages.set(i, ChatMessage.getLoadingMessage(i, this.chatId))
+            const msgInMemory = this.messages.get(i)
+
+            if (msgInMemory) {
+                msgInMemory.type !== ChatMessageType.Deleted && msgs.push(msgInMemory)
+            } else {
+                const promise = LocalDatabase.loadMessageLocal(this.chatId, i)
+                    .then(
+                        action((messageLocal) => {
+                            let chatMsg = undefined
+
+                            if (messageLocal === null) {
+                                unknown.push(i)
+                                chatMsg = ChatMessage.getLoadingMessage(i, this.chatId)
+                            } else {
+                                chatMsg = ChatMessage.createFromReciveMessage(messageLocal)
+                            }
+
+                            this.setMessage(chatMsg)
+                            chatMsg.type !== ChatMessageType.Deleted && msgs.push(chatMsg)
+                        })
+                    )
+                    .catch((err) => {
+                        console.log('localForage错误 ' + err)
+                    })
+
+                promises.push(promise)
             }
-            msgs.push(this.messages.get(i)!)
         }
 
-        LocalDatabase.loadMessages(this.chatId, startId, endId)
+        await Promise.all(promises)
 
-        return msgs
+        if (unknown.length === 0) {
+            return msgs.sort((a, b) => a.inChatId! - b.inChatId!)
+        }
+
+        // TODO : 根据unknow选择不同的加载策略
+        if (unknown.length < 4) {
+            // 逐个
+        } else {
+            // 合批
+        }
+
+        const getEndId = Math.max(...unknown)
+        const getStartId = Math.min(...unknown)
+
+        runInAction(() => {
+            MessageServer.Instance().send<Send.GetMessages>(Send.GetMessages, {
+                startId: getStartId,
+                endId: getEndId,
+                chatId: this.chatId,
+            })
+        })
+
+        return msgs.sort((a, b) => a.inChatId! - b.inChatId!)
     }
 
-    sendFileMessage(type : ChatMessageType, file : File, contentProducer : (hash : string, file : File) => any) {
+    sendFileMessage(
+        type: ChatMessageType,
+        file: File,
+        contentProducer: (hash: string, file: File) => any
+    ) {
         const timestamp = Date.now()
         let msg = new ChatMessage({
             type,
-            content : "",
+            content: '',
             timestamp,
             inChatId: undefined,
             senderId: authStore.userId,
             state: ChatMessageState.Sending,
-            chatId: this.chatId
+            chatId: this.chatId,
         })
         msg.clientId = ++this.lastClientId
 
         const sendingMessages = this.sendingMessages
         const chatId = this.chatId
-        
-        const uploading = fileStore.requestUpload(file, action((uploading : UploadingFile) => {
-            const content = contentProducer(uploading.hash!, file)
 
-            const data: SendSendMessageData = {
-                type,
-                clientId: msg.clientId!,
-                serializedContent: JSON.stringify(content),
-                chatId: chatId,
-                timestamp,
-            }
+        const uploading = fileStore.requestUpload(
+            file,
+            action((uploading: UploadingFile) => {
+                const content = contentProducer(uploading.hash!, file)
 
-            sendingMessages.push(msg)
-            MessageServer.Instance().send<Send.SendMessage>(Send.SendMessage, data)
-            
-            msg.bindUploading = undefined
-            msg.content = content
-        }))
+                const data: SendSendMessageData = {
+                    type,
+                    clientId: msg.clientId!,
+                    serializedContent: JSON.stringify(content),
+                    chatId: chatId,
+                    timestamp,
+                }
+
+                sendingMessages.push(msg)
+                MessageServer.Instance().send<Send.SendMessage>(Send.SendMessage, data)
+
+                msg.bindUploading = undefined
+                msg.content = content
+            })
+        )
 
         msg.bindUploading = uploading
         return msg
@@ -407,30 +476,30 @@ export class Chat {
 
     sendTransferMessage(msgs: ChatMessage[]) {
         const timestamp = Date.now()
-        const content = msgs.map((msg, _) => { 
+        const content = msgs.map((msg, _) => {
             return msg.serialized()
         })
         const data: SendSendMessageData = {
-            type : ChatMessageType.Transfer,
+            type: ChatMessageType.Transfer,
             clientId: ++this.lastClientId,
-            serializedContent : JSON.stringify({
+            serializedContent: JSON.stringify({
                 userId: authStore.userId,
-                messages: content
+                messages: content,
             }),
             chatId: this.chatId,
             timestamp,
         }
         let msg = new ChatMessage({
-            type :ChatMessageType.Transfer,
-            content : {
+            type: ChatMessageType.Transfer,
+            content: {
                 userId: authStore.userId,
-                messages: content
+                messages: content,
             },
             timestamp,
             inChatId: undefined,
             senderId: authStore.userId,
             state: ChatMessageState.Sending,
-            chatId: this.chatId
+            chatId: this.chatId,
         })
         msg.clientId = data.clientId
         // TODO : Response超时
@@ -442,20 +511,20 @@ export class Chat {
     sendTextMessage(text: string) {
         const timestamp = Date.now()
         const data: SendSendMessageData = {
-            type : ChatMessageType.Text,
+            type: ChatMessageType.Text,
             clientId: ++this.lastClientId,
-            serializedContent : JSON.stringify(text),
+            serializedContent: JSON.stringify(text),
             chatId: this.chatId,
             timestamp,
         }
         let msg = new ChatMessage({
-            type :ChatMessageType.Text,
-            content : text,
+            type: ChatMessageType.Text,
+            content: text,
             timestamp,
             inChatId: undefined,
             senderId: authStore.userId,
             state: ChatMessageState.Sending,
-            chatId: this.chatId
+            chatId: this.chatId,
         })
         msg.clientId = data.clientId
 
@@ -620,7 +689,8 @@ export class ChatStore {
         chatStore.setActiveChatId && chatStore.setActiveChatId(null)
         userSettingStore.setChatVerify(chat.chatId, '')
         chat.bindUser && userSettingStore.setUserNickName(chat.bindUser.userId, '')
-        for (let inChatId = 1; inChatId <= chat.lastMessage!.inChatId!; inChatId++) { // 清除聊天记录
+        for (let inChatId = 1; inChatId <= chat.lastMessage!.inChatId!; inChatId++) {
+            // 清除聊天记录
             LocalDatabase.removeMessage(chat.chatId, inChatId).catch((err) => console.log(err))
         }
         LocalDatabase.removeChatInfo(chat.chatId)
@@ -629,12 +699,13 @@ export class ChatStore {
     private DeleteChatHandler(chatId: number) {
         if (!this.chats.has(chatId)) {
             this.errors = `清除聊天失败，聊天${chatId}不存在`
-            return 
+            return
         }
         const chat = this.chats.get(chatId)!
-        if (chat.chatType === ChatType.Private) { // 删除私聊
+        if (chat.chatType === ChatType.Private) {
+            // 删除私聊
             LocalDatabase.removeUserInfo(chat.bindUser!.userId).catch((err) => console.log(err)) // 清除用户
-        } 
+        }
         this.removeChatInfo(chat)
     }
 
@@ -660,7 +731,6 @@ export class ChatStore {
         }
     }
 
-
     private ReceiveSendMessageResponseHandler(response: ReceiveSendMessageResponseData) {
         this.getChat(response.chatId).handleSendMessageResponse(
             response,
@@ -675,7 +745,6 @@ export class ChatStore {
 
         const msg = ChatMessage.createFromReciveMessage(receiveMessage)
 
-
         if (receiveMessage.chatId === this.activeChatId && this.setViewMessages) {
             this.setViewMessages((draft) => {
                 draft.push(msg)
@@ -689,7 +758,7 @@ export class ChatStore {
         let chat: Chat | undefined = undefined
         for (let i = 0; i < serializeds.length; i++) {
             const receiveMessage: ReceiveChatMessage = JSON.parse(serializeds[i])
-            
+
             if (chat === undefined || chat!.chatId !== receiveMessage.chatId) {
                 chat = this.getChat(receiveMessage.chatId)
             }

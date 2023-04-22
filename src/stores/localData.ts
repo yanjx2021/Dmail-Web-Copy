@@ -1,6 +1,6 @@
 import localforage from 'localforage'
-import { ChatInfo, ChatMessage, chatStore } from './chatStore'
-import { Send, SerializedReceiveChatMessage } from '../utils/message'
+import { ChatInfo, ChatMessage, ChatMessageType, chatStore } from './chatStore'
+import { ReceiveChatMessage, Send, SerializedReceiveChatMessage } from '../utils/message'
 import { MessageServer } from '../utils/networkWs'
 import { Request, requestStore } from './requestStore'
 import { User, userStore } from './userStore'
@@ -8,6 +8,9 @@ import { UserSetting, userSettingStore } from './userSettingStore'
 import { fileStore } from './fileStore'
 import axios from 'axios'
 import { imageStore } from './imageStore'
+import { serialize } from 'v8'
+import { lchown } from 'fs'
+import { runInAction } from 'mobx'
 
 const userSettingIndex = 'userSetting'
 
@@ -32,7 +35,7 @@ export class LocalDatabase {
     static requestIndex(reqId: number) {
         return `request:${reqId}`
     }
-    static imageBlobIndex(hash : string) {
+    static imageBlobIndex(hash: string) {
         return `image:${hash}`
     }
 
@@ -51,15 +54,15 @@ export class LocalDatabase {
         })
     }
 
-    static async saveImageBlob(hash : string, blob : Blob) {
+    static async saveImageBlob(hash: string, blob: Blob) {
         this.database.setItem(LocalDatabase.imageBlobIndex(hash), blob)
     }
 
-    static async loadImageBlob(hash : string) {
+    static async loadImageBlob(hash: string) {
         this.database.getItem(hash).then((blob) => {
             if (blob === null) {
                 fileStore.getFileUrl(hash, (getUrl) => {
-                    axios.get(getUrl, {responseType : 'blob'}).then((response) => {
+                    axios.get(getUrl, { responseType: 'blob' }).then((response) => {
                         this.saveImageBlob(hash, response.data)
                         const localUrl = URL.createObjectURL(response.data)
                         imageStore.setImageUrl(hash, localUrl)
@@ -74,7 +77,9 @@ export class LocalDatabase {
 
     static async saveUserInfo(userId: number, user: User) {
         const userInfo = user.serialized()
-        this.database.setItem(this.userInfoIndex(userId), userInfo).catch((err) => console.error(err))
+        this.database
+            .setItem(this.userInfoIndex(userId), userInfo)
+            .catch((err) => console.error(err))
     }
 
     static async loadUserInfo(userId: number) {
@@ -92,7 +97,9 @@ export class LocalDatabase {
     static async saveRequest(reqId: number, req: Request) {
         // 保存request
         const serialized = req.serialized()
-        this.database.setItem(this.requestIndex(reqId), serialized).catch((err) => console.error(err))
+        this.database
+            .setItem(this.requestIndex(reqId), serialized)
+            .catch((err) => console.error(err))
     }
 
     static async loadRequest(reqId: number) {
@@ -110,14 +117,18 @@ export class LocalDatabase {
         this.database.removeItem(this.chatInfoIndex(chatId)).catch((err) => console.log(err))
     }
     static async removeMessage(chatId: number, inChatId: number) {
-        this.database.removeItem(this.messageIndex(chatId, inChatId)).catch((err) => console.log(err))
+        this.database
+            .removeItem(this.messageIndex(chatId, inChatId))
+            .catch((err) => console.log(err))
     }
     static async removeUserInfo(userId: number) {
         this.database.removeItem(this.userInfoIndex(userId)).catch((err) => console.log(err))
     }
 
     static async saveChatInfo(chatId: number, chatInfo: ChatInfo) {
-        this.database.setItem(this.chatInfoIndex(chatId), JSON.stringify(chatInfo)).catch((err) => console.error(err))
+        this.database
+            .setItem(this.chatInfoIndex(chatId), JSON.stringify(chatInfo))
+            .catch((err) => console.error(err))
     }
 
     static async loadChatInfo(chatId: number) {
@@ -132,58 +143,28 @@ export class LocalDatabase {
     }
 
     static async saveMessage(msg: ChatMessage) {
-        const serialized = msg.serialized()
-        return this.database
-            .setItem(this.messageIndex(msg.chatId, msg.inChatId!), serialized)
-            .catch((err) => {
-                console.log('localForage错误 ' + err)
-            })
-    }
+        const local = await this.loadMessageLocal(msg.chatId, msg.inChatId!)
 
-    static async loadMessages(chatId: number, start: number, end: number) {
-        // TODO : 根据unknow选择不同的加载策略
-        const unknown: number[] = []
-        const promises = []
+        runInAction(() => {
+            if (local?.type === ChatMessageType.Deleted) {
+                msg.type = ChatMessageType.Deleted
+                return
+            }
 
-        const chat = chatStore.getChat(chatId)
-
-        for (let i = start; i <= end; i++) {
-            const promise = this.database
-                .getItem<SerializedReceiveChatMessage>(this.messageIndex(chatId, i))
-                .then((value) => {
-                    if (value == null) {
-                        unknown.push(i)
-                        return
-                    }
-                    let chatMsg = ChatMessage.createFromReciveMessage(JSON.parse(value))
-                    chat.setMessage(chatMsg)
-                })
+            const serialized = msg.serialized()
+            this.database
+                .setItem(this.messageIndex(msg.chatId, msg.inChatId!), serialized)
                 .catch((err) => {
                     console.log('localForage错误 ' + err)
                 })
-            promises.push(promise)
-        }
-
-        await Promise.all(promises)
-
-        if (unknown.length === 0) {
-            return
-        }
-
-        // TODO
-        if (unknown.length < 4) {
-            // 逐个
-        } else {
-            // 合批
-        }
-
-        const endId = Math.max(...unknown)
-        const startId = Math.min(...unknown)
-
-        MessageServer.Instance().send<Send.GetMessages>(Send.GetMessages, {
-            startId,
-            endId,
-            chatId,
         })
+    }
+
+    static async loadMessageLocal(chatId: number, inChatId: number) {
+        return this.database
+            .getItem<SerializedReceiveChatMessage>(this.messageIndex(chatId, inChatId))
+            .then((serialized) =>
+                serialized ? (JSON.parse(serialized) as ReceiveChatMessage) : null
+            )
     }
 }

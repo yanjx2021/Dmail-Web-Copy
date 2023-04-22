@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Chat, ChatMessage, ChatMessageState, MessageId } from '../../stores/chatStore'
+import { Chat, ChatMessage, ChatMessageState, MessageId, chatStore } from '../../stores/chatStore'
 import { ChatMessageItem } from './ChatMessageItem'
 import { action, autorun, observe, runInAction } from 'mobx'
 import { observer } from 'mobx-react-lite'
@@ -33,7 +33,15 @@ export const ChatMessageContent = observer(
             }
             const messagesToPrepend = 20
 
-            setMessages(() => [...chat.getMessages(firstIndex - 1, messagesToPrepend), ...messages])
+            chat.getMessages(firstIndex - 1, messagesToPrepend).then(
+                action((msgs) => {
+                    if (chatStore.activeChatId !== chat.chatId) {
+                        return
+                    }
+
+                    setMessages(() => [...msgs, ...messages])
+                })
+            )
         }, [chat, messages, setMessages])
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -41,6 +49,7 @@ export const ChatMessageContent = observer(
             action((index: number, message: ChatMessage) => (
                 <ChatMessageItem
                     msg={message}
+                    indexInView={index - 1}
                     key={
                         message.senderId === authStore.userId ? message.timestamp : message.inChatId
                     }
@@ -57,7 +66,7 @@ export const ChatMessageContent = observer(
                 setShowButton(false)
             }
         }, [atBottom])
-        
+
         return (
             <>
                 <div className="chat-content">
