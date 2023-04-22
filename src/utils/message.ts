@@ -226,7 +226,6 @@ export interface ReceiveGetFileUrlResponse {
     url? : string
 }
 
-
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -262,6 +261,8 @@ export enum Receive {
     DeleteChat = 'DeleteChat',
     ReadCursors = 'ReadCursors',
     SetAlreadyReadResponse = 'SetAlreadyReadResponse',
+    Notice = 'Notice',
+    Notices = 'Noitces',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -286,9 +287,8 @@ export interface SendSendMessageData {
 }
 
 export interface SendPullData {
-    lastChatId: number
-    lastMessageId: number
     lastRequestId: number
+    noticeTimestamp: number
 }
 
 export interface UserRequestContent {
@@ -340,6 +340,12 @@ export interface SendSetAlreadyReadData {
     inChatId: number
 }
 
+export interface SendRevokeMessageData {
+    chatId: number,
+    inChatId: number,
+    method: 'Sender' | 'GroupAdmin'
+}
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -365,6 +371,7 @@ export enum Send {
     FileUploaded = 'FileUploaded',
     Unfriend = 'Unfriend',
     SetAlreadyRead = 'SetAlreadyRead',
+    RevokeMessage = 'RevokeMessage',
 }
 
 // COMMAND和DATA类型捆绑
@@ -401,6 +408,8 @@ export interface MessageReceiveData {
     [Receive.ReadCursors]: [number, number][]
     [Receive.SetAlreadyReadResponse]: ReceiveSetAlreadyReadResponseData
     [Receive.GetFileUrlResponse] : ReceiveGetFileUrlResponse
+    [Receive.Notice]: string,
+    [Receive.Notices]: string[],
 }
 
 export interface MessageSendData {
@@ -427,6 +436,7 @@ export interface MessageSendData {
     [Send.UploadFileRequest] : UserUploadFileRequestData
     [Send.FileUploaded] : UploadId
     [Send.SetAlreadyRead]: SendSetAlreadyReadData
+    [Send.RevokeMessage]: SendRevokeMessageData
 }
 
 // 封装消息包

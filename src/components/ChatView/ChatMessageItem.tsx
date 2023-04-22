@@ -119,6 +119,12 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                 </a>
             </div>
         )
+    } else if (msg.type === ChatMessageType.Revoked) {
+        return (
+            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                {"消息已撤回"}
+            </div>
+        )
     }
     return <div></div>
 })

@@ -1,6 +1,12 @@
 import { action, makeAutoObservable } from 'mobx'
 import localforage from 'localforage'
-import { LoginResponseState, Receive, ReceiveLoginResponseData, ReceiveUpdateUserInfoResponseData, Send } from '../utils/message'
+import {
+    LoginResponseState,
+    Receive,
+    ReceiveLoginResponseData,
+    ReceiveUpdateUserInfoResponseData,
+    Send,
+} from '../utils/message'
 import { MessageServer } from '../utils/networkWs'
 import { passwordTester } from '../constants/passwordFormat'
 import { SHA256 } from 'crypto-js'
@@ -13,6 +19,7 @@ import { updateUserStore } from './updateUserStore'
 import { secureAuthStore } from './secureAuthStore'
 import { modalStore } from './modalStore'
 import { chatSideStore } from './chatSideStore'
+import { noticeStore } from './noticeStore'
 
 export type UserId = number
 
@@ -56,7 +63,6 @@ export class AuthStore {
         this.emailCode = ''
         this.password = ''
         this.errors = ''
-        
     }
 
     logout() {
@@ -104,15 +110,18 @@ export class AuthStore {
         this.state = AuthState.Logged
         this.userId = userId
 
-
         LocalDatabase.createUserInstance(userId)
         console.log('登录成功')
 
-        MessageServer.Instance().send(Send.Pull, {
-            lastChatId: 0,
-            lastMessageId: 0,
-            lastRequestId: 0,
-        })
+        //TODO
+        LocalDatabase.loadTimestamp().then(
+            action(() => {
+                MessageServer.Instance().send(Send.Pull, {
+                    lastRequestId: 0,
+                    noticeTimestamp: noticeStore.timestamp!,
+                })
+            })
+        )
     }
 
     private loginWithPassword() {
@@ -125,10 +134,13 @@ export class AuthStore {
             email: this.email,
             password: SHA256(this.password + 'dmail' + this.email).toString(),
         })
-        this.timer = setTimeout(action(() => {
-            this.state = AuthState.Started
-            this.errors = '网络连接超时，请检查网络状况'
-        }), this.timeout)
+        this.timer = setTimeout(
+            action(() => {
+                this.state = AuthState.Started
+                this.errors = '网络连接超时，请检查网络状况'
+            }),
+            this.timeout
+        )
 
         this.state = AuthState.Logging
     }
@@ -138,10 +150,13 @@ export class AuthStore {
             email: this.email,
             emailCode: parseInt(this.emailCode),
         })
-        this.timer = setTimeout(action(() => {
-            this.state = AuthState.Started
-            this.errors = '网络连接超时，请检查网络状况'
-        }), this.timeout)
+        this.timer = setTimeout(
+            action(() => {
+                this.state = AuthState.Started
+                this.errors = '网络连接超时，请检查网络状况'
+            }),
+            this.timeout
+        )
         this.state = AuthState.Logging
     }
 

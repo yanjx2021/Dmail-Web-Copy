@@ -67,6 +67,7 @@ export enum ChatMessageType {
     Image = 'Image',
     Deleted = 'Deleted',
     Transfer = 'Transfer',
+    Revoked = 'Revoked'
 }
 
 export type ChatMessageContentType =
@@ -100,6 +101,22 @@ export class ChatMessage {
 
     bindUploading?: UploadingFile
 
+    private revokeMethod(): 'Sender' | 'GroupAdmin' {
+        if (chatStore.getChat(this.chatId).chatType === ChatType.Private) {
+            return 'Sender'
+        }
+        //TODO-群聊身份完成后，在此添加判断撤回群聊消息的逻辑
+        return 'Sender'
+    }
+
+    revokeMessage() {
+        MessageServer.Instance().send<Send.RevokeMessage>(Send.RevokeMessage, {
+            chatId: this.chatId,
+            inChatId: this.inChatId!,
+            method: this.revokeMethod()
+        })
+    }
+
     static getLoadingMessage(inChatId: ChatId, chatId: ChatId) {
         return new ChatMessage({
             type: ChatMessageType.Text,
@@ -115,7 +132,7 @@ export class ChatMessage {
     static createFromReciveMessage(receiveMessage: ReceiveChatMessage) {
         return new ChatMessage({
             type: receiveMessage.type,
-            content: JSON.parse(receiveMessage.serializedContent),
+            content:  JSON.parse(receiveMessage.serializedContent),
             timestamp: receiveMessage.timestamp,
             inChatId: receiveMessage.inChatId,
             senderId: receiveMessage.senderId,
@@ -194,7 +211,10 @@ export class ChatMessage {
             return '[聊天记录]'
         } else if (this.type === ChatMessageType.Deleted) {
             return '[已删除]'
-        } else {
+        } else if (this.type === ChatMessageType.Revoked) {
+            return '[已撤回]'
+        } 
+        else {
             return '[文件/图片消息]'
         }
     }
@@ -405,7 +425,7 @@ export class Chat {
         await Promise.all(promises)
 
         if (unknown.length === 0) {
-            return msgs.sort((a, b) => a.inChatId! - b.inChatId!)
+            return msgs.sort(action((a, b) => a.inChatId! - b.inChatId!))
         }
 
         // TODO : 根据unknow选择不同的加载策略
@@ -426,7 +446,7 @@ export class Chat {
             })
         })
 
-        return msgs.sort((a, b) => a.inChatId! - b.inChatId!)
+        return msgs.sort(action((a, b) => a.inChatId! - b.inChatId!))
     }
 
     sendFileMessage(

@@ -11,6 +11,8 @@ import { imageStore } from './imageStore'
 import { serialize } from 'v8'
 import { lchown } from 'fs'
 import { runInAction } from 'mobx'
+import { async } from 'q'
+import { noticeStore } from './noticeStore'
 
 const userSettingIndex = 'userSetting'
 
@@ -37,6 +39,29 @@ export class LocalDatabase {
     }
     static imageBlobIndex(hash: string) {
         return `image:${hash}`
+    }
+
+    static timestampIndex() {
+        return `timestamp`
+    }
+
+    static async saveTimeStamp(timestamp: number) {
+        console.log('保存本地时间')
+        this.database.setItem(this.timestampIndex(), timestamp)
+    }
+
+    static async loadTimestamp() {
+        return this.database.getItem<number>(this.timestampIndex()).then((timestamp) => {
+            if (timestamp) {
+                noticeStore.timestamp = timestamp
+            } else {
+                console.log('生成本地时间')
+                const time = Date.now()
+                console.log(time)
+                this.saveTimeStamp(time)
+                noticeStore.timestamp = time
+            }
+        })
     }
 
     static async saveUserSetting(userSetting: string) {
@@ -166,5 +191,15 @@ export class LocalDatabase {
             .then((serialized) =>
                 serialized ? (JSON.parse(serialized) as ReceiveChatMessage) : null
             )
+    }
+
+    static async revokeMessageLocal(chatId: number, inChatId: number) {
+        return this.loadMessageLocal(chatId, inChatId).then((receiveMessage) => {
+            if (receiveMessage === null || receiveMessage.type === ChatMessageType.Deleted || receiveMessage.type === ChatMessageType.Revoked) return
+            receiveMessage.type = ChatMessageType.Revoked
+            receiveMessage.serializedContent = JSON.stringify('""')
+
+            this.database.setItem(this.messageIndex(chatId, inChatId), JSON.stringify(receiveMessage))
+        })
     }
 }

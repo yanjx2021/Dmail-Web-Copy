@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx"
+import { action, makeAutoObservable } from "mobx"
 import { Chat, ChatMessage, ChatMessageState, ChatMessageType, chatStore } from "../../stores/chatStore"
 import { observer } from "mobx-react-lite"
 import { modalStore } from "../../stores/modalStore"
@@ -84,7 +84,7 @@ export class MessageSelectStore {
         this.msgs.forEach((msg, inChatId) => {
             list.push(msg)
         })
-        list.sort((a, b) => a.inChatId! - b.inChatId!)
+        list.sort(action((a, b) => a.inChatId! - b.inChatId!))
         return list
     }
 }
@@ -104,7 +104,7 @@ export const MessageSelector = observer(({ msg }: { msg: ChatMessage }) => {
     )
 })
 
-export const ChatSelector = observer(({ chat }: { chat: Chat }) => {
+export const ChatSelector = (({ chat }: { chat: Chat }) => {
     return (
         <label className="c_checkbox">
             <input
