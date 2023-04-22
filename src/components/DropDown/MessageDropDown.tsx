@@ -4,7 +4,7 @@ import { action } from 'mobx'
 import { modalStore } from '../../stores/modalStore'
 import { DropDownItem } from './ChatDropDown'
 import { ChatMessage } from '../../stores/chatStore'
-import { messageSelectStore } from '../ChatView/ChatMessageItem'
+import { messageSelectStore } from '../MessagesBox/Selector'
 
 export const MessageDropDown = observer(({ msg }: { msg: ChatMessage }) => {
     // TODO-在这里添加删除消息的函数

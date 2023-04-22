@@ -9,6 +9,11 @@ export class SecureAuthStore {
     chatId: number = 0
     errors: string = ''
 
+    hasChecked(chatId: number) {
+        const check = this.chatVerify.get(chatId)
+        if (check === undefined) return false
+        return !check
+    }
 
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })

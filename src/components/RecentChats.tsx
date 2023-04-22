@@ -4,6 +4,8 @@ import { action } from 'mobx'
 import { ChatDropDown } from './DropDown/ChatDropDown'
 import { Badge } from 'antd'
 import { HoverOption } from './AllChats'
+import { ChatSelector, messageSelectStore } from './MessagesBox/Selector'
+import { secureAuthStore } from '../stores/secureAuthStore'
 
 const RecentChatItem = observer(
     ({
@@ -51,6 +53,7 @@ const RecentChatItem = observer(
                         </div>
                     </div>
                 </a>
+                {messageSelectStore.showSelector ? <ChatSelector key={chat.chatId} chatId={chat.chatId}/> : <></>}
             </li>
         )
     }
@@ -77,7 +80,7 @@ export const RecentChats = observer(
                     <input className="form-control text-footerform" type="text" placeholder="搜索..."></input>
                 </div>
                 <ul className="chat-list">
-                    <li className="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                    <li key='chatTitle' className="header d-flex justify-content-between ps-3 pe-3 mb-1">
                         <span>最近的对话</span>
                     </li>
                     {chatStore.recentChatsView.map((chat) => (

@@ -2,7 +2,7 @@
 import { observer } from 'mobx-react-lite'
 import React, { useEffect, useRef, useState } from 'react'
 import { useImmer } from 'use-immer'
-import { ChatMessage, ChatMessageFileInfo, ChatMessageType } from '../../stores/chatStore'
+import { Chat, ChatMessage, ChatMessageFileInfo, ChatMessageType } from '../../stores/chatStore'
 import { authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
 import { userStore } from '../../stores/userStore'
@@ -11,6 +11,7 @@ import { createDownload } from '../../utils/file'
 import { action, makeAutoObservable } from 'mobx'
 import { imageStore } from '../../stores/imageStore'
 import { MessageDropDown } from '../DropDown/MessageDropDown'
+import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
 
 const MessageAlert = () => {
     return (
@@ -101,63 +102,6 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
     return <div></div>
 })
 
-export class MessageSelectStore {
-    msgs: Map<number, ChatMessage> = new Map()
-    showSelector: boolean = false
-    constructor() {
-        makeAutoObservable(this, {}, { autoBind: true })
-    }
-
-    hasMessage(inChatId: number) {
-        return this.msgs.has(inChatId)
-    }
-
-    reset() {
-        this.showSelector = false
-        this.msgs.clear()
-    }
-
-    toggleCheck(msg: ChatMessage) {
-        console.log(this.msgsList)
-        if (this.hasMessage(msg.inChatId!)) this.unCheckMsg(msg)
-        else this.checkMsg(msg)
-    }
-
-    checkMsg(msg: ChatMessage) {
-        this.msgs.set(msg.inChatId!, msg)
-    }
-
-    unCheckMsg(msg: ChatMessage) {
-        if (this.msgs.has(msg.inChatId!)) {
-            this.msgs.delete(msg.inChatId!)
-        }
-    }
-
-    get msgsList() {
-        const list: ChatMessage[] = []
-        this.msgs.forEach((msg, inChatId) => {
-            list.push(msg)
-        })
-        list.sort((a, b) => a.inChatId! - b.inChatId!)
-        return list
-    }
-}
-
-export const messageSelectStore = new MessageSelectStore()
-
-export const Selector = observer(({ msg }: { msg: ChatMessage }) => {
-    return (
-        <label className="c_checkbox">
-            <input
-                type="checkbox"
-                onChange={() => messageSelectStore.toggleCheck(msg)}
-                checked={messageSelectStore.hasMessage(msg.inChatId!)}
-            />
-            <span className="checkmark"></span>
-        </label>
-    )
-})
-
 export const ChatMessageItem = observer(
     React.forwardRef(
         ({ msg, enableDropDown }: { msg: ChatMessage; enableDropDown: boolean }, ref: any) => {
@@ -186,11 +130,11 @@ export const ChatMessageItem = observer(
                                 <>
                                     {enableDropDown && <MessageDropDown msg={msg} />}
                                     <ChatMessageItemContent msg={msg} />
-                                    {enableDropDown && messageSelectStore.showSelector && <Selector msg={msg} />}
+                                    {enableDropDown && messageSelectStore.showSelector && <MessageSelector msg={msg} />}
                                 </>
                             ) : (
                                 <>
-                                    {enableDropDown && messageSelectStore.showSelector && <Selector msg={msg} />}
+                                    {enableDropDown && messageSelectStore.showSelector && <MessageSelector msg={msg} />}
                                     <ChatMessageItemContent msg={msg} />
                                     {enableDropDown && <MessageDropDown msg={msg} />}
                                 </>

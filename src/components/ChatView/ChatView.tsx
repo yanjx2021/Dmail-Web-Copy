@@ -3,7 +3,7 @@ import { Chat, ChatMessage, ChatMessageFileInfo, ChatMessageType, chatStore } fr
 import { ChatViewHeader } from './ChatViewHeader'
 import { ChatMessageContent } from './ChatViewContent'
 import { useState, useCallback, useEffect, LegacyRef } from 'react'
-import { ChatViewFooter } from './ChatViewFooter'
+import { ChatViewFooter, MessageSelectedFooter } from './ChatViewFooter'
 import { authStore } from '../../stores/authStore'
 import { useImmer } from 'use-immer'
 import { action, runInAction } from 'mobx'
@@ -14,7 +14,7 @@ import { secureAuthStore } from '../../stores/secureAuthStore'
 import React from 'react'
 import { UploadingFile, fileStore } from '../../stores/fileStore'
 import { isImage } from '../../utils/file'
-import { messageSelectStore } from './ChatMessageItem'
+import { messageSelectStore } from '../MessagesBox/Selector'
 
 export const ChatView =
     observer(({ chat }: { chat: Chat }) => {
@@ -140,7 +140,7 @@ export const ChatView =
                 <div className="chat-body" ref={dropRef}>
                     <ChatViewHeader chat={chat} />
                     <ChatMessageContent chat={chat} messages={messages} setMessages={setMessages} />
-                    <ChatViewFooter handleSend={sendTextMessageHanlder} />
+                    {messageSelectStore.showSelector ? <MessageSelectedFooter /> : <ChatViewFooter handleSend={sendTextMessageHanlder} />}
                 </div>
                 <ChatSidebar chat={chat} />
                 <UserSidebar chat={chat} />
