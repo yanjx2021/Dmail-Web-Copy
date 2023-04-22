@@ -8,7 +8,7 @@ import '../../styles/ChatMessageItem.css'
 import { userStore } from '../../stores/userStore'
 import { fileStore } from '../../stores/fileStore'
 import { createDownload } from '../../utils/file'
-import { action } from 'mobx'
+import { action, makeAutoObservable } from 'mobx'
 import { imageStore } from '../../stores/imageStore'
 import { MessageDropDown } from '../DropDown/MessageDropDown'
 
@@ -101,43 +101,104 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
     return <div></div>
 })
 
+export class MessageSelectStore {
+    msgs: Map<number, ChatMessage> = new Map()
+    showSelector: boolean = false
+    constructor() {
+        makeAutoObservable(this, {}, { autoBind: true })
+    }
+
+    hasMessage(inChatId: number) {
+        return this.msgs.has(inChatId)
+    }
+
+    reset() {
+        this.showSelector = false
+        this.msgs.clear()
+    }
+
+    toggleCheck(msg: ChatMessage) {
+        console.log(this.msgsList)
+        if (this.hasMessage(msg.inChatId!)) this.unCheckMsg(msg)
+        else this.checkMsg(msg)
+    }
+
+    checkMsg(msg: ChatMessage) {
+        this.msgs.set(msg.inChatId!, msg)
+    }
+
+    unCheckMsg(msg: ChatMessage) {
+        if (this.msgs.has(msg.inChatId!)) {
+            this.msgs.delete(msg.inChatId!)
+        }
+    }
+
+    get msgsList() {
+        const list: ChatMessage[] = []
+        this.msgs.forEach((msg, inChatId) => {
+            list.push(msg)
+        })
+        list.sort((a, b) => a.inChatId! - b.inChatId!)
+        return list
+    }
+}
+
+export const messageSelectStore = new MessageSelectStore()
+
+export const Selector = observer(({ msg }: { msg: ChatMessage }) => {
+    return (
+        <label className="c_checkbox">
+            <input
+                type="checkbox"
+                onChange={() => messageSelectStore.toggleCheck(msg)}
+                checked={messageSelectStore.hasMessage(msg.inChatId!)}
+            />
+            <span className="checkmark"></span>
+        </label>
+    )
+})
+
 export const ChatMessageItem = observer(
-    React.forwardRef(({ msg }: { msg: ChatMessage }, ref: any) => {
-        const isRight = msg.senderId === authStore.userId
-        return (
-            <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
-                {!isRight ? (
-                    <div className="avatar mr-lg-3 me-2">
+    React.forwardRef(
+        ({ msg, enableDropDown }: { msg: ChatMessage; enableDropDown: boolean }, ref: any) => {
+            const isRight = msg.senderId === authStore.userId
+            return (
+                <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
+                    {!isRight ? (
+                        <div className="avatar mr-lg-3 me-2">
+                            <div
+                                //添加颜色
+                                className={'avatar rounded-circle no-image ' + ''}>
+                                <span>{msg.senderId}</span>
+                            </div>
+                        </div>
+                    ) : (
+                        ''
+                    )}
+                    <div className="message-body">
+                        <span className="date-time text-muted">{msg.getMessageTip}</span>
                         <div
-                            //添加颜色
-                            className={'avatar rounded-circle no-image ' + ''}>
-                            <span>{msg.senderId}</span>
+                            className={
+                                'message-row d-flex align-items-center' +
+                                (isRight ? ' justify-content-end' : '')
+                            }>
+                            {isRight ? (
+                                <>
+                                    {enableDropDown && <MessageDropDown msg={msg} />}
+                                    <ChatMessageItemContent msg={msg} />
+                                    {enableDropDown && messageSelectStore.showSelector && <Selector msg={msg} />}
+                                </>
+                            ) : (
+                                <>
+                                    {enableDropDown && messageSelectStore.showSelector && <Selector msg={msg} />}
+                                    <ChatMessageItemContent msg={msg} />
+                                    {enableDropDown && <MessageDropDown msg={msg} />}
+                                </>
+                            )}
                         </div>
                     </div>
-                ) : (
-                    ''
-                )}
-                <div className="message-body">
-                    <span className="date-time text-muted">{msg.getMessageTip}</span>
-                    <div
-                        className={
-                            'message-row d-flex align-items-center' +
-                            (isRight ? ' justify-content-end' : '')
-                        }>
-                        {isRight ? (
-                            <>
-                                <MessageDropDown msg={msg} />
-                                <ChatMessageItemContent msg={msg} />
-                            </>
-                        ) : (
-                            <>
-                                <ChatMessageItemContent msg={msg} />
-                                <MessageDropDown msg={msg} />
-                            </>
-                        )}
-                    </div>
-                </div>
-            </li>
-        )
-    })
+                </li>
+            )
+        }
+    )
 )

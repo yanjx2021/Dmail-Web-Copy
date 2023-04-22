@@ -44,6 +44,7 @@ export const ChatMessageContent = observer(
                     key={
                         message.senderId === authStore.userId ? message.timestamp : message.inChatId
                     }
+                    enableDropDown={true}
                 />
             )),
             []

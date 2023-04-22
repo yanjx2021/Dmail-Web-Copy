@@ -4,6 +4,7 @@ import { action } from 'mobx'
 import { modalStore } from '../../stores/modalStore'
 import { DropDownItem } from './ChatDropDown'
 import { ChatMessage } from '../../stores/chatStore'
+import { messageSelectStore } from '../ChatView/ChatMessageItem'
 
 export const MessageDropDown = observer(({ msg }: { msg: ChatMessage }) => {
     // TODO-在这里添加删除消息的函数
@@ -17,12 +18,22 @@ export const MessageDropDown = observer(({ msg }: { msg: ChatMessage }) => {
                 aria-expanded="false">
                 <i className="zmdi zmdi-more-vert"></i>
             </a>
-            
+
             <div className="dropdown-menu dropdown-menu-right">
-                <DropDownItem
-                    text="删除"
-                    handleClick={() => {}}
-                />
+                <DropDownItem text="删除" handleClick={() => {}} />
+                {messageSelectStore.showSelector ? (
+                    <DropDownItem
+                        text="取消多选"
+                        handleClick={action(() => {
+                            messageSelectStore.reset()
+                        })}
+                    />
+                ) : (
+                    <DropDownItem
+                        text="多选"
+                        handleClick={action(() => (messageSelectStore.showSelector = true))}
+                    />
+                )}
             </div>
         </div>
     )

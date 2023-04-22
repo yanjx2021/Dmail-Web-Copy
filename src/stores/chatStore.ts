@@ -191,7 +191,7 @@ export enum ChatType {
 }
 
 export class Chat {
-    private messages: Map<MessageId, ChatMessage> = new Map()
+    messages: Map<MessageId, ChatMessage> = new Map()
     private sendingMessages: ChatMessage[] = []
 
     private lastClientId: number = 0

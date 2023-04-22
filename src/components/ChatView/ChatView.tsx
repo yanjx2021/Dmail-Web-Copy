@@ -14,6 +14,7 @@ import { secureAuthStore } from '../../stores/secureAuthStore'
 import React from 'react'
 import { UploadingFile, fileStore } from '../../stores/fileStore'
 import { isImage } from '../../utils/file'
+import { messageSelectStore } from './ChatMessageItem'
 
 export const ChatView =
     observer(({ chat }: { chat: Chat }) => {
@@ -71,6 +72,8 @@ export const ChatView =
             }),
             [chat, setMessages]
         )
+
+        useEffect(action(() => messageSelectStore.reset()), [chat])
     
 
         const [drag, setDrag] = useState(false);
