@@ -3,6 +3,14 @@ import { secureAuthStore } from '../../stores/secureAuthStore'
 import { action } from 'mobx'
 import { modalStore } from '../../stores/modalStore'
 
+export const DropDownItem = ({ text, handleClick }: { text: string; handleClick: any }) => {
+    return (
+        <a className="dropdown-item" type="button" onClick={handleClick}>
+            {text}
+        </a>
+    )
+}
+
 export const ChatDropDown = observer(({ chatId }: { chatId: number }) => {
     return (
         <div className="dropdown">
@@ -12,29 +20,25 @@ export const ChatDropDown = observer(({ chatId }: { chatId: number }) => {
                 data-toggle="dropdown"
                 aria-haspopup="true"
                 aria-expanded="false"
-                onClick={action(() => secureAuthStore.chatId = chatId)}>
+                onClick={action(() => (secureAuthStore.chatId = chatId))}>
                 <i className="zmdi zmdi-more-vert"></i>
             </a>
             <div className="dropdown-menu dropdown-menu-right">
-                <a
-                    className="dropdown-item"
-                    type="button"
-                    onClick={action(() => {
+                <DropDownItem
+                    text="设置二次验证"
+                    handleClick={action(() => {
                         modalStore.modalType = 'SetSecure'
                         modalStore.isOpen = true
-                    })}>
-                    设置二次验证
-                </a>
+                    })}
+                />
                 {secureAuthStore.hasSetChatCode(chatId) ? (
-                    <a
-                        className="dropdown-item"
-                        type="button"
-                        onClick={action(() => {
+                    <DropDownItem
+                        text="取消二次验证"
+                        handleClick={action(() => {
                             modalStore.modalType = 'RemoveSecure'
                             modalStore.isOpen = true
-                        })}>
-                        取消二次验证
-                    </a>
+                        })}
+                    />
                 ) : (
                     <></>
                 )}
