@@ -299,7 +299,7 @@ export class Chat {
         LocalDatabase.saveChatInfo(this.chatId, info)
     }
 
-    setMessage(msg: ChatMessage) {
+    async setMessage(msg: ChatMessage) {
         const message_opt = this.messages.get(msg.inChatId!)
         let updated_msg = undefined
 
@@ -379,7 +379,7 @@ export class Chat {
         await Promise.all(promises)
 
         if (unknown.length === 0) {
-            return msgs
+            return msgs.sort((a, b) => a.inChatId! - b.inChatId!)
         }
 
         // TODO : 根据unknow选择不同的加载策略
