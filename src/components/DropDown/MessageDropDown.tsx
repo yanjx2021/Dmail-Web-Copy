@@ -5,7 +5,13 @@ import { modalStore } from '../../stores/modalStore'
 import { DropDownItem } from './ChatDropDown'
 import { ChatMessage } from '../../stores/chatStore'
 
-export const MessageDropDown = observer(({ msg }: { msg: ChatMessage }) => {
+export const MessageDropDown = ({
+    msg,
+    indexInView,
+}: {
+    msg: ChatMessage
+    indexInView: number
+}) => {
     // TODO-在这里添加删除消息的函数
     return (
         <div className="dropdown">
@@ -17,13 +23,15 @@ export const MessageDropDown = observer(({ msg }: { msg: ChatMessage }) => {
                 aria-expanded="false">
                 <i className="zmdi zmdi-more-vert"></i>
             </a>
-            
+
             <div className="dropdown-menu dropdown-menu-right">
                 <DropDownItem
                     text="删除"
-                    handleClick={() => {}}
+                    handleClick={() => {
+                        msg.deleteLocal(indexInView)
+                    }}
                 />
             </div>
         </div>
     )
-})
+}

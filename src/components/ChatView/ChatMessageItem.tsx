@@ -102,42 +102,46 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
 })
 
 export const ChatMessageItem = observer(
-    React.forwardRef(({ msg }: { msg: ChatMessage }, ref: any) => {
-        const isRight = msg.senderId === authStore.userId
-        return (
-            <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
-                {!isRight ? (
-                    <div className="avatar mr-lg-3 me-2">
+    React.forwardRef(
+        ({ msg, indexInView }: { msg: ChatMessage; indexInView: number }, ref: any) => {
+            const isRight = msg.senderId === authStore.userId
+            return msg.type === ChatMessageType.Deleted ? (
+                <div style={{ height: '1px' }}></div>
+            ) : (
+                <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
+                    {!isRight ? (
+                        <div className="avatar mr-lg-3 me-2">
+                            <div
+                                //添加颜色
+                                className={'avatar rounded-circle no-image ' + ''}>
+                                <span>{msg.senderId}</span>
+                            </div>
+                        </div>
+                    ) : (
+                        ''
+                    )}
+                    <div className="message-body">
+                        <span className="date-time text-muted">{msg.getMessageTip}</span>
                         <div
-                            //添加颜色
-                            className={'avatar rounded-circle no-image ' + ''}>
-                            <span>{msg.senderId}</span>
+                            className={
+                                'message-row d-flex align-items-center' +
+                                (isRight ? ' justify-content-end' : '')
+                            }>
+                            {isRight ? (
+                                <>
+                                    <MessageDropDown msg={msg} indexInView={indexInView} />
+                                    <ChatMessageItemContent msg={msg} />
+                                </>
+                            ) : (
+                                <>
+                                    <ChatMessageItemContent msg={msg} />
+                                    <MessageDropDown msg={msg} indexInView={indexInView} />
+                                </>
+                            )}
                         </div>
                     </div>
-                ) : (
-                    ''
-                )}
-                <div className="message-body">
-                    <span className="date-time text-muted">{msg.getMessageTip}</span>
-                    <div
-                        className={
-                            'message-row d-flex align-items-center' +
-                            (isRight ? ' justify-content-end' : '')
-                        }>
-                        {isRight ? (
-                            <>
-                                <MessageDropDown msg={msg} />
-                                <ChatMessageItemContent msg={msg} />
-                            </>
-                        ) : (
-                            <>
-                                <ChatMessageItemContent msg={msg} />
-                                <MessageDropDown msg={msg} />
-                            </>
-                        )}
-                    </div>
-                </div>
-            </li>
-        )
-    })
+                </li>
+            )
+        }
+    )
 )
