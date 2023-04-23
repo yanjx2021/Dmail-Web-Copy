@@ -17,7 +17,7 @@ p
 .link
 {
   border:none;
-  background:#fff;
+  background:transparent;
 }
 
 .link:hover

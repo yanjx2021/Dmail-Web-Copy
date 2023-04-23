@@ -118,9 +118,38 @@ export const ProfileCard = observer(({ user }: { user: User }) => {
     )
 })
 
-export const ColorSelectDot = ({ theme, title }: { theme: string; title: string }) => {
+export const ColorSelectDot = ({
+    theme,
+    title,
+    classname,
+}: {
+    theme: string
+    title: string
+    classname: string
+}) => {
+    const ref :any =useRef(null);
+    const handleTheme = (e:any) => {
+        var $body: any = document.querySelector('#layout')
+        var $this:any = ref.current
+        console.log($this?.getAttribute('data-theme'))
+        var existTheme: any = document
+            .querySelector('.choose-skin li.active')?.getAttribute('data-theme')
+        var theme: any = document.querySelectorAll('.choose-skin li')
+        for (var i = 0; i < theme.length; i++) {
+            theme[i].classList.remove('active')
+        }
+        $body.classList.remove('theme-' + existTheme)
+        $this.classList.add('active')
+        $body.classList.add('theme-' +$this.getAttribute('data-theme') )
+    }
     return (
-        <li data-theme={theme} data-toggle="tooltip" data-original-title={title}>
+        <li
+            className={classname}
+            data-theme={theme}
+            data-toggle="tooltip"
+            data-original-title={title}
+            onClick={(e) => handleTheme(e)}
+            ref={ref}>
             <div className={theme}></div>
         </li>
     )
@@ -131,11 +160,11 @@ export const ColorScheme = () => {
         <li className="list-group-item d-flex justify-content-between align-items-center">
             <span>主题颜色</span>
             <ul className="choose-skin list-unstyled mb-0">
-                <ColorSelectDot theme="indigo" title="Theme-Indigo" />
-                <ColorSelectDot theme="cyan" title="Theme-Cyan" />
-                <ColorSelectDot theme="green" title="Theme-Green" />
-                <ColorSelectDot theme="blush" title="Theme-Blush" />
-                <ColorSelectDot theme="dark" title="Theme-Dark" />
+                <ColorSelectDot theme="indigo" title="Theme-Indigo" classname="" />
+                <ColorSelectDot theme="cyan" title="Theme-Cyan" classname="active" />
+                <ColorSelectDot theme="green" title="Theme-Green" classname="" />
+                <ColorSelectDot theme="blush" title="Theme-Blush" classname="" />
+                <ColorSelectDot theme="dark" title="Theme-Dark" classname="" />
             </ul>
         </li>
     )
@@ -168,10 +197,13 @@ export const SoundNotification = () => {
 export const ChangePassword = () => {
     return (
         <li className="list-group-item border-0 mt-2">
-            <a className="link" type='button' onClick={action(() => {
-                modalStore.modalType = 'ChangePassword'
-                modalStore.isOpen = true
-            })}>
+            <a
+                className="link"
+                type="button"
+                onClick={action(() => {
+                    modalStore.modalType = 'ChangePassword'
+                    modalStore.isOpen = true
+                })}>
                 <i className="zmdi zmdi-chevron-right me-2"></i>
                 {'  修改密码'}
             </a>
