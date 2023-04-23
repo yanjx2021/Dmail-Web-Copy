@@ -272,7 +272,8 @@ export class Chat {
 
 
 
-    constructor() {
+    constructor(chatId: number) {
+        this.chatId = chatId
         makeAutoObservable(this, {}, { autoBind: true })
     }
 
@@ -281,9 +282,7 @@ export class Chat {
     }
 
     static getLoadingChat(chatId: ChatId) {
-        let ret = new Chat()
-        ret.chatId = chatId
-        return ret
+        return new Chat(chatId)
     }
 
     get sidebarTitle() {
@@ -694,14 +693,14 @@ export class ChatStore {
     }
 
     getChat(chatId: ChatId) {
-        if (this.chats.has(chatId)) {
+        const chat = this.chats.get(chatId)
+        if (chat === undefined) {
+            this.chats.set(chatId, Chat.getLoadingChat(chatId))
+            LocalDatabase.loadChatInfo(chatId)
             return this.chats.get(chatId)!
+        } else {
+            return chat
         }
-        const ret = Chat.getLoadingChat(chatId)
-        this.chats.set(chatId, ret)
-
-        LocalDatabase.loadChatInfo(chatId)
-        return ret
     }
 
     private SetAlreadyReadResponseHandler(response: ReceiveSetAlreadyReadResponseData) {

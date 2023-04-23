@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite"
 import { modalStore } from "../../stores/modalStore"
 import { SendSendMessageData } from "../../utils/message"
 import { authStore } from "../../stores/authStore"
+import { User } from "../../stores/userStore"
 
 export class MessageSelectStore {
     msgs: Map<number, ChatMessage> = new Map()
@@ -111,6 +112,59 @@ export const ChatSelector = (({ chat }: { chat: Chat }) => {
                 type="checkbox"
                 onChange={() => messageSelectStore.toggleCheckChat(chat)}
                 checked={messageSelectStore.hasSelectChat(chat)}
+            />
+            <span className="checkmark"></span>
+        </label>
+    )
+})
+
+export class UserSelectStore {
+    users: Map<number, User> = new Map()
+    errors: string = ''
+    constructor() {
+        makeAutoObservable(this, {}, { autoBind: true })
+    }
+
+    hasSelectUser(userId: number) {
+        return this.users.has(userId)
+    }
+
+    reset() {
+        this.users.clear()
+        this.errors = ''
+    }
+
+    toggleCheckUser(user: User) {
+        if (this.hasSelectUser(user.userId)) this.unCheckUser(user)
+        else this.checkUser(user)
+    }
+
+    checkUser(user: User) {
+        this.users.set(user.userId, user)
+    }
+
+    unCheckUser(user: User) {
+        if (this.users.has(user.userId)) this.users.delete(user.userId)
+    }
+
+    get usersList() {
+        const userList: User[] = []
+        this.users.forEach((user, _) => {
+            userList.push(user)
+        })
+        return userList
+    }
+}
+
+export const userSelectStore = new UserSelectStore()
+
+export const UserSelector = observer(({ user }: { user: User }) => {
+    return (
+        <label className="c_checkbox">
+            <input
+                readOnly={true}
+                type="checkbox"
+                checked={userSelectStore.hasSelectUser(user.userId)}
             />
             <span className="checkmark"></span>
         </label>

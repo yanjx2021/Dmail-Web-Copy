@@ -7,10 +7,12 @@ import { SendRequestResponseState } from '../utils/message'
 import { authStore } from './authStore'
 import { User, userStore } from './userStore'
 import { LocalDatabase } from './localData'
+import { Chat, chatStore } from './chatStore'
 
 export enum RequestContentType {
     MakeFriend = 'MakeFriend',
-    JoinGroup = 'JoinGroup'
+    JoinGroup = 'JoinGroup',
+    GroupInvitation = 'GroupInvitation',
 }
 
 export interface MakeFriendRequest {
@@ -22,7 +24,13 @@ export interface JoinGroupRequest {
     chatId: number
 }
 
-export type RequestContent = MakeFriendRequest | JoinGroupRequest
+export interface GroupInvitationRequest {
+    type: RequestContentType.GroupInvitation
+    receiverId: number
+    chatId: number
+}
+
+export type RequestContent = MakeFriendRequest | JoinGroupRequest | GroupInvitationRequest
 
 interface RequestInfo {
     reqId: number,
@@ -46,11 +54,29 @@ export class Request {
     state: RequestState = RequestState.Unsolved
     reqId: number = 0
     senderId: number = 0
+
+    sendUser: User | null = null
+    receiveUser: User | null = null
+    chat: Chat | null = null
+
     message: string = ''
     content: RequestContent = {
         type: RequestContentType.MakeFriend,
         receiverId: 0
     }
+
+    get isSender() {
+        return this.senderId === authStore.userId
+    }
+
+    get textTip() {
+        if (this.content.type === RequestContentType.JoinGroup) {
+            return this.isSender ? this.chat?.name : this.sendUser?.name
+        } else {
+            return this.isSender ? this.receiveUser?.showName : this.sendUser?.showName
+        }
+    }
+
     constructor({state, reqId, senderId, message, content} : {state : RequestState, reqId : number, senderId : number, message : string, content : RequestContent}) {
         makeAutoObservable(this, {}, { autoBind: true })
         this.state = state
@@ -71,11 +97,32 @@ export class Request {
             },
         })
     }
+
+    bindObject() {
+        if (this.senderId === 0) return this
+        this.sendUser = userStore.getUser(this.senderId)
+        switch (this.content.type) {
+            case RequestContentType.MakeFriend:
+                this.receiveUser = userStore.getUser(this.content.receiverId)
+                break
+            case RequestContentType.JoinGroup:
+                this.chat = chatStore.getChat(this.content.chatId)
+                break
+            case RequestContentType.GroupInvitation:
+                this.receiveUser = userStore.getUser(this.content.receiverId)
+                this.chat = chatStore.getChat(this.content.chatId)
+                break
+            default:
+                console.log('只要到达，那个地方...')
+        }
+        return this
+    }
+
     static createFromReceiveRequest(req: ReceiveRequest) {
         return new Request({
             state: req.state,
             ...req.info,
-        })
+        }).bindObject()
     }
     static createFromSendRequest({message, content} : {message: string, content: RequestContent}) {
         return new Request({
@@ -84,14 +131,18 @@ export class Request {
             senderId: authStore.userId,
             message: message,
             content: content,
-        })
+        }).bindObject()
     }
+
     setToSelf(req: Request) {
         this.state = req.state
         this.senderId = req.senderId
         this.reqId = req.reqId
         this.message = req.message
         this.content = req.content
+        this.sendUser = req.sendUser
+        this.receiveUser = req.receiveUser
+        this.chat = req.chat
     }
     serialized(): string {
         const request = {
@@ -138,25 +189,18 @@ export class RequestStore {
     }
 
     get requestsList() {
-        const unsolvedRequests : {message: string, reqId: number, senderId: number, content: RequestContent, state: RequestState}[] = []
-        const waitintSolvedRequests : {message: string, reqId: number, senderId: number, content: RequestContent, state: RequestState}[] = []
-        const solvedRequests : {message: string, reqId: number, senderId: number, content: RequestContent, state: RequestState}[] = []
-        this.requests.forEach((req, reqId) => {
+        const unsolvedRequests : Request[] = []
+        const waitintSolvedRequests : Request[] = []
+        const solvedRequests : Request[] = []
+        this.requests.forEach((req, _) => {
             if (req.state === RequestState.Unsolved) {
-                if (req.senderId !== authStore.userId) unsolvedRequests.push({message: req.message, reqId: reqId, senderId: req.senderId, content: req.content, state: req.state})
-                else waitintSolvedRequests.push({message: req.message, reqId: reqId, senderId: req.senderId, content: req.content, state: req.state})
+                if (req.senderId !== authStore.userId) unsolvedRequests.push(req)
+                else waitintSolvedRequests.push(req)
             } else {
-                solvedRequests.push({message: req.message, reqId: reqId, senderId: req.senderId, content: req.content, state: req.state})
+                solvedRequests.push(req)
             }
         })
         return unsolvedRequests.concat(waitintSolvedRequests, solvedRequests)
-    }
-    get requestStashList() {
-        const requests: {message: string, reqId: number}[] = []
-        this.requsetStash.forEach((req, reqId) => {
-            requests.push({message: req.message, reqId: reqId})
-        })
-        return requests
     }
 
     sendRequestResponseHandler(data: ReceiveSendRequestResponseData) {
@@ -251,8 +295,34 @@ export class RequestStore {
         this.message = ''
         this.toggleClientId()
     }
+    sendGroupInvitationRequest(chatId: number, receiverId: number | null) {
+        if (receiverId === null) {
+            this.errors = "用户ID不能为空, 请输入用户ID"
+            return
+        }
+        this.requsetStash.set(this.clientId, Request.createFromSendRequest({
+            message: this.message,
+            content: {
+                type: RequestContentType.GroupInvitation,
+                chatId: chatId,
+                receiverId: receiverId
+            }
+        }))
+        MessageServer.Instance().send(Send.SendRequest, {
+            clientId: this.clientId,
+            message: this.message,
+            content: {
+                type: RequestContentType.GroupInvitation,
+                chatId: chatId,
+                receiverId: receiverId
+            }
+        })
+        this.message = ''
+        this.toggleClientId()
+    }
 
     setRequest(req: Request) {
+        req.bindObject()
         const request = this.requests.get(req.reqId)
         if (request === undefined) {
             this.requests.set(req.reqId, req)

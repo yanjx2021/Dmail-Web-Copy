@@ -1,4 +1,4 @@
-import { RequestState } from '../stores/requestStore'
+import { RequestContentType, RequestState } from '../stores/requestStore'
 
 import { ChatId, ChatMessageFileInfo, ChatMessageType } from "../stores/chatStore"
 import { UserId } from "../stores/authStore"
@@ -299,7 +299,7 @@ export interface SendPullData {
 }
 
 export interface UserRequestContent {
-    type: 'MakeFriend' | 'JoinGroup'
+    type: RequestContentType
     receiverId?: number
     chatId?: number
 }

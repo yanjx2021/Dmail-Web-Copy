@@ -1,5 +1,6 @@
 import { action, observe } from 'mobx'
 import {
+    Request,
     RequestContent,
     RequestContentType,
     RequestState,
@@ -19,9 +20,10 @@ import { chatStore } from '../stores/chatStore'
 
 const RequestItemStatus = observer(
     ({ senderId, state, reqId }: { senderId: number; state: RequestState; reqId: number }) => {
+        const isSender = senderId === authStore.userId
         switch (state) {
             case RequestState.Unsolved:
-                return senderId === authStore.userId ? (
+                return isSender ? (
                     <div className="align-center-container">等待对方验证...</div>
                 ) : (
                     <div className="align-center-container">
@@ -41,14 +43,14 @@ const RequestItemStatus = observer(
                 )
                 break
             case RequestState.Approved:
-                return senderId === authStore.userId ? (
+                return isSender ? (
                     <div className="align-center-container">请求已通过</div>
                 ) : (
                     <div className="align-center-container">已同意</div>
                 )
                 break
             case RequestState.Refused:
-                return senderId === authStore.userId ? (
+                return isSender ? (
                     <div className="align-center-container">请求被拒绝</div>
                 ) : (
                     <div className="align-center-container">已拒绝</div>
@@ -57,137 +59,126 @@ const RequestItemStatus = observer(
     }
 )
 
-const RequestFriendItem = observer(
-    ({
-        message,
-        reqId,
-        senderId,
-        receiverId,
-        state,
-    }: {
-        message: string
-        reqId: number
-        senderId: number
-        receiverId: number
-        state: RequestState
-    }) => {
-        return (
-            <li>
-                <a className="card">
-                    <div className="card-body">
-                        <div className="media">
-                            <div className="avatar me-3">
-                                <span className="rounded-circle"></span>
-                                <div className="avatar rounded-circle no-image timber">
-                                    <span>
-                                        {senderId === authStore.userId ? receiverId : senderId}
-                                    </span>
-                                </div>
+const RequestFriendItem = observer(({ request }: { request: Request }) => {
+    //TODO-yjx
+    //添加好友申请标题的样式,这个玩意：<h5>好友申请</h5>
+    return (
+        <li>
+            <a className="card">
+                <div className="card-body">
+                    <h5>好友申请</h5>
+                    <div className="media">
+                        <div className="avatar me-3">
+                            <span className="rounded-circle"></span>
+                            <div className="avatar rounded-circle no-image timber">
+                                <span>
+                                    {request.isSender && 'receiverId' in request.content
+                                        ? request.content.receiverId
+                                        : request.senderId}
+                                </span>
                             </div>
-                            <div className="media-body overflow-hidden">
-                                <div className="d-flex align-items-center mb-1">
-                                    <h6 className="text-truncate mb-0 me-auto">
-                                        {senderId === authStore.userId
-                                            ? userStore.getUser(receiverId).showName
-                                            : userStore.getUser(senderId).showName}
-                                    </h6>
-                                </div>
-                                <div className="text-truncate">{message}</div>
-                            </div>
-                            <RequestItemStatus senderId={senderId} state={state} reqId={reqId} />
                         </div>
-                    </div>
-                </a>
-            </li>
-        )
-    }
-)
-const RequestGroupItem = observer(
-    ({
-        message,
-        reqId,
-        senderId,
-        chatId,
-        state,
-    }: {
-        message: string
-        reqId: number
-        senderId: number
-        chatId: number
-        state: RequestState
-    }) => {
-        return (
-            <li>
-                <a className="card">
-                    <div className="card-body">
-                        <div className="media">
-                            <div className="avatar me-3">
-                                <span className="rounded-circle"></span>
-                                <div className="avatar rounded-circle no-image timber">
-                                    <span>{senderId === authStore.userId ? chatId : senderId}</span>
-                                </div>
+                        <div className="media-body overflow-hidden">
+                            <div className="d-flex align-items-center mb-1">
+                                <h6 className="text-truncate mb-0 me-auto">{request.textTip}</h6>
                             </div>
-                            <div className="media-body overflow-hidden">
-                                <div className="d-flex align-items-center mb-1">
-                                    <h6 className="text-truncate mb-0 me-auto">
-                                        {senderId === authStore.userId
-                                            ? chatStore.getChat(chatId).name
-                                            : userStore.getUser(senderId).showName}
-                                    </h6>
-                                </div>
-                                <div className="text-truncate">{message}</div>
-                            </div>
-                            <RequestItemStatus senderId={senderId} state={state} reqId={reqId} />
+                            <div className="text-truncate">{request.message}</div>
                         </div>
+                        <RequestItemStatus
+                            senderId={request.senderId}
+                            state={request.state}
+                            reqId={request.reqId}
+                        />
                     </div>
-                </a>
-            </li>
-        )
-    }
-)
+                </div>
+            </a>
+        </li>
+    )
+})
 
-const RequestItem = observer(
-    ({
-        message,
-        reqId,
-        senderId,
-        content,
-        state,
-    }: {
-        message: string
-        reqId: number
-        senderId: number
-        content: RequestContent
-        state: RequestState
-    }) => {
-        const userName = userStore.getUser(senderId).showName
-        switch (content.type) {
-            case RequestContentType.MakeFriend:
-                return (
-                    <RequestFriendItem
-                        message={message}
-                        state={state}
-                        reqId={reqId}
-                        senderId={senderId}
-                        receiverId={content.receiverId}
-                    />
-                )
-                break
-            case RequestContentType.JoinGroup:
-                return (
-                    <RequestGroupItem
-                        message={message}
-                        state={state}
-                        reqId={reqId}
-                        senderId={senderId}
-                        chatId={content.chatId}
-                    />
-                )
-            default:
-                return <div>Some Error</div>
-        }
+const RequestGroupItem = observer(({ request }: { request: Request }) => {
+    return (
+        <li>
+            <a className="card">
+                <div className="card-body">
+                    <h5>群聊申请</h5>
+                    <div className="media">
+                        <div className="avatar me-3">
+                            <span className="rounded-circle"></span>
+                            <div className="avatar rounded-circle no-image timber">
+                                <span>
+                                    {request.isSender && 'chatId' in request.content
+                                        ? request.content.chatId
+                                        : request.senderId}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="media-body overflow-hidden">
+                            <div className="d-flex align-items-center mb-1">
+                                <h6 className="text-truncate mb-0 me-auto">{request.textTip}</h6>
+                            </div>
+                            <div className="text-truncate">{request.message}</div>
+                        </div>
+                        <RequestItemStatus
+                            senderId={request.senderId}
+                            state={request.state}
+                            reqId={request.reqId}
+                        />
+                    </div>
+                </div>
+            </a>
+        </li>
+    )
+})
+
+const RequestGroupInvitationItem = observer(({ request }: { request: Request }) => {
+    const textTitle = `群聊 ${request.chat?.name} 的邀请`
+    return (
+        <li>
+            <a className="card">
+                <div className="card-body">
+                    <h5>{textTitle}</h5>
+                    <div className="media">
+                        <div className="avatar me-3">
+                            <span className="rounded-circle"></span>
+                            <div className="avatar rounded-circle no-image timber">
+                                <span>
+                                    {request.isSender && 'receiverId' in request.content
+                                        ? request.content.receiverId
+                                        : request.senderId}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="media-body overflow-hidden">
+                            <div className="d-flex align-items-center mb-1">
+                                <h6 className="text-truncate mb-0 me-auto">{request.textTip}</h6>
+                            </div>
+                            <div className="text-truncate">{request.message}</div>
+                        </div>
+                        <RequestItemStatus
+                            senderId={request.senderId}
+                            state={request.state}
+                            reqId={request.reqId}
+                        />
+                    </div>
+                </div>
+            </a>
+        </li>
+    )
+})
+
+const RequestItem = observer(({ request }: { request: Request }) => {
+    switch (request.content.type) {
+        case RequestContentType.MakeFriend:
+            return <RequestFriendItem request={request} />
+        case RequestContentType.JoinGroup:
+            return <RequestGroupItem request={request} />
+        case RequestContentType.GroupInvitation:
+            return <RequestGroupInvitationItem request={request} />
+        default:
+            return <div>Some Error</div>
     }
-)
+})
 
 const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore }) => {
     return (
@@ -216,15 +207,8 @@ const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore 
                     placeholder="搜索..."></input>
             </div>
             <ul className="chat-list">
-                {requestStore.requestsList.map(({ message, reqId, senderId, content, state }) => (
-                    <RequestItem
-                        key={reqId}
-                        state={state}
-                        message={message}
-                        reqId={reqId}
-                        senderId={senderId}
-                        content={content}
-                    />
+                {requestStore.requestsList.map((req) => (
+                    <RequestItem key={req.reqId} request={req} />
                 ))}
             </ul>
         </div>
