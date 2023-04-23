@@ -20,7 +20,9 @@ import { secureAuthStore } from '../../stores/secureAuthStore'
 import React from 'react'
 import { UploadingFile, fileStore } from '../../stores/fileStore'
 import { isImage } from '../../utils/file'
-import { messageSelectStore } from '../MessagesBox/Selector'
+import { messageSelectStore, userSelectStore } from '../MessagesBox/Selector'
+import { MessageServer } from '../../utils/networkWs'
+import { Send } from '../../utils/message'
 
 export const ChatView = observer(({ chat }: { chat: Chat }) => {
     const [messages, setMessages] = useImmer<ChatMessage[]>([])
@@ -63,6 +65,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         action(() => {
             if (!secureAuthStore.showSecureBox) {
                 chat.setReadCuser()
+                MessageServer.Instance().send<Send.GetGroupUsers>(Send.GetGroupUsers, chat.chatId)
             }
         }),
         [chat, secureAuthStore.showSecureBox]
@@ -87,7 +90,10 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
     )
 
     useEffect(
-        action(() => messageSelectStore.reset()),
+        action(() => {
+            messageSelectStore.reset()
+            userSelectStore.reset()
+        }),
         [chat]
     )
 

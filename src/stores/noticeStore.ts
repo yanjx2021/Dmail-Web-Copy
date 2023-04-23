@@ -16,8 +16,6 @@ export interface ReceiveNoticeData {
 export class NoticeStore {
     timestamp: number | undefined = undefined
 
-
-
     constructor() {
         makeAutoObservable(this, {}, {autoBind: true})
         MessageServer.on(Receive.Notice, this.receiveNoticeHandler)

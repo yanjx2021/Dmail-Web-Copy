@@ -9,14 +9,11 @@ import '../../styles/AllChats.css'
 import { ChatSidebarHeader } from './ChatSidebarHeader'
 import { UserSelector, userSelectStore } from '../MessagesBox/Selector'
 import { User } from '../../stores/userStore'
+import { modalStore } from '../../stores/modalStore'
 
 //这里面直接内置通讯录就行
 
-export const UserSidebarUsersItemCard = observer(({
-    user
-}: {
-    user: User
-}) => {
+export const UserSidebarUsersItemCard = observer(({ user }: { user: User }) => {
     return (
         <a href="#" className="card" onClick={() => userSelectStore.toggleCheckUser(user)}>
             <div className="card-body">
@@ -33,7 +30,7 @@ export const UserSidebarUsersItemCard = observer(({
                         </div>
                         <div className="text-truncate"></div>
                     </div>
-                    <UserSelector user={user}/>
+                    <UserSelector user={user} />
                 </div>
             </div>
         </a>
@@ -44,9 +41,7 @@ export const UserSidebarUsersItem = observer(({ chat }: { chat: Chat }) => {
     if (!chat.bindUser) return <></>
     return (
         <li>
-            <UserSidebarUsersItemCard
-                user={chat.bindUser}
-            />
+            <UserSidebarUsersItemCard user={chat.bindUser} />
         </li>
     )
 })
@@ -75,13 +70,26 @@ export const UserSidebar = observer(({ chat }: { chat: Chat }) => {
     return (
         <div className="addnew-user-sidebar py-xl-4 py-3 px-xl-4 px-3">
             <div className="d-flex flex-column">
-                {isPrivate ? <ChatSidebarHeader title='邀请其他好友创建群聊'/> : <ChatSidebarHeader title='邀请好友入群'/>}
+                {isPrivate ? (
+                    <ChatSidebarHeader title="邀请其他好友创建群聊" />
+                ) : (
+                    <ChatSidebarHeader title="邀请好友入群" />
+                )}
                 <div className="body mt-4">
+                    <button
+                        onClick={action(() => {
+                            if (isPrivate) {
+                                modalStore.modalType = 'CreateGroup'
+                                modalStore.isOpen = true
+                            } else userSelectStore.inviteUsers(chat.chatId)
+                        })}>
+                        邀请
+                    </button>
                     <div className="form-group input-group-lg search mb-3">
                         <i className="zmdi zmdi-search"></i>
                         <input type="text" className="form-control" placeholder="搜索..." />
                     </div>
-                    <UserSidebarUsersList/>
+                    <UserSidebarUsersList />
                 </div>
             </div>
         </div>

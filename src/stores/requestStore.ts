@@ -51,6 +51,8 @@ interface ReceiveRequest {
 }
 
 export class Request {
+    
+
     state: RequestState = RequestState.Unsolved
     reqId: number = 0
     senderId: number = 0
@@ -66,7 +68,7 @@ export class Request {
     }
 
     get isSender() {
-        return this.senderId === authStore.userId
+        return authStore && this.senderId === authStore.userId
     }
 
     get textTip() {
@@ -301,7 +303,7 @@ export class RequestStore {
             return
         }
         this.requsetStash.set(this.clientId, Request.createFromSendRequest({
-            message: this.message,
+            message: '欢迎加入群聊',
             content: {
                 type: RequestContentType.GroupInvitation,
                 chatId: chatId,

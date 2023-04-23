@@ -2,9 +2,11 @@ import { action, makeAutoObservable } from "mobx"
 import { Chat, ChatMessage, ChatMessageState, ChatMessageType, chatStore } from "../../stores/chatStore"
 import { observer } from "mobx-react-lite"
 import { modalStore } from "../../stores/modalStore"
-import { SendSendMessageData } from "../../utils/message"
+import { Send, SendSendMessageData } from "../../utils/message"
 import { authStore } from "../../stores/authStore"
 import { User } from "../../stores/userStore"
+import { MessageServer } from "../../utils/networkWs"
+import { requestStore } from "../../stores/requestStore"
 
 export class MessageSelectStore {
     msgs: Map<number, ChatMessage> = new Map()
@@ -123,6 +125,22 @@ export class UserSelectStore {
     errors: string = ''
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
+    }
+
+    get isEmpty() {
+        return this.users.size === 0
+    }
+
+    inviteUsers(chatId: number) {
+        if (this.usersList.length === 0) {
+            this.errors = '请选择一个好友，来邀请他/她加入群聊'
+            return
+        }
+        this.usersList.forEach((user, _) => {
+            requestStore.sendGroupInvitationRequest(chatId, user.userId)
+        })
+        console.log('清除选中')
+        this.reset()
     }
 
     hasSelectUser(userId: number) {

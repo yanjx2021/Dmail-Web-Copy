@@ -24,7 +24,7 @@ import { User, UserStore, userStore } from './userStore'
 import { timeStamp } from 'console'
 import { pinyin } from 'pinyin-pro'
 import { ReceiveCreateGroupChatResponse } from '../utils/message'
-import { chineseRegex } from '../constants/chineseAndLetter'
+import { chineseOrEnglishRegex, englishRegex } from '../constants/chineseAndLetter'
 import { secureAuthStore } from './secureAuthStore'
 import { userSettingStore } from './userSettingStore'
 import { ChatMessageContent } from '../components/ChatView/ChatViewContent'
@@ -34,6 +34,7 @@ import { FileChangeInfo } from 'fs/promises'
 import { text } from 'stream/consumers'
 import { Content } from 'antd/es/layout/layout'
 import { serialize } from 'v8'
+import { userSelectStore } from '../components/MessagesBox/Selector'
 
 export type ChatId = number
 
@@ -68,7 +69,7 @@ export enum ChatMessageType {
     Image = 'Image',
     Deleted = 'Deleted',
     Transfer = 'Transfer',
-    Revoked = 'Revoked'
+    Revoked = 'Revoked',
 }
 
 export type ChatMessageContentType =
@@ -114,7 +115,7 @@ export class ChatMessage {
         MessageServer.Instance().send<Send.RevokeMessage>(Send.RevokeMessage, {
             chatId: this.chatId,
             inChatId: this.inChatId!,
-            method: this.revokeMethod()
+            method: this.revokeMethod(),
         })
     }
 
@@ -133,7 +134,7 @@ export class ChatMessage {
     static createFromReciveMessage(receiveMessage: ReceiveChatMessage) {
         return new ChatMessage({
             type: receiveMessage.type,
-            content:  JSON.parse(receiveMessage.serializedContent),
+            content: JSON.parse(receiveMessage.serializedContent),
             timestamp: receiveMessage.timestamp,
             inChatId: receiveMessage.inChatId,
             senderId: receiveMessage.senderId,
@@ -214,8 +215,7 @@ export class ChatMessage {
             return '[已删除]'
         } else if (this.type === ChatMessageType.Revoked) {
             return '[已撤回]'
-        } 
-        else {
+        } else {
             return '[文件/图片消息]'
         }
     }
@@ -268,9 +268,6 @@ export class Chat {
     userIds: number[] | null = null
     groupName: string | null = null
     groupAvaterPath: string | null = null
-
-
-
 
     constructor(chatId: number) {
         this.chatId = chatId
@@ -612,7 +609,6 @@ export class ChatStore {
         MessageServer.on(Receive.GetGroupUsersResponse, this.GetGroupUsersResponseHandler)
     }
 
-
     reset() {
         this.chats.clear()
         this.setViewMessages = undefined
@@ -626,12 +622,14 @@ export class ChatStore {
         const nonChineseChats: Chat[] = []
         let groupCounts: number[] = Array(27).fill(0)
         const groups: string[] = []
-        const firstLetter = (chat: Chat) =>
-            pinyin(chat.name[0].toLowerCase(), { pattern: 'initial', toneType: 'none' })
+        const firstLetter = (chat: Chat) => {
+            if (englishRegex.test(chat.name[0])) return chat.name[0].toLowerCase()
+            return pinyin(chat.name[0].toLowerCase(), { pattern: 'initial', toneType: 'none' })
+        }
 
         this.chats.forEach((chat, _) => {
             if (chat.chatType === ChatType.Private) {
-                if (chineseRegex.test(chat.name[0])) {
+                if (chineseOrEnglishRegex.test(chat.name[0])) {
                     chats.push(chat)
                 } else {
                     groupCounts[26]++
@@ -657,6 +655,11 @@ export class ChatStore {
         //为特殊字符添加编号#
         groupCounts[26] !== 0 && groups.push('#')
         groupCounts = groupCounts.filter((value, _) => value !== 0)
+        console.log({
+            chats: chats,
+            groups: groups,
+            groupCounts: groupCounts,
+        })
         return {
             chats: chats,
             groups: groups,
@@ -829,6 +832,13 @@ export class ChatStore {
             return
         } else {
             this.getChat(data.chatId!)
+            if (!userSelectStore.isEmpty) {
+                
+                this.activeChatId &&
+                    this.getChat(this.activeChatId).chatType === ChatType.Private &&
+                    userSelectStore.checkUser(this.getChat(this.activeChatId).bindUser!)
+                userSelectStore.inviteUsers(data.chatId!)
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { ChatType } from "./chatStore";
+import { userSelectStore } from "../components/MessagesBox/Selector";
 
 
 export class ChatSideStore {
@@ -16,6 +17,7 @@ export class ChatSideStore {
             this.type = 'chat'
             this.open = true
         } else if (this.type !== 'chat') {
+            userSelectStore.reset()
             this.type = 'chat'
         } else {
             this.open = false
@@ -30,10 +32,12 @@ export class ChatSideStore {
             this.type = 'user'
         } else {
             this.open = false
+            userSelectStore.reset()
         }
     }
 
     close() {
+        userSelectStore.reset()
         this.open = false
     }
 
