@@ -36,3 +36,21 @@
 {
     padding-top: .75rem !important;
 }
+
+.message .c_checkbox
+{
+  top: 12px;
+  margin-left: 8px;
+  margin-right: 12px;
+}
+.message .c_checkbox .checkmark
+{
+  height:20px;
+  width:20px;
+  border-radius: 30rem;
+}
+.message .c_checkbox .checkmark::after
+{
+  left:6.5px;
+  top:3px;
+}

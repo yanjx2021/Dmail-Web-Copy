@@ -19,6 +19,9 @@ import { imageStore } from '../../stores/imageStore'
 import { MessageDropDown } from '../DropDown/MessageDropDown'
 import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
+import { FileItem, LoadingFileItem } from '../ChatView/FileItem'
+import { LoadingPhotoItem, PhotoItem } from '../ChatView/PhotoItem'
+import '../../styles/MessageBoxItem.css'
 
 export const ChatMessageBoxItemContent = observer(
     ({ msg, userId }: { msg: ChatMessage; userId: number }) => {
@@ -34,22 +37,20 @@ export const ChatMessageBoxItemContent = observer(
             if (msg.bindUploading) {
                 return (
                     <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                        <h3>图片正在上传</h3>
-                        <h5>{msg.bindUploading.progress}</h5>
+                        <LoadingPhotoItem bindUploading={msg.bindUploading} />
                     </div>
                 )
             } else {
                 const cachedUrl = imageStore.getImageUrl(msg.content)
 
-                return <img className="rounded mt-1" src={cachedUrl.url} alt=""></img>
+                return <PhotoItem cachedUrl={cachedUrl} />
             }
         } else if (msg.type === ChatMessageType.File) {
             if (msg.bindUploading) {
                 // 正在上传
                 return (
                     <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                        <h3>文件正在上传</h3>
-                        <h5>{msg.bindUploading.progress}</h5>
+                        <LoadingFileItem bindUploading={msg.bindUploading} />
                     </div>
                 )
             } else {
@@ -58,16 +59,7 @@ export const ChatMessageBoxItemContent = observer(
                 const fileInfo = msg.content as ChatMessageFileInfo
                 return (
                     <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                        <h3>文件</h3>
-                        <h5>{fileInfo.name}</h5>
-                        <h5>{fileInfo.hash}</h5>
-                        <h5>{fileInfo.size}</h5>
-                        <button
-                            onClick={action(() =>
-                                fileStore.getFileUrl(fileInfo.hash, (url) =>
-                                    createDownload(url, fileInfo.name)
-                                )
-                            )}></button>
+                        <FileItem fileInfo={fileInfo} />
                     </div>
                 )
             }
@@ -94,35 +86,26 @@ export const ChatMessageBoxItem = observer(
     React.forwardRef(({ msg, userId }: { msg: ChatMessage; userId: number }, ref: any) => {
         const isRight = msg.senderId === userId
         return (
-            <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
+            <li className={'d-flex message'} ref={ref}>
                 {isRight ? (
-                    <></>
+                    <div className="avatar mr-lg-3 me-2">
+                        <div className={'avatar rounded-circle no-image ' + 'timber'}>
+                            <span>我</span>
+                        </div>
+                    </div>
                 ) : (
                     <div className="avatar mr-lg-3 me-2">
-                        <div className={'avatar rounded-circle no-image ' + ''}>
+                        <div className={'avatar rounded-circle no-image ' + 'timber'}>
                             <span>{msg.senderId}</span>
                         </div>
                     </div>
                 )}
                 <div className="message-body">
                     <span className="date-time text-muted">{msg.getMessageBoxTip}</span>
-                    <div
-                        className={
-                            'message-row d-flex align-items-center' +
-                            (isRight ? ' justify-content-end' : '')
-                        }>
+                    <div className={'message-row d-flex align-items-center'}>
                         <ChatMessageBoxItemContent msg={msg} userId={userId} />
                     </div>
                 </div>
-                {isRight ? (
-                    <div className="avatar mr-lg-3 me-2">
-                        <div className={'avatar rounded-circle no-image ' + ''}>
-                            <span>{userId}</span>
-                        </div>
-                    </div>
-                ) : (
-                    <></>
-                )}
             </li>
         )
     })

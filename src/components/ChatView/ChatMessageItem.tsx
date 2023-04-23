@@ -20,6 +20,8 @@ import { MessageDropDown } from '../DropDown/MessageDropDown'
 import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
 import { chatSideStore } from '../../stores/chatSideStore'
+import { FileItem, LoadingFileItem } from './FileItem'
+import { LoadingPhotoItem, PhotoItem } from './PhotoItem'
 
 const MessageAlert = () => {
     return (
@@ -69,22 +71,20 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         if (msg.bindUploading) {
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                    <h3>图片正在上传</h3>
-                    <h5>{msg.bindUploading.progress}</h5>
+                    <LoadingPhotoItem bindUploading={msg.bindUploading} />
                 </div>
             )
         } else {
             const cachedUrl = imageStore.getImageUrl(msg.content)
 
-            return <img className="rounded mt-1" src={cachedUrl.url} alt=""></img>
+            return <PhotoItem cachedUrl={cachedUrl} />
         }
     } else if (msg.type === ChatMessageType.File) {
         if (msg.bindUploading) {
             // 正在上传
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                    <h3>文件正在上传</h3>
-                    <h5>{msg.bindUploading.progress}</h5>
+                    <LoadingFileItem bindUploading={msg.bindUploading} />
                 </div>
             )
         } else {
@@ -93,16 +93,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             const fileInfo = msg.content as ChatMessageFileInfo
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                    <h3>文件</h3>
-                    <h5>{fileInfo.name}</h5>
-                    <h5>{fileInfo.hash}</h5>
-                    <h5>{fileInfo.size}</h5>
-                    <button
-                        onClick={action(() =>
-                            fileStore.getFileUrl(fileInfo.hash, (url) =>
-                                createDownload(url, fileInfo.name)
-                            )
-                        )}></button>
+                    <FileItem fileInfo={fileInfo} />
                 </div>
             )
         }
@@ -143,6 +134,9 @@ export const ChatMessageItem = observer(
                 <div style={{ height: '1px' }}></div>
             ) : (
                 <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
+                    {enableDropDown && messageSelectStore.showSelector && (
+                        <MessageSelector msg={msg} />
+                    )}
                     {!isRight ? (
                         <a
                             type="button"
@@ -173,15 +167,9 @@ export const ChatMessageItem = observer(
                                         <MessageDropDown msg={msg} indexInView={indexInView} />
                                     )}
                                     <ChatMessageItemContent msg={msg} />
-                                    {enableDropDown && messageSelectStore.showSelector && (
-                                        <MessageSelector msg={msg} />
-                                    )}
                                 </>
                             ) : (
                                 <>
-                                    {enableDropDown && messageSelectStore.showSelector && (
-                                        <MessageSelector msg={msg} />
-                                    )}
                                     <ChatMessageItemContent msg={msg} />
                                     {enableDropDown && (
                                         <MessageDropDown msg={msg} indexInView={indexInView} />
