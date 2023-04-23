@@ -1,0 +1,22 @@
+.ant-modal-body .container-xxl 
+{
+  overflow-x: hidden;
+}
+.ant-modal-body .container-xxl div>div>:first-child li 
+{
+    padding-top: .75rem !important;
+}
+.ant-modal-body .message .message-content
+{
+    background-color: var(--border-color);
+    min-width: 6%;
+    border-radius: 0 15px 15px 15px;
+    font-size: 16px; 
+    white-space: pre-wrap;
+    word-wrap:break-word;
+}
+.ant-modal-body .message .message-body
+{
+  flex:1;
+  width:0;
+}

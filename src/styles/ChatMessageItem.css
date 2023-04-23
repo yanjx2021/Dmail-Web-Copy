@@ -37,18 +37,20 @@
     padding-top: .75rem !important;
 }
 
-.message-row .c_checkbox
+.message .c_checkbox
 {
+  top: 12px;
   margin-left: 8px;
-  margin-right: 6px;
+  margin-right: 12px;
 }
-.message-row .c_checkbox .checkmark
+.message .c_checkbox .checkmark
 {
-  height:15px;
-  width:15px;
+  height:20px;
+  width:20px;
+  border-radius: 30rem;
 }
-.message-row .c_checkbox .checkmark::after
+.message .c_checkbox .checkmark::after
 {
-  left:4px;
-  top:1px;
+  left:6.5px;
+  top:3px;
 }

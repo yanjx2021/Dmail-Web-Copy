@@ -70,20 +70,20 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         if (msg.bindUploading) {
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                    <LoadingPhotoItem bindUploading={msg.bindUploading}/>
+                    <LoadingPhotoItem bindUploading={msg.bindUploading} />
                 </div>
             )
         } else {
             const cachedUrl = imageStore.getImageUrl(msg.content)
 
-            return <PhotoItem cachedUrl={cachedUrl}/>
+            return <PhotoItem cachedUrl={cachedUrl} />
         }
     } else if (msg.type === ChatMessageType.File) {
         if (msg.bindUploading) {
             // 正在上传
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                  <LoadingFileItem bindUploading={msg.bindUploading}/>
+                    <LoadingFileItem bindUploading={msg.bindUploading} />
                 </div>
             )
         } else {
@@ -92,7 +92,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             const fileInfo = msg.content as ChatMessageFileInfo
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                    <FileItem fileInfo={fileInfo}/>
+                    <FileItem fileInfo={fileInfo} />
                 </div>
             )
         }
@@ -133,6 +133,9 @@ export const ChatMessageItem = observer(
                 <div style={{ height: '1px' }}></div>
             ) : (
                 <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
+                    {enableDropDown && messageSelectStore.showSelector && (
+                        <MessageSelector msg={msg} />
+                    )}
                     {!isRight ? (
                         <div className="avatar mr-lg-3 me-2">
                             <div
@@ -157,15 +160,9 @@ export const ChatMessageItem = observer(
                                         <MessageDropDown msg={msg} indexInView={indexInView} />
                                     )}
                                     <ChatMessageItemContent msg={msg} />
-                                    {enableDropDown && messageSelectStore.showSelector && (
-                                        <MessageSelector msg={msg} />
-                                    )}
                                 </>
                             ) : (
                                 <>
-                                    {enableDropDown && messageSelectStore.showSelector && (
-                                        <MessageSelector msg={msg} />
-                                    )}
                                     <ChatMessageItemContent msg={msg} />
                                     {enableDropDown && (
                                         <MessageDropDown msg={msg} indexInView={indexInView} />
