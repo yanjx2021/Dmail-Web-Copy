@@ -36,3 +36,19 @@
 {
     padding-top: .75rem !important;
 }
+
+.message-row .c_checkbox
+{
+  margin-left: 8px;
+  margin-right: 6px;
+}
+.message-row .c_checkbox .checkmark
+{
+  height:15px;
+  width:15px;
+}
+.message-row .c_checkbox .checkmark::after
+{
+  left:4px;
+  top:1px;
+}
