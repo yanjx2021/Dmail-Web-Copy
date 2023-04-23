@@ -132,7 +132,7 @@ export class UserSelectStore {
     }
 
     inviteUsers(chatId: number) {
-        if (this.usersList.length === 0) {
+        if (this.isEmpty) {
             this.errors = '请选择一个好友，来邀请他/她加入群聊'
             return
         }

@@ -8,7 +8,7 @@ import { secureAuthStore } from '../../stores/secureAuthStore'
 import { message } from 'antd'
 import { useCallback, useEffect } from 'react'
 import { duration } from '../../constants/messageContent'
-import { messageSelectStore } from '../MessagesBox/Selector'
+import { messageSelectStore, userSelectStore } from '../MessagesBox/Selector'
 
 export const RegisterError = () => {
     useEffect(() => {
@@ -84,7 +84,19 @@ export const RegisterError = () => {
         })
         return disposer
     }, [])
-
+    useEffect(() => {
+        // userSelectStore
+        const disposer = autorun(() => {
+            if (userSelectStore.errors !== '') {
+                message.error({
+                    content: userSelectStore.errors,
+                    duration: duration,
+                    onClose: action(() => (userSelectStore.errors = '')),
+                })
+            }
+        })
+        return disposer
+    }, [])
 
     return <></>
 }

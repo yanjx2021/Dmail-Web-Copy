@@ -71,19 +71,23 @@ export const UserSidebar = observer(({ chat }: { chat: Chat }) => {
         <div className="addnew-user-sidebar py-xl-4 py-3 px-xl-4 px-3">
             <div className="d-flex flex-column">
                 {isPrivate ? (
-                    <ChatSidebarHeader title="邀请其他好友创建群聊" />
+                    <ChatSidebarHeader title="邀请好友创建群聊" />
                 ) : (
                     <ChatSidebarHeader title="邀请好友入群" />
                 )}
                 <div className="body mt-4">
                     <button
                         onClick={action(() => {
+                            if (userSelectStore.isEmpty) {
+                                userSelectStore.errors = '请选择一个好友，来邀请他/她加入群聊'
+                                return
+                            }
                             if (isPrivate) {
                                 modalStore.modalType = 'CreateGroup'
                                 modalStore.isOpen = true
                             } else userSelectStore.inviteUsers(chat.chatId)
                         })}>
-                        邀请
+                        {isPrivate ? '创建群聊' : '邀请好友'}
                     </button>
                     <div className="form-group input-group-lg search mb-3">
                         <i className="zmdi zmdi-search"></i>

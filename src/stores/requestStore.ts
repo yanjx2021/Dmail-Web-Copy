@@ -1,6 +1,15 @@
 import { action, makeAutoObservable } from 'mobx'
 import localforage from 'localforage'
-import { LoginResponseState, Receive, ReceiveLoginResponseData, ReceiveRequestStateUpdateData, ReceiveSolveRequestResponseData, RequestError, Send, SendUserSendRequestData } from '../utils/message'
+import {
+    LoginResponseState,
+    Receive,
+    ReceiveLoginResponseData,
+    ReceiveRequestStateUpdateData,
+    ReceiveSolveRequestResponseData,
+    RequestError,
+    Send,
+    SendUserSendRequestData,
+} from '../utils/message'
 import { MessageServer } from '../utils/networkWs'
 import { ReceiveSendRequestResponseData } from '../utils/message'
 import { SendRequestResponseState } from '../utils/message'
@@ -33,10 +42,10 @@ export interface GroupInvitationRequest {
 export type RequestContent = MakeFriendRequest | JoinGroupRequest | GroupInvitationRequest
 
 interface RequestInfo {
-    reqId: number,
-    senderId: number,
-    message: string,
-    content: RequestContent,
+    reqId: number
+    senderId: number
+    message: string
+    content: RequestContent
 }
 
 export enum RequestState {
@@ -51,8 +60,6 @@ interface ReceiveRequest {
 }
 
 export class Request {
-    
-
     state: RequestState = RequestState.Unsolved
     reqId: number = 0
     senderId: number = 0
@@ -64,7 +71,7 @@ export class Request {
     message: string = ''
     content: RequestContent = {
         type: RequestContentType.MakeFriend,
-        receiverId: 0
+        receiverId: 0,
     }
 
     get isSender() {
@@ -79,7 +86,19 @@ export class Request {
         }
     }
 
-    constructor({state, reqId, senderId, message, content} : {state : RequestState, reqId : number, senderId : number, message : string, content : RequestContent}) {
+    constructor({
+        state,
+        reqId,
+        senderId,
+        message,
+        content,
+    }: {
+        state: RequestState
+        reqId: number
+        senderId: number
+        message: string
+        content: RequestContent
+    }) {
         makeAutoObservable(this, {}, { autoBind: true })
         this.state = state
         this.reqId = reqId
@@ -95,7 +114,7 @@ export class Request {
             message: '正在加载',
             content: {
                 type: RequestContentType.MakeFriend,
-                receiverId: 0
+                receiverId: 0,
             },
         })
     }
@@ -126,7 +145,13 @@ export class Request {
             ...req.info,
         }).bindObject()
     }
-    static createFromSendRequest({message, content} : {message: string, content: RequestContent}) {
+    static createFromSendRequest({
+        message,
+        content,
+    }: {
+        message: string
+        content: RequestContent
+    }) {
         return new Request({
             state: RequestState.Unsolved,
             reqId: 0,
@@ -168,8 +193,6 @@ export class RequestStore {
     requsetStash: Map<ClientId, Request> = new Map()
     requests: Map<ReqId, Request> = new Map()
 
-
-
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
         MessageServer.on(Receive.Request, this.receiveRequestHandler)
@@ -191,9 +214,9 @@ export class RequestStore {
     }
 
     get requestsList() {
-        const unsolvedRequests : Request[] = []
-        const waitintSolvedRequests : Request[] = []
-        const solvedRequests : Request[] = []
+        const unsolvedRequests: Request[] = []
+        const waitintSolvedRequests: Request[] = []
+        const solvedRequests: Request[] = []
         this.requests.forEach((req, _) => {
             if (req.state === RequestState.Unsolved) {
                 if (req.senderId !== authStore.userId) unsolvedRequests.push(req)
@@ -226,7 +249,10 @@ export class RequestStore {
                     this.errors = '已经添加过该好友'
                     break
                 case 'AlreadyInGroup':
-                    this.errors = '已经在该群聊中了'
+                    const req = this.requsetStash.get(data.clientId)
+                    req && req.receiveUser
+                        ? (this.errors = `${req.receiveUser.showName}已加入该群聊`)
+                        : (this.errors = '已加入该群聊')
                     break
                 case 'RequestExisted':
                     this.errors = '已向该用户发送过请求，或尚未处理对方请求'
@@ -253,71 +279,80 @@ export class RequestStore {
 
     sendMakeFriendRequest(receiverId: number | null) {
         if (receiverId === null) {
-            this.errors = "用户ID不能为空, 请输入用户ID"
+            this.errors = '用户ID不能为空, 请输入用户ID'
             return
         }
-        this.requsetStash.set(this.clientId, Request.createFromSendRequest({
-            message: this.message,
-            content: {
-                type: RequestContentType.MakeFriend,
-                receiverId: receiverId!
-            }
-        }))
+        this.requsetStash.set(
+            this.clientId,
+            Request.createFromSendRequest({
+                message: this.message,
+                content: {
+                    type: RequestContentType.MakeFriend,
+                    receiverId: receiverId!,
+                },
+            })
+        )
         MessageServer.Instance().send(Send.SendRequest, {
             clientId: this.clientId,
             message: this.message,
             content: {
                 type: RequestContentType.MakeFriend,
-                receiverId: receiverId!
-            }
+                receiverId: receiverId!,
+            },
         })
         this.message = ''
         this.toggleClientId()
     }
     sendJoinGroupRequest(chatId: number | null) {
         if (chatId === null) {
-            this.errors = "群聊ID不能为空, 请输入群聊ID"
+            this.errors = '群聊ID不能为空, 请输入群聊ID'
             return
         }
-        this.requsetStash.set(this.clientId, Request.createFromSendRequest({
-            message: this.message,
-            content: {
-                type: RequestContentType.JoinGroup,
-                chatId: chatId
-            }
-        }))
+        this.requsetStash.set(
+            this.clientId,
+            Request.createFromSendRequest({
+                message: this.message,
+                content: {
+                    type: RequestContentType.JoinGroup,
+                    chatId: chatId,
+                },
+            })
+        )
         MessageServer.Instance().send(Send.SendRequest, {
             clientId: this.clientId,
             message: this.message,
             content: {
                 type: RequestContentType.JoinGroup,
-                chatId: chatId
-            }
+                chatId: chatId,
+            },
         })
         this.message = ''
         this.toggleClientId()
     }
     sendGroupInvitationRequest(chatId: number, receiverId: number | null) {
         if (receiverId === null) {
-            this.errors = "用户ID不能为空, 请输入用户ID"
+            this.errors = '用户ID不能为空, 请输入用户ID'
             return
         }
-        this.requsetStash.set(this.clientId, Request.createFromSendRequest({
-            message: '欢迎加入群聊',
-            content: {
-                type: RequestContentType.GroupInvitation,
-                chatId: chatId,
-                receiverId: receiverId
-            }
-        }))
+        this.requsetStash.set(
+            this.clientId,
+            Request.createFromSendRequest({
+                message: '欢迎加入群聊',
+                content: {
+                    type: RequestContentType.GroupInvitation,
+                    chatId: chatId,
+                    receiverId: receiverId,
+                },
+            })
+        )
         MessageServer.Instance().send(Send.SendRequest, {
             clientId: this.clientId,
             message: this.message,
             content: {
                 type: RequestContentType.GroupInvitation,
                 chatId: chatId,
-                receiverId: receiverId
-            }
+                receiverId: receiverId,
+            },
         })
         this.message = ''
         this.toggleClientId()
@@ -333,7 +368,7 @@ export class RequestStore {
         }
         LocalDatabase.saveRequest(req.reqId, req) // 本地缓存
     }
-    
+
     getRequest(reqId: ReqId) {
         if (this.requests.has(reqId)) {
             return this.requests.get(reqId)
@@ -377,7 +412,7 @@ export class RequestStore {
         }
         MessageServer.Instance().send(Send.SolveRequest, {
             reqId: reqId,
-            answer: 'Approved'
+            answer: 'Approved',
         })
     }
     refuseRequest(reqId: number) {
@@ -388,7 +423,7 @@ export class RequestStore {
         }
         MessageServer.Instance().send(Send.SolveRequest, {
             reqId: reqId,
-            answer: 'Refused'
+            answer: 'Refused',
         })
     }
     get showError() {
