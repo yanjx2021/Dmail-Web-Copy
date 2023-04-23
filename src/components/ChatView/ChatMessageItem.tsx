@@ -20,6 +20,7 @@ import { MessageDropDown } from '../DropDown/MessageDropDown'
 import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
 import { FileItem, LoadingFileItem } from './FileItem'
+import { LoadingPhotoItem, PhotoItem } from './PhotoItem'
 
 const MessageAlert = () => {
     return (
@@ -69,14 +70,13 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         if (msg.bindUploading) {
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                    <h3>图片正在上传</h3>
-                    <h5>{msg.bindUploading.progress}</h5>
+                    <LoadingPhotoItem bindUploading={msg.bindUploading}/>
                 </div>
             )
         } else {
             const cachedUrl = imageStore.getImageUrl(msg.content)
 
-            return <img className="rounded mt-1" src={cachedUrl.url} alt=""></img>
+            return <PhotoItem cachedUrl={cachedUrl}/>
         }
     } else if (msg.type === ChatMessageType.File) {
         if (msg.bindUploading) {

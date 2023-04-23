@@ -12846,13 +12846,16 @@ body.admin .main-body .body-page::-webkit-scrollbar-thumb {
 }
 
 .main .attachment img {
-    width: auto;
-    height: 80px
+  width: auto;
+  height: auto;
+  max-width: 400px;
+  max-height: 200px;
+  box-shadow: 0 0 5px .3px #999 
 }
 
 @media screen and (max-width: 992px) {
     .main .attachment img {
-        height: 50px
+        height: 100px
     }
 }
 
@@ -12880,7 +12883,6 @@ body.admin .main-body .body-page::-webkit-scrollbar-thumb {
 .main .attachment.right-file {
     justify-content: flex-end
 }
-
 .main .attachment.right-file img {
     margin-left: .25rem
 }

@@ -5,6 +5,7 @@ import { fileStore, UploadingFile } from '../../stores/fileStore'
 
 import { ChatMessage, ChatMessageFileInfo } from '../../stores/chatStore'
 import { createDownload } from '../../utils/file'
+import {  Progress  } from 'antd'
 
 export const filterSize = (size: number) => {
     function pow1024(num: number) {
@@ -54,9 +55,9 @@ export const LoadingFileItem = observer(({ bindUploading }: { bindUploading: Upl
                         <i className="zmdi zmdi-file"></i>
                     </div>
                 </div>
-                <div className="media-body overflow-hidden">
-                    <h6 className="text-truncate mb-0">文件正在上传</h6>
-                    <progress value={bindUploading.progress} />
+                <div className="media-body">
+                    <h6 className="text-truncate mb-0">文件正在上传中</h6>
+                    <Progress percent={Math.floor(bindUploading.progress*10000)/100} />
                 </div>
             </div>
         </div>
