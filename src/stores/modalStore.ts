@@ -7,7 +7,7 @@ import { ReceiveChatMessage } from "../utils/message";
 export class ModalStore {
     isOpen: boolean = false
     isLoading: boolean = false
-    modalType: '' | 'AddFriend' | 'CreateGroup' | 'ChangePassword' |'RemoveSecure' | 'SetSecure' | 'TransferChat' | 'TransferChatBox' = ''
+    modalType: '' | 'AddFriend' | 'CreateGroup' | 'ChangePassword' |'RemoveSecure' | 'SetSecure' | 'TransferChat' | 'TransferChatBox' | 'JoinGroup' = ''
     transferInfo: ChatMessageTransferInfo | undefined = undefined
 
 

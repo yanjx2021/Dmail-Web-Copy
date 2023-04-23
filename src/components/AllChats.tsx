@@ -193,7 +193,7 @@ export const AllChatList = ({
                             className="btn btn-dark"
                             type="button"
                             onClick={action(() => {
-                                modalStore.modalType = 'AddFriend'
+                                modalStore.modalType = 'JoinGroup'
                                 modalStore.isOpen = true
                             })}>
                             <i className="zmdi zmdi-account-add" />

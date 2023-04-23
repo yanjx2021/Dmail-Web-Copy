@@ -15,6 +15,7 @@ import { userStore } from '../stores/userStore'
 import { MessageServer } from '../utils/networkWs'
 import { Send } from '../utils/message'
 import { modalStore } from '../stores/modalStore'
+import { chatStore } from '../stores/chatStore'
 
 const RequestItemStatus = observer(
     ({ senderId, state, reqId }: { senderId: number; state: RequestState; reqId: number }) => {
@@ -101,43 +102,49 @@ const RequestFriendItem = observer(
         )
     }
 )
-const RequestGroupItem = ({
-    message,
-    reqId,
-    senderId,
-    chatId,
-    state,
-}: {
-    message: string
-    reqId: number
-    senderId: number
-    chatId: number
-    state: RequestState
-}) => {
-    return (
-        <li>
-            <a className="card">
-                <div className="card-body">
-                    <div className="media">
-                        <div className="avatar me-3">
-                            <span className="rounded-circle"></span>
-                            <div className="avatar rounded-circle no-image timber">
-                                <span>{reqId}</span>
+const RequestGroupItem = observer(
+    ({
+        message,
+        reqId,
+        senderId,
+        chatId,
+        state,
+    }: {
+        message: string
+        reqId: number
+        senderId: number
+        chatId: number
+        state: RequestState
+    }) => {
+        return (
+            <li>
+                <a className="card">
+                    <div className="card-body">
+                        <div className="media">
+                            <div className="avatar me-3">
+                                <span className="rounded-circle"></span>
+                                <div className="avatar rounded-circle no-image timber">
+                                    <span>{senderId === authStore.userId ? chatId : senderId}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="media-body overflow-hidden">
-                            <div className="d-flex align-items-center mb-1">
-                                <h6 className="text-truncate mb-0 me-auto">名字</h6>
+                            <div className="media-body overflow-hidden">
+                                <div className="d-flex align-items-center mb-1">
+                                    <h6 className="text-truncate mb-0 me-auto">
+                                        {senderId === authStore.userId
+                                            ? chatStore.getChat(chatId).name
+                                            : userStore.getUser(senderId).showName}
+                                    </h6>
+                                </div>
+                                <div className="text-truncate">{message}</div>
                             </div>
-                            <div className="text-truncate">{message}</div>
+                            <RequestItemStatus senderId={senderId} state={state} reqId={reqId} />
                         </div>
-                        <RequestItemStatus senderId={senderId} state={state} reqId={reqId} />
                     </div>
-                </div>
-            </a>
-        </li>
-    )
-}
+                </a>
+            </li>
+        )
+    }
+)
 
 const RequestItem = observer(
     ({
@@ -203,7 +210,10 @@ const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore 
             <div className="form-group input-group-lg search mb-3">
                 <i className="zmdi zmdi-search"></i>
                 <i className="zmdi zmdi-dialpad"></i>
-                <input className="form-control text-footerform" type="text" placeholder="搜索..."></input>
+                <input
+                    className="form-control text-footerform"
+                    type="text"
+                    placeholder="搜索..."></input>
             </div>
             <ul className="chat-list">
                 {requestStore.requestsList.map(({ message, reqId, senderId, content, state }) => (

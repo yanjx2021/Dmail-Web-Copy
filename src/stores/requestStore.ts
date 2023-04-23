@@ -228,7 +228,11 @@ export class RequestStore {
         this.message = ''
         this.toggleClientId()
     }
-    sendJoinGroupRequest(chatId: number) {
+    sendJoinGroupRequest(chatId: number | null) {
+        if (chatId === null) {
+            this.errors = "群聊ID不能为空, 请输入群聊ID"
+            return
+        }
         this.requsetStash.set(this.clientId, Request.createFromSendRequest({
             message: this.message,
             content: {

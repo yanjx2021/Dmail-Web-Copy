@@ -226,6 +226,12 @@ export interface ReceiveGetFileUrlResponse {
     url? : string
 }
 
+export interface ReceiveGetGroupUsersResponseData {
+    state: 'Success' | 'ServerError' | 'NotGroupChat'
+    chatId?: number
+    userIds?: number[]
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -263,6 +269,7 @@ export enum Receive {
     SetAlreadyReadResponse = 'SetAlreadyReadResponse',
     Notice = 'Notice',
     Notices = 'Noitces',
+    GetGroupUsersResponse = 'GetGroupUsersResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -372,6 +379,7 @@ export enum Send {
     Unfriend = 'Unfriend',
     SetAlreadyRead = 'SetAlreadyRead',
     RevokeMessage = 'RevokeMessage',
+    GetGroupUsers = 'GetGroupUsers',
 }
 
 // COMMAND和DATA类型捆绑
@@ -410,6 +418,7 @@ export interface MessageReceiveData {
     [Receive.GetFileUrlResponse] : ReceiveGetFileUrlResponse
     [Receive.Notice]: string,
     [Receive.Notices]: string[],
+    [Receive.GetGroupUsersResponse]: ReceiveGetGroupUsersResponseData,
 }
 
 export interface MessageSendData {
@@ -437,6 +446,7 @@ export interface MessageSendData {
     [Send.FileUploaded] : UploadId
     [Send.SetAlreadyRead]: SendSetAlreadyReadData
     [Send.RevokeMessage]: SendRevokeMessageData
+    [Send.GetGroupUsers]: ChatId
 }
 
 // 封装消息包

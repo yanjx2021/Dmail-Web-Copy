@@ -35,9 +35,44 @@ export const ModalInput = ({
     )
 }
 
+export const JoinGroupModalView = observer(({ title }: { title: string }) => {
+    const [reqId, setReqId] = useImmer<string>('')
+    return (
+        <Modal
+            footer={[
+                <Button
+                    key="send"
+                    onClick={() => {
+                        requestStore.sendJoinGroupRequest(parseInt(reqId) ? parseInt(reqId) : null)
+                        setReqId('')
+                    }}>
+                    发送请求
+                </Button>,
+            ]}
+            onCancel={modalStore.handleCancel}
+            title={title}
+            open={modalStore.isOpen}>
+            <ModalInput
+                type="text"
+                label="群聊ID"
+                value={reqId}
+                setValue={(e: any) => {
+                    const input = e.target.value.replace(/[^0-9]/g, '')
+                    setReqId(input)
+                }}
+            />
+            <ModalInput
+                type="text"
+                label="验证消息"
+                value={requestStore.message}
+                setValue={action((e: any) => (requestStore.message = e.target.value))}
+            />
+        </Modal>
+    )
+})
+
 export const AddFriendModalView = observer(({ title }: { title: string }) => {
     const [reqId, setReqId] = useImmer<string>('')
-
     return (
         <Modal
             footer={[
@@ -245,7 +280,7 @@ export const RemoveSecureModalView = observer(({ title }: { title: string }) => 
 export const ChatSelectCard = observer(({ chat }: { chat: Chat }) => {
     return (
         <li>
-            <a className="card">
+            <a className="card" onClick={action(() => messageSelectStore.toggleCheckChat(chat))}>
                 <div className="card-body">
                     <div className="media">
                         <div className="avatar me-3">
@@ -261,7 +296,6 @@ export const ChatSelectCard = observer(({ chat }: { chat: Chat }) => {
                             </div>
                         </div>
                         <Checkbox
-                            onChange={action(() => messageSelectStore.toggleCheckChat(chat))}
                             checked={messageSelectStore.hasSelectChat(chat)}
                         />
                     </div>
@@ -322,6 +356,8 @@ export const RegisterModal = observer(() => {
             return <TransferChatModalView title="选择要转发到的群聊" />
         case 'TransferChatBox':
             return <TransferChatBoxModalView title='聊天记录'/>
+        case 'JoinGroup':
+            return <JoinGroupModalView title='申请加入群聊'/>
         default:
             return <></>
     }

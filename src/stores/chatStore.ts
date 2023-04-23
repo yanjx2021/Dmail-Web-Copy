@@ -4,6 +4,7 @@ import { UserId, authStore } from './authStore'
 import {
     Receive,
     ReceiveChatMessage,
+    ReceiveGetGroupUsersResponseData,
     ReceivePullResponseData,
     ReceiveSetAlreadyReadResponseData,
     ReceiveUnfriendResponseData,
@@ -259,18 +260,24 @@ export class Chat {
 
     chatId: ChatId = 0
     chatType: ChatType = ChatType.Unknown
-
-    groupName: string | null = ''
-    groupAvaterPath: string | null = ''
-
-    bindUser: User | null = null
-
     lastMessage: ChatMessage | undefined = undefined
-
     readCursor: number = 0
+    // 私聊部分
+    bindUser: User | null = null
+    // 群聊部分
+    userIds: number[] | null = null
+    groupName: string | null = null
+    groupAvaterPath: string | null = null
+
+
+
 
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
+    }
+
+    setGroupChatUserIds(userIds: number[]) {
+        this.userIds = userIds
     }
 
     static getLoadingChat(chatId: ChatId) {
@@ -335,6 +342,7 @@ export class Chat {
             this.groupName = info.name
             this.groupAvaterPath = info.avaterPath
             this.chatType = ChatType.Group
+            this.userIds = []
         } else {
             // 私聊
             const users: [number, number] = info.users
@@ -602,7 +610,9 @@ export class ChatStore {
         MessageServer.on(Receive.DeleteChat, this.DeleteChatHandler)
         MessageServer.on(Receive.ReadCursors, this.ReadCusersHandler)
         MessageServer.on(Receive.SetAlreadyReadResponse, this.SetAlreadyReadResponseHandler)
+        MessageServer.on(Receive.GetGroupUsersResponse, this.GetGroupUsersResponseHandler)
     }
+
 
     reset() {
         this.chats.clear()
@@ -727,6 +737,23 @@ export class ChatStore {
             LocalDatabase.removeUserInfo(chat.bindUser!.userId).catch((err) => console.log(err)) // 清除用户
         }
         this.removeChatInfo(chat)
+    }
+
+    private GetGroupUsersResponseHandler(response: ReceiveGetGroupUsersResponseData) {
+        switch (response.state) {
+            case 'Success':
+                chatStore.getChat(response.chatId!).setGroupChatUserIds(response.userIds!)
+
+                break
+            case 'NotGroupChat':
+                this.errors = '私聊用户列表不存在'
+                break
+            case 'ServerError':
+                this.errors = '服务器异常'
+                break
+            default:
+                console.log('群聊用户列表异常错误')
+        }
     }
 
     private UnfriendResponseHandler(response: ReceiveUnfriendResponseData) {

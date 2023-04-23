@@ -8,9 +8,11 @@ import { Send } from '../../utils/message'
 import { useEffect } from 'react'
 
 const getInfo = action((chat: Chat) => {
+    console.log('拉取')
     if (chat.chatType === ChatType.Private) {
         MessageServer.Instance().send<Send.GetUserInfo>(Send.GetUserInfo, chat.bindUser!.userId)
     } else {
+        MessageServer.Instance().send<Send.GetGroupUsers>(Send.GetGroupUsers, chat.chatId)
         // TODO-拉取群聊信息
     }
 })

@@ -53,6 +53,16 @@ export const RemoveFriendButton = ({ userId }: { userId: number }) => {
     )
 }
 
+export const GroupUserItem = ({userId} : {userId: number}) => {
+    return <li>{userId}</li>
+}
+
+export const GroupUserList = observer(({ chat }: { chat: Chat }) => {
+    return <ul>
+        {chat.userIds!.map((userId) => <GroupUserItem key={userId} userId={userId}/>)}
+    </ul>
+})
+
 export const ChatSidebarBody = observer(({ chat }: { chat: Chat }) => {
     // TODO-后续群聊和用户可以复用
     return (
@@ -62,7 +72,9 @@ export const ChatSidebarBody = observer(({ chat }: { chat: Chat }) => {
             {chat.chatType === ChatType.Private ? (
                 <RemoveFriendButton userId={chat.bindUser!.userId} />
             ) : (
-                <></>
+                <>
+                    <GroupUserList chat={chat}/>
+                </>
             )}
         </div>
     )
