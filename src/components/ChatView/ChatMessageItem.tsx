@@ -19,6 +19,7 @@ import { imageStore } from '../../stores/imageStore'
 import { MessageDropDown } from '../DropDown/MessageDropDown'
 import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
+import { chatSideStore } from '../../stores/chatSideStore'
 
 const MessageAlert = () => {
     return (
@@ -121,9 +122,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         )
     } else if (msg.type === ChatMessageType.Revoked) {
         return (
-            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                {"消息已撤回"}
-            </div>
+            <div className={'message-content p-3' + (isRight ? ' border' : '')}>{'消息已撤回'}</div>
         )
     }
     return <div></div>
@@ -145,13 +144,19 @@ export const ChatMessageItem = observer(
             ) : (
                 <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
                     {!isRight ? (
-                        <div className="avatar mr-lg-3 me-2">
-                            <div
-                                //添加颜色
-                                className={'avatar rounded-circle no-image ' + ''}>
-                                <span>{msg.senderId}</span>
+                        <a
+                            type="button"
+                            onClick={action(() =>
+                                chatSideStore.visitUsertoggle(userStore.getUser(msg.senderId))
+                            )}>
+                            <div className="avatar mr-lg-3 me-2">
+                                <div
+                                    //添加颜色
+                                    className={'avatar rounded-circle no-image ' + ''}>
+                                    <span>{msg.senderId}</span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     ) : (
                         ''
                     )}

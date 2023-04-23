@@ -1,58 +1,79 @@
-import { makeAutoObservable } from "mobx";
-import { ChatType } from "./chatStore";
-import { userSelectStore } from "../components/MessagesBox/Selector";
-
+import { action, makeAutoObservable } from 'mobx'
+import { ChatType } from './chatStore'
+import { userSelectStore } from '../components/MessagesBox/Selector'
+import { User } from './userStore'
 
 export class ChatSideStore {
     open: boolean = false
     type: '' | 'chat' | 'user' = ''
+    visitUser: User | null = null
 
     reset() {
         this.open = false
         this.type = ''
+        this.visitUser = null
     }
 
-    ChatSidebartoggle() { // 聊天
+    visitUsertoggle(user: User) {
+        if (this.open === false) {
+            this.visitUser = user
+            this.type = 'chat'
+            this.open = true
+        } else if (this.type !== 'chat') {
+            this.visitUser = user
+            this.type = 'chat'
+        } else if (this.visitUser !== user) {
+            this.visitUser = user
+        } else {
+            this.reset()
+            userSelectStore.reset()
+        }
+    }
+
+    ChatSidebartoggle() {
+        // 聊天
         if (this.open === false) {
             this.type = 'chat'
             this.open = true
         } else if (this.type !== 'chat') {
-            userSelectStore.reset()
             this.type = 'chat'
+        } else if (this.visitUser !== null) {
+            this.visitUser = null
         } else {
-            this.open = false
+            this.reset()
+            userSelectStore.reset()
         }
     }
 
-    UserSidebartoggle() { // 邀请好友
+    UserSidebartoggle() {
+        // 邀请好友
+        this.visitUser = null
         if (this.open === false) {
             this.type = 'user'
             this.open = true
         } else if (this.type !== 'user') {
             this.type = 'user'
         } else {
-            this.open = false
+            this.reset()
             userSelectStore.reset()
         }
     }
 
     close() {
+        this.reset()
         userSelectStore.reset()
-        this.open = false
     }
 
     get sidebarState() {
         if (this.open) {
-            console.log(`open-${this.type}-sidebar`)
             return `open-${this.type}-sidebar`
         }
         return ''
     }
 
     constructor() {
-        makeAutoObservable(this, {}, {autoBind: true})
+        makeAutoObservable(this, {}, { autoBind: true })
     }
 }
-
 
 export const chatSideStore = new ChatSideStore()

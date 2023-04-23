@@ -175,7 +175,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
                     <ChatViewFooter handleSend={sendTextMessageHanlder} />
                 )}
             </div>
-            <ChatSidebar chat={chat} />
+            <ChatSidebar chat={chat} visitUser={chatSideStore.visitUser}/>
             <UserSidebar chat={chat} />
         </div>
     )

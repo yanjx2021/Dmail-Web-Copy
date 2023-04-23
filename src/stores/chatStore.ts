@@ -617,6 +617,16 @@ export class ChatStore {
         this.errors = ''
     }
 
+    get friendMap() {
+        const friendMap = new Map<number, undefined>()
+        this.chats.forEach((chat, _) => {
+            if (chat.chatType === ChatType.Private) {
+                friendMap.set(chat.bindUser!.userId, undefined)
+            }
+        })
+        return friendMap
+    }
+
     get privateChatGroup() {
         const chats: Chat[] = []
         const nonChineseChats: Chat[] = []
