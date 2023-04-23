@@ -19,6 +19,7 @@ import { imageStore } from '../../stores/imageStore'
 import { MessageDropDown } from '../DropDown/MessageDropDown'
 import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
+import { FileItem, LoadingFileItem } from './FileItem'
 
 const MessageAlert = () => {
     return (
@@ -82,8 +83,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             // 正在上传
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                    <h3>文件正在上传</h3>
-                    <h5>{msg.bindUploading.progress}</h5>
+                  <LoadingFileItem bindUploading={msg.bindUploading}/>
                 </div>
             )
         } else {
@@ -92,16 +92,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             const fileInfo = msg.content as ChatMessageFileInfo
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                    <h3>文件</h3>
-                    <h5>{fileInfo.name}</h5>
-                    <h5>{fileInfo.hash}</h5>
-                    <h5>{fileInfo.size}</h5>
-                    <button
-                        onClick={action(() =>
-                            fileStore.getFileUrl(fileInfo.hash, (url) =>
-                                createDownload(url, fileInfo.name)
-                            )
-                        )}></button>
+                    <FileItem fileInfo={fileInfo}/>
                 </div>
             )
         }
@@ -121,9 +112,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         )
     } else if (msg.type === ChatMessageType.Revoked) {
         return (
-            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                {"消息已撤回"}
-            </div>
+            <div className={'message-content p-3' + (isRight ? ' border' : '')}>{'消息已撤回'}</div>
         )
     }
     return <div></div>
