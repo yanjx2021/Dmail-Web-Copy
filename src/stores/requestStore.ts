@@ -347,7 +347,7 @@ export class RequestStore {
         )
         MessageServer.Instance().send(Send.SendRequest, {
             clientId: this.clientId,
-            message: this.message,
+            message: '欢迎加入群聊',
             content: {
                 type: RequestContentType.GroupInvitation,
                 chatId: chatId,

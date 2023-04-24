@@ -34,7 +34,10 @@ import { FileChangeInfo } from 'fs/promises'
 import { text } from 'stream/consumers'
 import { Content } from 'antd/es/layout/layout'
 import { serialize } from 'v8'
-import { userSelectStore } from '../components/MessagesBox/Selector'
+import {
+    createGroupFromAllFriendsSelectStore,
+    userSelectStore,
+} from '../components/MessagesBox/Selector'
 
 export type ChatId = number
 
@@ -842,8 +845,10 @@ export class ChatStore {
             return
         } else {
             this.getChat(data.chatId!)
+            if (!createGroupFromAllFriendsSelectStore.isEmpty) {
+                createGroupFromAllFriendsSelectStore.inviteUsers(data.chatId!)
+            }
             if (!userSelectStore.isEmpty) {
-                
                 this.activeChatId &&
                     this.getChat(this.activeChatId).chatType === ChatType.Private &&
                     userSelectStore.checkUser(this.getChat(this.activeChatId).bindUser!)

@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite'
 import { Chat } from '../../stores/chatStore'
 import { chatSideStore } from '../../stores/chatSideStore'
 import { action } from 'mobx'
+import { createGroupFromAllFriendsSelectStore } from '../MessagesBox/Selector'
 
 export const ChatViewHeader = observer(
     ({ chat }: { chat: Chat }) => {
@@ -64,7 +65,10 @@ export const ChatViewHeader = observer(
                                 </li>
                                 <li
                                     className="nav-item list-inline-item add-user-btn"
-                                    onClick={action(() => chatSideStore.UserSidebartoggle())}>
+                                    onClick={action(() => {
+                                        chatSideStore.UserSidebartoggle()
+                                        createGroupFromAllFriendsSelectStore.reset()
+                                    })}>
                                     <a href="#" className="nav-link text-muted px-3" title="新成员">
                                         <i className="zmdi zmdi-accounts-add zmdi-hc-lg"></i>
                                     </a>

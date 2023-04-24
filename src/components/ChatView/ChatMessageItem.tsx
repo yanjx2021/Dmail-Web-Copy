@@ -23,40 +23,7 @@ import { chatSideStore } from '../../stores/chatSideStore'
 import { FileItem, LoadingFileItem } from './FileItem'
 import { LoadingPhotoItem, PhotoItem } from './PhotoItem'
 
-const MessageAlert = () => {
-    return (
-        <div>
-            <a className="text-muted ms-1 p-2 text-muted" href="#">
-                <i className="zmdi zmdi-alert-circle"></i>
-            </a>
-        </div>
-    )
-}
-const MessageTool = () => {
-    return (
-        <div className="dropdown">
-            <a
-                className="text-muted me-1 p-2 text-muted"
-                href="#"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false">
-                <i className="zmdi zmdi-more-vert"></i>
-            </a>
-            <div className="dropdown-menu">
-                <a className="dropdown-item" href="#">
-                    编辑
-                </a>
-                <a className="dropdown-item" href="#">
-                    分享
-                </a>
-                <a className="dropdown-item" href="#">
-                    删除
-                </a>
-            </div>
-        </div>
-    )
-}
+
 
 export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) => {
     const isRight = msg.senderId === authStore.userId

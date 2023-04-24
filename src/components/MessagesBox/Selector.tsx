@@ -188,3 +188,79 @@ export const UserSelector = observer(({ user }: { user: User }) => {
         </label>
     )
 })
+
+class CreateGroupFromAllFriendsSelectStore {
+    users: Map<number, User> = new Map()
+    showSelector: boolean = false
+    errors: string = ''
+
+    reset() {
+        this.users.clear()
+        this.errors = ''
+        this.showSelector = false
+    }
+
+    constructor() {
+        makeAutoObservable(this, {}, { autoBind: true })
+    }
+
+    get isEmpty() {
+        return this.users.size === 0
+    }
+
+    inviteUsers(chatId: number) {
+        if (this.isEmpty) {
+            this.errors = '请选择至少一个好友，来创建群聊'
+            return
+        }
+        this.usersList.forEach((user, _) => {
+            requestStore.sendGroupInvitationRequest(chatId, user.userId)
+        })
+        console.log('清除选中')
+        this.reset()
+    }
+
+    hasSelectUser(userId: number) {
+        return this.users.has(userId)
+    }
+
+    toggleShowSelector() {
+        this.showSelector = !this.showSelector
+    }
+
+    toggleCheckUser(user: User) {
+        if (this.hasSelectUser(user.userId)) this.unCheckUser(user)
+        else this.checkUser(user)
+    }
+
+    checkUser(user: User) {
+        this.users.set(user.userId, user)
+    }
+
+    unCheckUser(user: User) {
+        if (this.users.has(user.userId)) this.users.delete(user.userId)
+    }
+
+    get usersList() {
+        const userList: User[] = []
+        this.users.forEach((user, _) => {
+            userList.push(user)
+        })
+        return userList
+    }
+}
+
+export const createGroupFromAllFriendsSelectStore = new CreateGroupFromAllFriendsSelectStore()
+
+export const CreateGroupFromAllFriendSelector = observer(({ user }: { user: User }) => {
+    return (
+        <label className="c_checkbox">
+            <input
+                onChange={() => createGroupFromAllFriendsSelectStore.toggleCheckUser(user)}
+                type="checkbox"
+                checked={createGroupFromAllFriendsSelectStore.hasSelectUser(user.userId)}
+            />
+            <span className="checkmark"></span>
+        </label>
+    )
+})

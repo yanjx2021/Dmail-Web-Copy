@@ -7,8 +7,12 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useImmer } from 'use-immer'
 import { userSettingStore } from '../stores/userSettingStore'
 import { ChatDropDown } from './DropDown/ChatDropDown'
-import "../styles/AllChats.css"
+import '../styles/AllChats.css'
 import { modalStore } from '../stores/modalStore'
+import {
+    CreateGroupFromAllFriendSelector,
+    createGroupFromAllFriendsSelectStore,
+} from './MessagesBox/Selector'
 
 export const AllChatsCard = observer(
     ({
@@ -81,6 +85,11 @@ export const AllChatsCard = observer(
                         </div>
                     </div>
                 </div>
+                {/* TODO-yjx 将这个选择框整的好看一点 */}
+                {chat.chatType === ChatType.Private &&
+                    createGroupFromAllFriendsSelectStore.showSelector && (
+                        <CreateGroupFromAllFriendSelector user={chat.bindUser!} />
+                    )}
             </a>
         )
     }
@@ -91,7 +100,7 @@ export const HoverOption = observer(({ chat }: { chat: Chat }) => {
     const type = chat.chatType === ChatType.Private ? 'private' : 'group' // 用于导航到对应的infoBox
     return (
         <div className="hover_action">
-            <ChatDropDown chatId={chat.chatId} />
+            <ChatDropDown chat={chat} />
         </div>
     )
 })
@@ -173,7 +182,10 @@ export const AllChatList = ({
                 <div className="form-group input-group-lg search mb-3">
                     <i className="zmdi zmdi-search"></i>
                     <i className="zmdi zmdi-dialpad"></i>
-                    <input className="form-control text-footerform" type="text" placeholder="搜索..."></input>
+                    <input
+                        className="form-control text-footerform"
+                        type="text"
+                        placeholder="搜索..."></input>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <div>

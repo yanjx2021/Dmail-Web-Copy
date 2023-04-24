@@ -2,6 +2,9 @@ import { observer } from 'mobx-react-lite'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 import { action } from 'mobx'
 import { modalStore } from '../../stores/modalStore'
+import { Chat, ChatType } from '../../stores/chatStore'
+import { createGroupFromAllFriendsSelectStore, userSelectStore } from '../MessagesBox/Selector'
+import { chatSideStore } from '../../stores/chatSideStore'
 
 export const DropDownItem = ({ text, handleClick }: { text: string; handleClick: any }) => {
     return (
@@ -11,7 +14,7 @@ export const DropDownItem = ({ text, handleClick }: { text: string; handleClick:
     )
 }
 
-export const ChatDropDown = observer(({ chatId }: { chatId: number }) => {
+export const ChatDropDown = observer(({ chat }: { chat: Chat }) => {
     return (
         <div className="dropdown">
             <a
@@ -20,10 +23,38 @@ export const ChatDropDown = observer(({ chatId }: { chatId: number }) => {
                 data-toggle="dropdown"
                 aria-haspopup="true"
                 aria-expanded="false"
-                onClick={action(() => (secureAuthStore.chatId = chatId))}>
+                onClick={action(() => (secureAuthStore.chatId = chat.chatId))}>
                 <i className="zmdi zmdi-more-vert"></i>
             </a>
             <div className="dropdown-menu dropdown-menu-right">
+                {chat.chatType === ChatType.Private ? (
+                    <>
+                        {!createGroupFromAllFriendsSelectStore.showSelector ? (
+                            <DropDownItem
+                                text="多选以创建群聊"
+                                handleClick={action(
+                                    () => {
+                                        userSelectStore.reset()
+                                        if (chatSideStore.open && chatSideStore.type === 'user') {
+                                            chatSideStore.UserSidebartoggle()
+                                        }
+                                        createGroupFromAllFriendsSelectStore.showSelector = true
+                                    }
+                                )}
+                            />
+                        ) : (
+                            <DropDownItem
+                                text="取消多选"
+                                handleClick={action(
+                                    () =>
+                                        (createGroupFromAllFriendsSelectStore.showSelector = false)
+                                )}
+                            />
+                        )}
+                    </>
+                ) : (
+                    <></>
+                )}
                 <DropDownItem
                     text="设置二次验证"
                     handleClick={action(() => {
@@ -31,7 +62,7 @@ export const ChatDropDown = observer(({ chatId }: { chatId: number }) => {
                         modalStore.isOpen = true
                     })}
                 />
-                {secureAuthStore.hasSetChatCode(chatId) ? (
+                {secureAuthStore.hasSetChatCode(chat.chatId) ? (
                     <DropDownItem
                         text="取消二次验证"
                         handleClick={action(() => {

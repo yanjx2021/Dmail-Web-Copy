@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useImmer } from 'use-immer'
 import '../../styles/AllChats.css'
 import { ChatSidebarHeader } from './ChatSidebarHeader'
-import { UserSelector, userSelectStore } from '../MessagesBox/Selector'
+import { UserSelector, createGroupFromAllFriendsSelectStore, userSelectStore } from '../MessagesBox/Selector'
 import { User } from '../../stores/userStore'
 import { modalStore } from '../../stores/modalStore'
 
@@ -15,7 +15,10 @@ import { modalStore } from '../../stores/modalStore'
 
 export const UserSidebarUsersItemCard = observer(({ user }: { user: User }) => {
     return (
-        <a href="#" className="card" onClick={() => userSelectStore.toggleCheckUser(user)}>
+        <a href="#" className="card" onClick={() => {
+            userSelectStore.toggleCheckUser(user)
+            createGroupFromAllFriendsSelectStore.reset()
+        }}>
             <div className="card-body">
                 <div className="media">
                     <div className="avatar me-3">
