@@ -4,7 +4,17 @@ import { AuthMethod, AuthState, authStore } from '../stores/authStore'
 import { requestStore } from '../stores/requestStore'
 import { action, runInAction } from 'mobx'
 
-const server_address = 'ws://127.0.0.1:8080/ws'
+export const GetServerAddress = () => {
+    const protocol = document.location.protocol
+    if (protocol === 'http:') {
+        return 'ws://' + document.location.host + '/ws'
+    } else if (protocol === 'https:') {
+        return 'wss://' + document.location.host + '/ws'
+    } else {
+        return ''
+    }
+}
+
 // 43.143.134.180
 export type Callback = (e: Event) => void
 export type MessageCallback = (msg: DataType<Receive>) => void
@@ -121,6 +131,8 @@ export class MessageServer {
     }
 
     private createWebsocket() {
+        const server_address = GetServerAddress()
+        console.log(`尝试连接至${server_address}`)
         const websocket = new WebSocket(server_address)
 
         websocket.onmessage = (event) => {
