@@ -5,6 +5,7 @@ import { requestStore } from '../stores/requestStore'
 import { action, runInAction } from 'mobx'
 
 export const GetServerAddress = () => {
+    return 'ws://127.0.0.1:8080/ws'
     const protocol = document.location.protocol
     if (protocol === 'http:') {
         return 'ws://' + document.location.host + '/ws'

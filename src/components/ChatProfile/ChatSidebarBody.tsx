@@ -153,6 +153,22 @@ export const GroupUserItem = ({ userId }: { userId: number }) => {
     return <li>{userId}</li>
 }
 
+export const QuitGroupButton = ({ chatId }: { chatId: number }) => {
+    return (
+        <div className="text-center mt-3 mb-5">
+            <Popconfirm
+                title="你确定退出群聊吗"
+                okText="确定"
+                cancelText="取消"
+                onConfirm={() => {
+                    MessageServer.Instance().send<Send.QuitGroupChat>(Send.QuitGroupChat, chatId)
+                }}>
+                <Button>退出群聊</Button>
+            </Popconfirm>
+        </div>
+    )
+}
+
 export const GroupUserList = observer(({ chat }: { chat: Chat }) => {
     return (
         <ul>
@@ -187,6 +203,7 @@ export const ChatSidebarBody = observer(
                 ) : (
                     <>
                         <GroupUserList chat={chat} />
+                        <QuitGroupButton chatId={chat.chatId}/>
                     </>
                 )}
             </div>

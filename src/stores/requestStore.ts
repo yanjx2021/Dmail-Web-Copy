@@ -22,6 +22,7 @@ export enum RequestContentType {
     MakeFriend = 'MakeFriend',
     JoinGroup = 'JoinGroup',
     GroupInvitation = 'GroupInvitation',
+    InvitedJoinGroup = 'InvitedJoinGroup',
 }
 
 export interface MakeFriendRequest {
@@ -39,7 +40,13 @@ export interface GroupInvitationRequest {
     chatId: number
 }
 
-export type RequestContent = MakeFriendRequest | JoinGroupRequest | GroupInvitationRequest
+export interface InvitedJoinGroupRequest {
+    type: RequestContentType.InvitedJoinGroup
+    inviterId: number
+    chatId: number
+}
+
+export type RequestContent = MakeFriendRequest | JoinGroupRequest | GroupInvitationRequest | InvitedJoinGroupRequest
 
 interface RequestInfo {
     reqId: number
@@ -66,6 +73,7 @@ export class Request {
 
     sendUser: User | null = null
     receiveUser: User | null = null
+    inviteUser: User | null = null
     chat: Chat | null = null
 
     message: string = ''
@@ -78,10 +86,37 @@ export class Request {
         return authStore && this.senderId === authStore.userId
     }
 
+    get showId() {
+        switch (this.content.type) {
+            case RequestContentType.MakeFriend:
+                return this.isSender ? this.content.receiverId : this.senderId
+            case RequestContentType.JoinGroup:
+                return this.isSender ? this.content.chatId : this.senderId
+            case RequestContentType.GroupInvitation:
+                return this.isSender ? this.content.receiverId : this.senderId
+            case RequestContentType.InvitedJoinGroup:
+                return this.senderId
+        }
+    }
+    get title() {
+        switch (this.content.type) {
+            case RequestContentType.MakeFriend:
+                return '好友申请'
+            case RequestContentType.JoinGroup:
+                return '群聊申请'
+            case RequestContentType.GroupInvitation:
+                return `群聊 ${this.chat?.name} 的邀请`
+            case RequestContentType.InvitedJoinGroup:
+                return `群聊审核: ${this.chat?.name}`
+        }
+    }
     get textTip() {
         if (this.content.type === RequestContentType.JoinGroup) {
             return this.isSender ? this.chat?.name : this.sendUser?.name
-        } else {
+        } else if(this.content.type === RequestContentType.InvitedJoinGroup) {
+            return this.inviteUser?.showName + '邀请' + this.sendUser?.showName + '入群'
+        } 
+        else {
             return this.isSender ? this.receiveUser?.showName : this.sendUser?.showName
         }
     }
@@ -133,6 +168,10 @@ export class Request {
                 this.receiveUser = userStore.getUser(this.content.receiverId)
                 this.chat = chatStore.getChat(this.content.chatId)
                 break
+            case RequestContentType.InvitedJoinGroup:
+                this.inviteUser = userStore.getUser(this.content.inviterId)
+                this.chat = chatStore.getChat(this.content.chatId)
+            break
             default:
                 console.log('只要到达，那个地方...')
         }

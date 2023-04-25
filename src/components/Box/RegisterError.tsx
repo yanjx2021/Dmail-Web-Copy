@@ -9,6 +9,7 @@ import { message } from 'antd'
 import { useCallback, useEffect } from 'react'
 import { duration } from '../../constants/messageContent'
 import { messageSelectStore, userSelectStore } from '../MessagesBox/Selector'
+import { chatStore } from '../../stores/chatStore'
 
 export const RegisterError = () => {
     useEffect(() => {
@@ -92,6 +93,19 @@ export const RegisterError = () => {
                     content: userSelectStore.errors,
                     duration: duration,
                     onClose: action(() => (userSelectStore.errors = '')),
+                })
+            }
+        })
+        return disposer
+    }, [])
+    useEffect(() => {
+        // chatStore
+        const disposer = autorun(() => {
+            if (chatStore.errors !== '') {
+                message.error({
+                    content: chatStore.errors,
+                    duration: duration,
+                    onClose: action(() => (chatStore.errors = '')),
                 })
             }
         })

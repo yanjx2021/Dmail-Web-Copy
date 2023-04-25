@@ -232,6 +232,11 @@ export interface ReceiveGetGroupUsersResponseData {
     userIds?: number[]
 }
 
+export interface ReceiveQuitGroupChatResponseData {
+    state: 'Success' | 'NoPermission' | 'UserNotInChat' | 'DatabaseError' | 'ServerError'
+    chatId?: number
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -270,6 +275,7 @@ export enum Receive {
     Notice = 'Notice',
     Notices = 'Noitces',
     GetGroupUsersResponse = 'GetGroupUsersResponse',
+    QuitGroupChatResponse = 'QuitGroupChatResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -380,6 +386,7 @@ export enum Send {
     SetAlreadyRead = 'SetAlreadyRead',
     RevokeMessage = 'RevokeMessage',
     GetGroupUsers = 'GetGroupUsers',
+    QuitGroupChat = 'QuitGroupChat',
 }
 
 // COMMAND和DATA类型捆绑
@@ -419,6 +426,7 @@ export interface MessageReceiveData {
     [Receive.Notice]: string,
     [Receive.Notices]: string[],
     [Receive.GetGroupUsersResponse]: ReceiveGetGroupUsersResponseData,
+    [Receive.QuitGroupChatResponse]: ReceiveQuitGroupChatResponseData,
 }
 
 export interface MessageSendData {
@@ -447,6 +455,7 @@ export interface MessageSendData {
     [Send.SetAlreadyRead]: SendSetAlreadyReadData
     [Send.RevokeMessage]: SendRevokeMessageData
     [Send.GetGroupUsers]: ChatId
+    [Send.QuitGroupChat]: number
 }
 
 // 封装消息包

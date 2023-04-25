@@ -4,6 +4,7 @@ import {
     ChatMessage,
     ChatMessageFileInfo,
     ChatMessageType,
+    ChatType,
     chatStore,
 } from '../../stores/chatStore'
 import { ChatViewHeader } from './ChatViewHeader'
@@ -65,7 +66,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         action(() => {
             if (!secureAuthStore.showSecureBox) {
                 chat.setReadCuser()
-                MessageServer.Instance().send<Send.GetGroupUsers>(Send.GetGroupUsers, chat.chatId)
+                chat.chatType !== ChatType.Private && MessageServer.Instance().send<Send.GetGroupUsers>(Send.GetGroupUsers, chat.chatId)
             }
         }),
         [chat, secureAuthStore.showSecureBox]

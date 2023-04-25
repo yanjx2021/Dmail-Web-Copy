@@ -6,6 +6,7 @@ import {
     ReceiveChatMessage,
     ReceiveGetGroupUsersResponseData,
     ReceivePullResponseData,
+    ReceiveQuitGroupChatResponseData,
     ReceiveSetAlreadyReadResponseData,
     ReceiveUnfriendResponseData,
     Send,
@@ -610,6 +611,7 @@ export class ChatStore {
         MessageServer.on(Receive.ReadCursors, this.ReadCusersHandler)
         MessageServer.on(Receive.SetAlreadyReadResponse, this.SetAlreadyReadResponseHandler)
         MessageServer.on(Receive.GetGroupUsersResponse, this.GetGroupUsersResponseHandler)
+        MessageServer.on(Receive.QuitGroupChatResponse, this.QuitGroupResponseHandler)
     }
 
     reset() {
@@ -752,6 +754,40 @@ export class ChatStore {
             LocalDatabase.removeUserInfo(chat.bindUser!.userId).catch((err) => console.log(err)) // 清除用户
         }
         this.removeChatInfo(chat)
+    }
+
+    private QuitGroupResponseHandler(response: ReceiveQuitGroupChatResponseData) {
+        switch (response.state) {
+            case 'Success':
+                if (!this.chats.has(response.chatId!)) {
+                    this.errors = `找不到聊天，聊天${response.chatId}不存在`
+                    return
+                } else {
+                    const chat = this.chats.get(response.chatId!)!
+                    if (chat.chatType === ChatType.Private) {
+                        this.errors = `聊天属性异常：聊天${response.chatId}属性为私聊`
+                        return
+                    }
+                    this.removeChatInfo(chat)
+                }
+                return
+            case 'DatabaseError':
+                console.log(111)
+                this.errors = '数据库异常'
+                return 
+            case 'NoPermission':
+                this.errors = '群主不能退出群聊'
+                return 
+            case 'UserNotInChat':
+                this.errors = '用户不在群聊中'
+                return 
+            case 'ServerError':
+                this.errors = '服务器异常'
+                return 
+            default:
+                this.errors = '未知错误'
+                return 
+        }
     }
 
     private GetGroupUsersResponseHandler(response: ReceiveGetGroupUsersResponseData) {
