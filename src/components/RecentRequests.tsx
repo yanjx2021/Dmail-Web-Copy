@@ -16,7 +16,7 @@ const RequestItemStatus = observer(
         switch (state) {
             case RequestState.Unsolved:
                 return isSender ? (
-                    <div className="align-center-container">等待对方验证...</div>
+                    <div className="align-center-container">等待验证...</div>
                 ) : (
                     <div className="align-center-container">
                         <button

@@ -269,6 +269,8 @@ export class Chat {
     // 私聊部分
     bindUser: User | null = null
     // 群聊部分
+    ownerId: number | null = null
+    adminIds: number[] | null = null
     userIds: number[] | null = null
     groupName: string | null = null
     groupAvaterPath: string | null = null
@@ -280,6 +282,16 @@ export class Chat {
 
     setGroupChatUserIds(userIds: number[]) {
         this.userIds = userIds
+    }
+
+    setGroupChatOwnerId(userId: number) {
+        this.ownerId = userId
+    }
+    addGroupChatAdminId(userId: number) {
+        this.adminIds && this.adminIds.indexOf(userId) > -1 && this.adminIds.push(userId)
+    }
+    setGroupChatAdminIds(userIds: number[]) {
+        this.adminIds = userIds
     }
 
     static getLoadingChat(chatId: ChatId) {
@@ -610,7 +622,6 @@ export class ChatStore {
         MessageServer.on(Receive.DeleteChat, this.DeleteChatHandler)
         MessageServer.on(Receive.ReadCursors, this.ReadCusersHandler)
         MessageServer.on(Receive.SetAlreadyReadResponse, this.SetAlreadyReadResponseHandler)
-        MessageServer.on(Receive.GetGroupUsersResponse, this.GetGroupUsersResponseHandler)
         MessageServer.on(Receive.QuitGroupChatResponse, this.QuitGroupResponseHandler)
     }
 
@@ -774,36 +785,19 @@ export class ChatStore {
             case 'DatabaseError':
                 console.log(111)
                 this.errors = '数据库异常'
-                return 
+                return
             case 'NoPermission':
                 this.errors = '群主不能退出群聊'
-                return 
+                return
             case 'UserNotInChat':
                 this.errors = '用户不在群聊中'
-                return 
+                return
             case 'ServerError':
                 this.errors = '服务器异常'
-                return 
+                return
             default:
                 this.errors = '未知错误'
-                return 
-        }
-    }
-
-    private GetGroupUsersResponseHandler(response: ReceiveGetGroupUsersResponseData) {
-        switch (response.state) {
-            case 'Success':
-                chatStore.getChat(response.chatId!).setGroupChatUserIds(response.userIds!)
-
-                break
-            case 'NotGroupChat':
-                this.errors = '私聊用户列表不存在'
-                break
-            case 'ServerError':
-                this.errors = '服务器异常'
-                break
-            default:
-                console.log('群聊用户列表异常错误')
+                return
         }
     }
 

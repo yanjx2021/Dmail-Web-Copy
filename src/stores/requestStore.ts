@@ -454,6 +454,7 @@ export class RequestStore {
             answer: 'Approved',
         })
     }
+    
     refuseRequest(reqId: number) {
         const req = this.requests.get(reqId)
         if (req === undefined) {

@@ -24,6 +24,7 @@ import { isImage } from '../../utils/file'
 import { messageSelectStore, userSelectStore } from '../MessagesBox/Selector'
 import { MessageServer } from '../../utils/networkWs'
 import { Send } from '../../utils/message'
+import { groupChatManageStore } from '../../stores/groupChatManageStore'
 
 export const ChatView = observer(({ chat }: { chat: Chat }) => {
     const [messages, setMessages] = useImmer<ChatMessage[]>([])
@@ -66,7 +67,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         action(() => {
             if (!secureAuthStore.showSecureBox) {
                 chat.setReadCuser()
-                chat.chatType !== ChatType.Private && MessageServer.Instance().send<Send.GetGroupUsers>(Send.GetGroupUsers, chat.chatId)
+                chat.chatType !== ChatType.Private && groupChatManageStore.sendGetGroupManage(chat.chatId)
             }
         }),
         [chat, secureAuthStore.showSecureBox]

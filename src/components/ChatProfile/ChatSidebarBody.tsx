@@ -9,6 +9,8 @@ import { requestStore } from '../../stores/requestStore'
 import { ModalInput } from '../Box/Modal'
 import { action } from 'mobx'
 import { useEffect } from 'react'
+import { SidebarUserDropDown } from '../DropDown/SidebarUserDropDown'
+import { authStore } from '../../stores/authStore'
 
 const ChatSidebarAvatar = ({ id }: { id: number }) => {
     return (
@@ -149,10 +151,6 @@ export const RemoveFriendButton = ({ userId }: { userId: number }) => {
     )
 }
 
-export const GroupUserItem = ({ userId }: { userId: number }) => {
-    return <li>{userId}</li>
-}
-
 export const QuitGroupButton = ({ chatId }: { chatId: number }) => {
     return (
         <div className="text-center mt-3 mb-5">
@@ -169,15 +167,162 @@ export const QuitGroupButton = ({ chatId }: { chatId: number }) => {
     )
 }
 
-export const GroupUserList = observer(({ chat }: { chat: Chat }) => {
+export const GroupTitle = ({ chatName }: { chatName: string }) => {
     return (
-        <ul>
-            {chat.userIds!.map((userId) => (
-                <GroupUserItem key={userId} userId={userId} />
-            ))}
+        <div className="text-center mt-3 mb-5">
+            <h4>{chatName}</h4>
+            <span className="text-muted"></span>
+        </div>
+    )
+}
+
+export const MembersHoverOption = ({ user, chatId }: { user: User, chatId: number }) => {
+    return (
+        <div className="hover_action">
+            <SidebarUserDropDown user={user} chatId={chatId}/>
+        </div>
+    )
+}
+
+export const UserCard = observer(({ user, showHover, chatId }: { user: User; showHover: boolean, chatId: number }) => {
+    return (
+        <li>
+            {showHover && <MembersHoverOption user={user} chatId={chatId} />}
+            <a className="card">
+                <div className="card-body">
+                    <div className="media">
+                        <div className="avatar me-3">
+                            <span className="rounded-circle"></span>
+                            <div className="avatar rounded-circle no-image timber">
+                                <span>
+                                    {user.showName.slice(0, Math.min(2, user.showName.length))}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="media-body overflow-hidden">
+                            <div className="d-flex align-items-center mb-1">
+                                <h6 className="text-truncate mb-0 me-auto">{user.showName}</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </li>
+    )
+})
+
+const ChatList = observer(({ chat }: { chat: Chat }) => {
+    return (
+        <ul className="chat-list">
+            <li className="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                <span>群主</span>
+            </li>
+            {chat.ownerId && (
+                <UserCard
+                    key={chat.ownerId}
+                    user={userStore.getUser(chat.ownerId)}
+                    showHover={false}
+                    chatId={chat.chatId}
+                />
+            )}
+            <li className="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                <span>群管理员</span>
+            </li>
+            {chat.adminIds &&
+                chat.adminIds
+                    .filter((userId) => userId != chat.ownerId)
+                    .map((userId, _) => {
+                        const user = userStore.getUser(userId)
+                        return (
+                            <UserCard
+                                key={userId}
+                                user={user}
+                                showHover={
+                                    authStore.userId !== userId && authStore.userId === chat.ownerId
+                                }
+                                chatId={chat.chatId}
+                            />
+                        )
+                    })}
         </ul>
     )
 })
+
+const MemberList = observer(({ chat }: { chat: Chat }) => {
+    return (
+        <ul className="chat-list">
+            <li className="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                <span>群成员</span>
+            </li>
+            {chat.userIds &&
+                chat.userIds.map((userId, _) => {
+                    const user = userStore.getUser(userId)
+                    return (
+                        <UserCard
+                            key={userId}
+                            user={user}
+                            showHover={
+                                authStore.userId !== userId &&
+                                (authStore.userId === chat.ownerId ||
+                                    (chat.adminIds !== null &&
+                                        chat.adminIds.indexOf(authStore.userId) > -1))
+                            }
+                            chatId={chat.chatId}
+                        />
+                    )
+                })}
+        </ul>
+    )
+})
+
+export const GroupMembers = ({ chat }: { chat: Chat }) => {
+    return (
+        <div className="tab-pane fade" id="GroupChat-Members" role="tabpanel">
+            <MemberList chat={chat} />
+        </div>
+    )
+}
+
+export const GroupDetails = observer(({ chat }: { chat: Chat }) => {
+    return (
+        <div className="tab-pane fade active show" id="GroupChat-Details" role="tabpanel">
+            <ChatSidebarAvatar id={1} />
+            <GroupTitle chatName={chat.name} />
+            <ChatList chat={chat} />
+        </div>
+    )
+})
+
+export const SidebarTabContent = ({ chat }: { chat: Chat }) => {
+    return (
+        <div className="tab-content py-3" id="myTabContent">
+            <GroupDetails chat={chat} />
+            <GroupMembers chat={chat} />
+        </div>
+    )
+}
+
+export const HeaderTab = () => {
+    return (
+        <ul className="nav nav-tabs nav-overflow page-header-tabs">
+            <li className="nav-item">
+                <a className="nav-link" data-toggle="tab" href="#GroupChat-Details">
+                    群聊信息
+                </a>
+            </li>
+            <li className="nav-item">
+                <a className="nav-link" data-toggle="tab" href="#GroupChat-Members">
+                    群聊成员
+                </a>
+            </li>
+            <li className="nav-item">
+                <a className="nav-link" data-toggle="tab" href="#GroupChat-Notices">
+                    群聊公告
+                </a>
+            </li>
+        </ul>
+    )
+}
 
 export const ChatSidebarBody = observer(
     ({ chat, visitUser }: { chat: Chat; visitUser: User | null }) => {
@@ -191,21 +336,19 @@ export const ChatSidebarBody = observer(
                 </div>
             )
         }
-
-        return (
-            <div className="body mt-4">
-                <ChatSidebarAvatar
-                    id={chat.chatType === ChatType.Private ? chat.bindUser!.userId : chat.chatId}
-                />
-                <ChatSidebarName chat={chat} visitUser={visitUser} />
-                {chat.chatType === ChatType.Private ? (
+        if (chat.chatType === ChatType.Private) {
+            return (
+                <div className="body mt-4">
+                    <ChatSidebarAvatar id={1} />
+                    <ChatSidebarName chat={chat} visitUser={visitUser} />
                     <FriendshipButton userId={chat.bindUser!.userId} />
-                ) : (
-                    <>
-                        <GroupUserList chat={chat} />
-                        <QuitGroupButton chatId={chat.chatId}/>
-                    </>
-                )}
+                </div>
+            )
+        }
+        return (
+            <div className="body">
+                <HeaderTab />
+                <SidebarTabContent chat={chat} />
             </div>
         )
     }

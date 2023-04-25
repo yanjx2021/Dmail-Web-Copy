@@ -74,9 +74,9 @@ export const UserSidebar = observer(({ chat }: { chat: Chat }) => {
         <div className="addnew-user-sidebar py-xl-4 py-3 px-xl-4 px-3">
             <div className="d-flex flex-column">
                 {isPrivate ? (
-                    <ChatSidebarHeader title="邀请好友创建群聊" />
+                    <ChatSidebarHeader title="邀请好友创建群聊" chatId={chat.chatId}/>
                 ) : (
-                    <ChatSidebarHeader title="邀请好友入群" />
+                    <ChatSidebarHeader title="邀请好友入群" chatId={chat.chatId}/>
                 )}
                 <div className="body mt-4">
                     <button

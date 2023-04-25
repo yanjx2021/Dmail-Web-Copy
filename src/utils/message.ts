@@ -237,6 +237,24 @@ export interface ReceiveQuitGroupChatResponseData {
     chatId?: number
 }
 
+export interface ReceiveGetGroupOwnerResponseData {
+    state: 'Success' | 'UserNotInChat' | 'DatabaseError' | 'ServerError'
+    userId: number
+    chatId: number
+}
+
+export interface ReceiveGetGroupAdminResponseData {
+    state: 'Success' | 'UserNotInChat' | 'DatabaseError' | 'ServerError'
+    chatId: number
+    userIds: number[]
+}
+
+export interface ReceiveSetGroupAdminResponseData {
+    state: 'Success' | 'NotOwner' | 'UserNotInChat' | 'AlreadyAdmin' | 'DatabaseError' | 'ServerError'
+    chatId?: number
+    userId?: number
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -276,6 +294,9 @@ export enum Receive {
     Notices = 'Noitces',
     GetGroupUsersResponse = 'GetGroupUsersResponse',
     QuitGroupChatResponse = 'QuitGroupChatResponse',
+    GetGroupOwnerResponse = 'GetGroupOwnerResponse',
+    GetGroupAdminResponse = 'GetGroupAdminResponse',
+    SetGroupAdminResponse = 'SetGroupAdminResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -359,6 +380,11 @@ export interface SendRevokeMessageData {
     method: 'Sender' | 'GroupAdmin'
 }
 
+export interface SendSetGroupAdminData {
+    chatId: number
+    userId: number
+}
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -387,6 +413,9 @@ export enum Send {
     RevokeMessage = 'RevokeMessage',
     GetGroupUsers = 'GetGroupUsers',
     QuitGroupChat = 'QuitGroupChat',
+    GetGroupOwner = 'GetGroupOwner',
+    GetGroupAdmin = 'GetGroupAdmin',
+    SetGroupAdmin = 'SetGroupAdmin',
 }
 
 // COMMAND和DATA类型捆绑
@@ -427,6 +456,9 @@ export interface MessageReceiveData {
     [Receive.Notices]: string[],
     [Receive.GetGroupUsersResponse]: ReceiveGetGroupUsersResponseData,
     [Receive.QuitGroupChatResponse]: ReceiveQuitGroupChatResponseData,
+    [Receive.GetGroupOwnerResponse]: ReceiveGetGroupOwnerResponseData,
+    [Receive.GetGroupAdminResponse]: ReceiveGetGroupAdminResponseData,
+    [Receive.SetGroupAdminResponse]: ReceiveSetGroupAdminResponseData,
 }
 
 export interface MessageSendData {
@@ -456,6 +488,9 @@ export interface MessageSendData {
     [Send.RevokeMessage]: SendRevokeMessageData
     [Send.GetGroupUsers]: ChatId
     [Send.QuitGroupChat]: number
+    [Send.GetGroupOwner]: number
+    [Send.GetGroupAdmin]: number
+    [Send.SetGroupAdmin]: SendSetGroupAdminData
 }
 
 // 封装消息包
