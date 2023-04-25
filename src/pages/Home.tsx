@@ -14,6 +14,7 @@ import { secureAuthStore } from '../stores/secureAuthStore'
 import { LockedChatView } from '../components/LockedChatView'
 import { RegisterModal } from '../components/Box/Modal'
 import { FileTest } from '../components/FileTest'
+import { RtcTest } from '../components/RtcTest'
 
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore; chatStore: ChatStore }) => {
@@ -43,14 +44,12 @@ const Home = observer(
             }),
             []
         )
-        
+
         useEffect(
-            action(
-                () => {
-                    chatStore.setActiveChatId = setActiveChatId
-                }
-            )
-            ,[setActiveChatId]
+            action(() => {
+                chatStore.setActiveChatId = setActiveChatId
+            }),
+            [setActiveChatId]
         )
 
         return authStore.state === AuthState.Logged ? (
@@ -58,11 +57,13 @@ const Home = observer(
                 <RegisterError />
                 <RegisterModal />
                 <Menu />
+                <RtcTest />
                 <TabContent activeChatId={activeChatId} setActiveChatId={checkAndSetActivateChat} />
                 {activeChatId === null ? (
                     <NoneActiveChatBody />
+                ) : secureAuthStore.showSecureBox ? (
+                    <LockedChatView />
                 ) : (
-                    secureAuthStore.showSecureBox ? <LockedChatView /> :
                     <ChatView chat={chatStore.getChat(activeChatId)} />
                 )}
             </>
