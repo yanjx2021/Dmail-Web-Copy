@@ -1,10 +1,37 @@
+.ant-modal-body
+{
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
 .ant-modal-body .container-xxl 
 {
   overflow-x: hidden;
+ 
+  border-top: 1px solid #dee2e6 !important;
+}
+.ant-modal-body .container-xxl::-webkit-scrollbar 
+{
+  width: 8px;
+  background-color: var(--font-eee)
+}
+
+.ant-modal-body .container-xxl::-webkit-scrollbar-thumb 
+{
+  background: var(--sidebar-bg);
+  border-radius: 5px
+}
+
+.ant-modal-body .container-xxl::-webkit-scrollbar-thumb:active 
+{
+  background-color: var(--font-color);
 }
 .ant-modal-body .container-xxl div>div>:first-child li 
 {
-    padding-top: .75rem !important;
+    padding-top: 1rem !important;
+}
+.ant-modal-body .container-xxl div>div>:last-child li 
+{
+    padding-bottom:1rem !important;
 }
 .ant-modal-body .message .message-content
 {
@@ -19,4 +46,11 @@
 {
   flex:1;
   width:0;
+}
+.ant-modal-body .attachment img {
+  width: auto;
+  height: auto;
+  max-width: 200px;
+  max-height: 100px;
+  box-shadow: 0 0 5px .3px #999 
 }

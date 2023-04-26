@@ -15,6 +15,8 @@ import { secondaryCodeHash } from '../../constants/passwordHash'
 import { ChatSelector, messageSelectStore } from '../MessagesBox/Selector'
 import { Chat, chatStore } from '../../stores/chatStore'
 import { MessageBox } from '../MessagesBox/MessageBox'
+import { useEffect } from 'react'
+import '../../styles/Modal.css'
 
 export const ModalInput = ({
     label,
@@ -295,9 +297,7 @@ export const ChatSelectCard = observer(({ chat }: { chat: Chat }) => {
                                 <h6 className="text-truncate mb-0 me-auto">{chat.name}</h6>
                             </div>
                         </div>
-                        <Checkbox
-                            checked={messageSelectStore.hasSelectChat(chat)}
-                        />
+                        <Checkbox checked={messageSelectStore.hasSelectChat(chat)} />
                     </div>
                 </div>
             </a>
@@ -335,12 +335,20 @@ export const TransferChatBoxModalView = observer(({ title }: { title: string }) 
             onCancel={modalStore.handleCancel}
             title={title}
             open={modalStore.isOpen}>
-            <MessageBox msgs={modalStore.transferData!.messages} userId={modalStore.transferData!.userId}/>
+            <MessageBox
+                msgs={modalStore.transferData!.messages}
+                userId={modalStore.transferData!.userId}
+            />
         </Modal>
     )
 })
 
 export const RegisterModal = observer(() => {
+    useEffect(() => {
+        var $box: any = document.querySelector('.ant-modal-root')
+        var $this: any = document.querySelector('.choose-skin li.active')
+        $box?.parentNode.classList.add('theme-' + $this.getAttribute('data-theme'))
+    })
     switch (modalStore.modalType) {
         case 'AddFriend':
             return <AddFriendModalView title="添加好友" />
@@ -355,9 +363,9 @@ export const RegisterModal = observer(() => {
         case 'TransferChat':
             return <TransferChatModalView title="选择要转发到的群聊" />
         case 'TransferChatBox':
-            return <TransferChatBoxModalView title='聊天记录'/>
+            return <TransferChatBoxModalView title="聊天记录" />
         case 'JoinGroup':
-            return <JoinGroupModalView title='申请加入群聊'/>
+            return <JoinGroupModalView title="申请加入群聊" />
         default:
             return <></>
     }

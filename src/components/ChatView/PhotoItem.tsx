@@ -4,13 +4,13 @@ import { action } from 'mobx'
 import { fileStore, UploadingFile } from '../../stores/fileStore'
 
 import { CachedImage } from '../../stores/imageStore'
-import { Progress } from 'antd'
+import { Progress,Image } from 'antd'
 
 export const PhotoItem = observer(({ cachedUrl }: { cachedUrl: CachedImage }) => {
     // TODO-在这里添加删除消息的函数
     return (
         <div className="attachment right-file">
-            <img className="rounded mt-1" src={cachedUrl.url} alt="" />
+            <Image className="rounded mt-1" src={cachedUrl.url} alt="" />
         </div>
     )
 })

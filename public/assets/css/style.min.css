@@ -12852,6 +12852,9 @@ body.admin .main-body .body-page::-webkit-scrollbar-thumb {
   max-height: 200px;
   box-shadow: 0 0 5px .3px #999 
 }
+.text-footerform {
+  color: var(--font-color) !important
+}
 
 @media screen and (max-width: 992px) {
     .main .attachment img {
