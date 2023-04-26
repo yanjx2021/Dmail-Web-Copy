@@ -1,0 +1,38 @@
+.ant-modal-root .form-control
+{
+  background-color: #fff;
+  border-color:#ced4da;
+}
+
+.ant-modal-root .form-control:focus 
+{
+  box-shadow: none;
+  outline: none;
+  border-color: var(--primary-color);
+  background-color: #F3F7FA;
+}
+
+.ant-modal-root .ant-btn
+{
+  background-color:var(--primary-color);
+  color:#fff;
+  padding: .5rem 1rem;
+  height:40px;
+  margin-top: 5px;
+}
+
+.ant-modal-root .ant-btn:focus
+{
+  outline: none;
+}
+
+:where(.css-dev-only-do-not-override-1mqg3i0).ant-btn-default:not(:disabled):hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+.ant-modal-root .ant-modal-body .form-group .form-control
+{
+  margin-top: 5px;
+  margin-bottom: 8px;
+}
