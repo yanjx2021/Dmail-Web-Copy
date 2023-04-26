@@ -114,8 +114,8 @@ export class LocalDatabase {
                 MessageServer.Instance().send<Send.GetUserInfo>(Send.GetUserInfo, userId)
                 return
             }
-            const info = JSON.parse(value) as { name: string; avaterPath: string }
-            userStore.setUser(userId, info.name, info.avaterPath)
+            const info = JSON.parse(value) as { name: string; avaterHash: string }
+            userStore.setUser(userId, info.name, info.avaterHash)
         })
     }
 

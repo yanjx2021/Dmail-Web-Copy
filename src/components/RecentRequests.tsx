@@ -9,6 +9,7 @@ import { observer } from 'mobx-react-lite'
 import { authStore } from '../stores/authStore'
 import '../styles/RecentRequests.css'
 import { modalStore } from '../stores/modalStore'
+import { userStore } from '../stores/userStore'
 
 const RequestItemStatus = observer(
     ({ senderId, state, reqId }: { senderId: number; state: RequestState; reqId: number }) => {
@@ -61,9 +62,7 @@ const RequestItem = observer(({ request }: { request: Request }) => {
                         <div className="avatar me-3">
                             <span className="rounded-circle"></span>
                             <div className="avatar rounded-circle no-image timber">
-                                <span>
-                                    {request.showId}
-                                </span>
+                                <img className='avatar rounded-circle' src={request.getAvaterUrl} alt='avatar'/>
                             </div>
                         </div>
                         <div className="media-body overflow-hidden">

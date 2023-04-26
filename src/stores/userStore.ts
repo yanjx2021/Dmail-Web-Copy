@@ -3,18 +3,24 @@ import { UserId } from './authStore'
 import { MessageServer } from '../utils/networkWs'
 import { Receive, ReceiveGetUserInfoResponseData, ReceiveGetUserInfoResponseState, Send } from '../utils/message'
 import { LocalDatabase } from './localData'
+import { imageStore } from './imageStore'
 
 export class User {
     userId: number = 0
     name = '加载中...'
     nickname = ''
-    avaterPath = ''
+    avaterHash = ''
 
     setToSelf(user: User) {
         this.userId = user.userId
         this.name = user.name
-        this.avaterPath = user.avaterPath
+        this.avaterHash = user.avaterHash
         this.nickname = user.nickname
+    }
+
+    get getAvaterUrl() {
+        if (this.avaterHash && this.avaterHash !== '') return imageStore.getImageUrl(this.avaterHash).url
+        return 'assets/images/user.png'
     }
 
     setNickname(nickname: string) {
@@ -23,7 +29,9 @@ export class User {
     setName(name: string) {
         this.name = name
     }
-
+    setAvaterHash(hash: string) {
+        this.avaterHash = hash
+    }
     get showName() {
         return this.nickname === '' ? this.name : this.nickname
     }
@@ -36,7 +44,7 @@ export class User {
         const user = {
             userId: this.userId,
             name: this.name,
-            avaterPath: this.avaterPath,
+            avaterHash: this.avaterHash,
         }
         return JSON.stringify(user)
     }
@@ -45,7 +53,7 @@ export class User {
         makeAutoObservable(this, {}, { autoBind: true })
         this.userId = userId
         this.name = name
-        this.avaterPath = avater_path
+        this.avaterHash = avater_path
         this.nickname = nickname
     }
 }
@@ -67,8 +75,8 @@ export class UserStore {
         switch (data.state) {
             case ReceiveGetUserInfoResponseState.Success:
                 console.log(`接受用户${data.userId}的信息`)
-                this.setUser(data.userId!, data.userName!, data.avaterPath!)
-                LocalDatabase.saveUserInfo(data.userId!, this.createUser(data.userId!, data.userName!, data.avaterPath!))
+                this.setUser(data.userId!, data.userName!, data.avaterHash!)
+                LocalDatabase.saveUserInfo(data.userId!, this.createUser(data.userId!, data.userName!, data.avaterHash!))
                 break
             default:
                 this.errors = '服务器跑路了'
@@ -100,7 +108,7 @@ export class UserStore {
             this.users.set(useId, this.createUser(useId, name, avater_path, ''))
         } else {
             user.setName(name)
-            user.avaterPath = avater_path
+            user.avaterHash = avater_path
             nickname && user.setNickname(nickname)
             this.users.get(useId)?.setToSelf(user)
         }

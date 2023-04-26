@@ -15,14 +15,14 @@ export class UpdateGroupStore {
     waitResponse: boolean = false
     chat: Chat | undefined = undefined
     newGroupName: string = ''
-    newAvaterPath: string = ''
+    newAvaterHash: string = ''
 
     errors: string = ''
 
 
     reset() {
         this.newGroupName = ''
-        this.newAvaterPath = ''
+        this.newAvaterHash = ''
         this.waitResponse = false
         this.updateType = 'GroupName'
         this.errors = ''
@@ -45,7 +45,13 @@ export class UpdateGroupStore {
                 })
                 break
             case 'Avater':
-                // TODO
+                this.chat && MessageServer.Instance().send<Send.UpdateGroupInfo>(Send.UpdateGroupInfo, {
+                    chatId: this.chat.chatId,
+                    content: {
+                        type: 'Avater',
+                        newAvater: this.newAvaterHash,
+                    }
+                })
                 break
             default:
                 break
@@ -56,16 +62,22 @@ export class UpdateGroupStore {
     writeToStore() {
         switch (this.updateType) {
             case 'GroupName':
-                this.chat && chatStore.getChat(this.chat.chatId).setGroupName(this.newGroupName)
+                this.chat && this.chat.setGroupName(this.newGroupName)
                 this.chat && LocalDatabase.saveChatInfo(this.chat.chatId, {
                     id: this.chat.chatId,
                     name: this.chat.groupName!,
-                    avaterPath: this.chat.groupAvaterPath!,
+                    avaterHash: this.chat.groupAvaterPath!,
                 })
                 this.newGroupName = ''
                 break
             case 'Avater':
-                // TODO
+                this.chat?.setGroupAvater(this.newAvaterHash)
+                this.chat && LocalDatabase.saveChatInfo(this.chat.chatId, {
+                    id: this.chat.chatId,
+                    name: this.chat.groupName!,
+                    avaterHash: this.chat.groupAvaterPath!,
+                })
+                this.newAvaterHash = ''
                 break
         }
     }

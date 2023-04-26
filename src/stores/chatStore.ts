@@ -40,6 +40,7 @@ import {
     createGroupFromAllFriendsSelectStore,
     userSelectStore,
 } from '../components/MessagesBox/Selector'
+import { imageStore } from './imageStore'
 
 export type ChatId = number
 
@@ -57,7 +58,7 @@ export interface PrivateChatInfo {
 export interface GroupChatInfo {
     id: number
     name: string
-    avaterPath: string
+    avaterHash: string
 }
 
 export type ChatInfo = PrivateChatInfo | GroupChatInfo
@@ -281,6 +282,20 @@ export class Chat {
         makeAutoObservable(this, {}, { autoBind: true })
     }
 
+    get getAvaterUrl() {
+        if (this.avaterHash && this.avaterHash !== '') return imageStore.getImageUrl(this.avaterHash).url
+        return 'assets/images/user.png'
+    }
+
+    get avaterHash() {
+        if (this.chatType === ChatType.Private) return this.bindUser!.avaterHash
+        return this.groupAvaterPath
+    }
+
+    setGroupAvater(avaterHash: string) {
+        this.groupAvaterPath = avaterHash
+    }
+
     setGroupName(newName: string) {
         this.groupName = newName
     }
@@ -367,7 +382,7 @@ export class Chat {
         if ('name' in info) {
             // 群聊
             this.groupName = info.name
-            this.groupAvaterPath = info.avaterPath
+            this.groupAvaterPath = info.avaterHash
             this.chatType = ChatType.Group
             this.userIds = []
         } else {

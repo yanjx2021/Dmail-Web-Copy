@@ -120,7 +120,7 @@ export const CreateGroupModalView = observer(({ title }: { title: string }) => {
                     onClick={() => {
                         MessageServer.Instance().send<Send.CreateGroupChat>(Send.CreateGroupChat, {
                             name: groupName,
-                            avaterPath: '',
+                            avaterHash: '',
                         })
                         setGroupName('')
                         modalStore.handleCancel()

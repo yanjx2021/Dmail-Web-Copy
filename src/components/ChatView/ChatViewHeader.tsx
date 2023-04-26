@@ -4,6 +4,8 @@ import { chatSideStore } from '../../stores/chatSideStore'
 import { action } from 'mobx'
 import { createGroupFromAllFriendsSelectStore } from '../MessagesBox/Selector'
 import { rtcStore } from '../../stores/rtcStore'
+import { Image } from 'antd'
+import { imageStore } from '../../stores/imageStore'
 
 export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
     return (
@@ -20,7 +22,15 @@ export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
                                     // 添加颜色
                                     className={'avatar rounded-circle no-image ' + 'timber'}>
                                     {/* TODO-昵称缩写 */}
-                                    <span>{chat.chatId}</span>
+                                    <img
+                                        className='avatar rounded-circle'
+                                        src={
+                                            chat.avaterHash && chat.avaterHash !== ''
+                                                ? imageStore.getImageUrl(chat.avaterHash).url
+                                                : 'assets/images/user.png'
+                                        }
+                                        alt='avatar'
+                                    />
                                 </div>
                             </div>
                             <div className="media-body overflow-hidden">

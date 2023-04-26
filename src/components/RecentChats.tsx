@@ -28,9 +28,7 @@ const RecentChatItem = observer(
                                 <Badge count={chat.unreadCount}>
                                     <span className="rounded-circle"></span>
                                     <div className="avatar rounded-circle no-image timber">
-                                        <span>
-                                            {chat.name.slice(0, Math.min(2, chat.name.length))}
-                                        </span>
+                                        <img className='avatar rounded-circle' src={chat.getAvaterUrl} alt='avatar'/>
                                     </div>
                                 </Badge>
                             </div>

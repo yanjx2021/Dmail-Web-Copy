@@ -6,6 +6,10 @@ import { updateUserStore } from '../stores/updateUserStore'
 import { useImmer } from 'use-immer'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { modalStore } from '../stores/modalStore'
+import { UploadingFile, fileStore } from '../stores/fileStore'
+import { imageStore } from '../stores/imageStore'
+import { Progress, Image } from 'antd'
+import { PhotoItem } from './ChatView/PhotoItem'
 
 export const ProfileHeader = () => {
     return (
@@ -20,16 +24,36 @@ export const ProfileHeader = () => {
     )
 }
 
-export const CardAvatar = ({ avatarPath }: { avatarPath: string }) => {
+export const CardAvatar = observer(({ avaterHash }: { avaterHash: string }) => {
+    const handleChange = (event: any) => {
+        event.target.files[0] &&
+            fileStore.requestUpload(
+                event.target.files[0],
+                action((uploadingFile: UploadingFile) => {
+                    updateUserStore.newAvaterHash = uploadingFile.hash!
+                    updateUserStore.updateType = 'AvaterHash'
+                    updateUserStore.sendUpdateUserInfo()
+                })
+            )
+    }
     return (
         <div className="card-user-avatar">
-            <img src={avatarPath === '' ? 'assets/images/user.png' : avatarPath} alt="avatar" />
+            <Image className="avatar xxl rounded-circle"
+                src={
+                    !avaterHash || avaterHash === '' 
+                        ? 'assets/images/user.png'
+                        : imageStore.getImageUrl(avaterHash).url
+                }
+                alt="avatar"
+            />
+            
+            <input type="file" accept="image/*" onChange={handleChange}></input>
             <button type="button" className="btn btn-secondary btn-sm">
                 <i className="zmdi zmdi-edit"></i>
             </button>
         </div>
     )
-}
+})
 
 export const UserNameInput = observer(({ handleOnBlur }: { handleOnBlur: any }) => {
     const inputRef: any = useRef(null)
@@ -111,7 +135,7 @@ export const ProfileCard = observer(({ user }: { user: User }) => {
     return (
         <div className="card border-0 text-center pt-3 mb-4">
             <div className="card-body">
-                <CardAvatar avatarPath={user.avaterPath} />
+                <CardAvatar avaterHash={user.avaterHash} />
                 <CardDetail userName={user.showName} email={authStore.email} userId={user.userId} />
             </div>
         </div>
@@ -127,22 +151,23 @@ export const ColorSelectDot = ({
     title: string
     classname: string
 }) => {
-    const ref :any =useRef(null);
-    const handleTheme = (e:any) => {
+    const ref: any = useRef(null)
+    const handleTheme = (e: any) => {
         var $body: any = document.querySelector('#layout')
         var $box: any = document.querySelector('.ant-modal-root')
-        var $this:any = ref.current
+        var $this: any = ref.current
         console.log($this?.getAttribute('data-theme'))
         var existTheme: any = document
-            .querySelector('.choose-skin li.active')?.getAttribute('data-theme')
+            .querySelector('.choose-skin li.active')
+            ?.getAttribute('data-theme')
         var theme: any = document.querySelectorAll('.choose-skin li')
         for (var i = 0; i < theme.length; i++) {
             theme[i].classList.remove('active')
         }
         $body.classList.remove('theme-' + existTheme)
         $this.classList.add('active')
-        $body.classList.add('theme-' +$this.getAttribute('data-theme') )
-        $box?.parentNode.setAttribute("class", 'theme-' +$this.getAttribute('data-theme') )
+        $body.classList.add('theme-' + $this.getAttribute('data-theme'))
+        $box?.parentNode.setAttribute('class', 'theme-' + $this.getAttribute('data-theme'))
     }
     return (
         <li

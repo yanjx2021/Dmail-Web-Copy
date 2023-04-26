@@ -22,8 +22,7 @@ import { modalStore } from '../../stores/modalStore'
 import { chatSideStore } from '../../stores/chatSideStore'
 import { FileItem, LoadingFileItem } from './FileItem'
 import { LoadingPhotoItem, PhotoItem } from './PhotoItem'
-
-
+import { Image } from 'antd'
 
 export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) => {
     const isRight = msg.senderId === authStore.userId
@@ -96,6 +95,7 @@ export const ChatMessageItem = observer(
             }: { msg: ChatMessage; indexInView: number; enableDropDown: boolean },
             ref: any
         ) => {
+            const user = userStore.getUser(msg.senderId)
             const isRight = msg.senderId === authStore.userId
             return msg.type === ChatMessageType.Deleted ? (
                 <div style={{ height: '1px' }}></div>
@@ -107,15 +107,17 @@ export const ChatMessageItem = observer(
                     {!isRight ? (
                         <a
                             type="button"
-                            onClick={action(() =>
-                                chatSideStore.visitUsertoggle(userStore.getUser(msg.senderId))
-                            )}>
+                            onClick={action(() => chatSideStore.visitUsertoggle(user))}>
                             <div className="avatar mr-lg-3 me-2">
-                                <div
-                                    //添加颜色
-                                    className={'avatar rounded-circle no-image ' + ''}>
-                                    <span>{msg.senderId}</span>
-                                </div>
+                                    <img
+                                        className={'avatar rounded-circle no-image ' + ''}
+                                        src={
+                                            !user.avaterHash || user.avaterHash === ''
+                                                ? 'assets/images/user.png'
+                                                : imageStore.getImageUrl(user.avaterHash).url
+                                        }
+                                        alt="avatar"
+                                    />
                             </div>
                         </a>
                     ) : (

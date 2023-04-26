@@ -17,6 +17,7 @@ import { authStore } from './authStore'
 import { User, userStore } from './userStore'
 import { LocalDatabase } from './localData'
 import { Chat, chatStore } from './chatStore'
+import { imageStore } from './imageStore'
 
 export enum RequestContentType {
     MakeFriend = 'MakeFriend',
@@ -46,7 +47,11 @@ export interface InvitedJoinGroupRequest {
     chatId: number
 }
 
-export type RequestContent = MakeFriendRequest | JoinGroupRequest | GroupInvitationRequest | InvitedJoinGroupRequest
+export type RequestContent =
+    | MakeFriendRequest
+    | JoinGroupRequest
+    | GroupInvitationRequest
+    | InvitedJoinGroupRequest
 
 interface RequestInfo {
     reqId: number
@@ -82,6 +87,59 @@ export class Request {
         receiverId: 0,
     }
 
+    get getAvaterUrl() {
+        switch (this.content.type) {
+            case RequestContentType.MakeFriend:
+                if (this.isSender) {
+                    if (this.receiveUser) {
+                        return imageStore.getImageUrl(this.receiveUser.avaterHash).url
+                    } else {
+                        return 'assets/images/user.png'
+                    }
+                } else {
+                    if (this.sendUser) {
+                        return imageStore.getImageUrl(this.sendUser.avaterHash).url
+                    } else {
+                        return 'assets/images/user.png'
+                    }
+                }
+            case RequestContentType.JoinGroup:
+                if (this.isSender) {
+                    if (this.chat) {
+                        return this.chat.getAvaterUrl
+                    } else {
+                        return 'assets/images/user.png'
+                    }
+                } else {
+                    if (this.sendUser) {
+                        return imageStore.getImageUrl(this.sendUser.avaterHash).url
+                    } else {
+                        return 'assets/images/user.png'
+                    }
+                }
+            case RequestContentType.GroupInvitation:
+                if (this.isSender) {
+                    if (this.receiveUser) {
+                        return imageStore.getImageUrl(this.receiveUser.avaterHash).url
+                    } else {
+                        return 'assets/images/user.png'
+                    }
+                } else {
+                    if (this.sendUser) {
+                        return imageStore.getImageUrl(this.sendUser.avaterHash).url
+                    } else {
+                        return 'assets/images/user.png'
+                    }
+                }
+            case RequestContentType.InvitedJoinGroup:
+                if (this.sendUser) {
+                    return imageStore.getImageUrl(this.sendUser.avaterHash).url
+                } else {
+                    return 'assets/images/user.png'
+                }
+        }
+    }
+
     get isSender() {
         return authStore && this.senderId === authStore.userId
     }
@@ -113,10 +171,9 @@ export class Request {
     get textTip() {
         if (this.content.type === RequestContentType.JoinGroup) {
             return this.isSender ? this.chat?.name : this.sendUser?.name
-        } else if(this.content.type === RequestContentType.InvitedJoinGroup) {
+        } else if (this.content.type === RequestContentType.InvitedJoinGroup) {
             return this.inviteUser?.showName + '邀请' + this.sendUser?.showName + '入群'
-        } 
-        else {
+        } else {
             return this.isSender ? this.receiveUser?.showName : this.sendUser?.showName
         }
     }
@@ -171,7 +228,7 @@ export class Request {
             case RequestContentType.InvitedJoinGroup:
                 this.inviteUser = userStore.getUser(this.content.inviterId)
                 this.chat = chatStore.getChat(this.content.chatId)
-            break
+                break
             default:
                 console.log('只要到达，那个地方...')
         }
@@ -454,7 +511,7 @@ export class RequestStore {
             answer: 'Approved',
         })
     }
-    
+
     refuseRequest(reqId: number) {
         const req = this.requests.get(reqId)
         if (req === undefined) {

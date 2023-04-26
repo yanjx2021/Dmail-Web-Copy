@@ -9,13 +9,13 @@ import { SHA256 } from 'crypto-js'
 import { modalStore } from './modalStore'
 
 export class UpdateUserStore {
-    updateType: 'Password' | 'UserName' | 'AvaterPath' = 'UserName'
+    updateType: 'Password' | 'UserName' | 'AvaterHash' = 'UserName'
 
     waitResponse: boolean = false
 
     newPassword: string = ''
     newUserName: string = ''
-    newAvaterPath: string = ''
+    newAvaterHash: string = ''
     emailCode: string = ''
 
     errors: string = ''
@@ -24,7 +24,7 @@ export class UpdateUserStore {
     reset() {
         this.newUserName = ''
         this.newPassword = ''
-        this.newAvaterPath = ''
+        this.newAvaterHash = ''
         this.emailCode = ''
         this.waitResponse = false
     }
@@ -42,10 +42,10 @@ export class UpdateUserStore {
                     newName: this.newUserName,
                 })
                 break
-            case 'AvaterPath':
+            case 'AvaterHash':
                 MessageServer.Instance().send<Send.UpdateUserInfo>(Send.UpdateUserInfo, {
-                    type: 'AvaterPath',
-                    newPath: this.newAvaterPath,
+                    type: 'AvaterHash',
+                    newHash: this.newAvaterHash,
                 })
                 break
             case 'Password':
@@ -81,10 +81,10 @@ export class UpdateUserStore {
                 this.emailCode = ''
                 authStore.logout()
                 break
-            case 'AvaterPath':
-                userStore.getUser(authStore.userId).avaterPath = this.newAvaterPath
+            case 'AvaterHash':
+                userStore.getUser(authStore.userId).avaterHash = this.newAvaterHash
                 LocalDatabase.saveUserInfo(authStore.userId, userStore.getUser(authStore.userId))
-                this.newAvaterPath = ''
+                this.newAvaterHash = ''
                 break
         }
     }

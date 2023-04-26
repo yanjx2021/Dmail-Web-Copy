@@ -172,7 +172,7 @@ export interface ReceiveGetUserInfoResponseData {
     state: ReceiveGetUserInfoResponseState
     userId?: number
     userName?: string
-    avaterPath?: string
+    avaterHash?: string
 }
 
 export interface ReceiveRequestStateUpdateData {
@@ -411,7 +411,7 @@ export interface SendSolveRequestData {
 }
 export interface SendCreateGroupChatData {
     name: string
-    avaterPath: string
+    avaterHash: string
 }
 
 export interface SendGetMessagesData {
@@ -425,8 +425,8 @@ export interface UpdateUserName {
     newName: string
 }
 export interface UpdateAvaterPath {
-    type: 'AvaterPath'
-    newPath: string
+    type: 'AvaterHash'
+    newHash: string
 }
 
 export interface UpdatePassword {
