@@ -5,14 +5,16 @@ import { requestStore } from '../stores/requestStore'
 import { action, runInAction } from 'mobx'
 
 export const GetServerAddress = () => {
-    const protocol = document.location.protocol
-    if (protocol === 'http:') {
-        return 'ws://' + document.location.host + '/ws'
-    } else if (protocol === 'https:') {
-        return 'wss://' + document.location.host + '/ws'
-    } else {
-        return ''
-    }
+    // const protocol = document.location.protocol
+    // if (protocol === 'http:') {
+    //     return 'ws://' + document.location.host + '/ws'
+    // } else if (protocol === 'https:') {
+    //     return 'wss://' + document.location.host + '/ws'
+    // } else {
+    //     return ''
+    // }
+    return 'wss://dmail.r1ntaro.com:8080/ws'
+    return 'wss://127.0.0.1:8080/ws'
 }
 
 // 43.143.134.180
