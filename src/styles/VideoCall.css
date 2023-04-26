@@ -1,0 +1,23 @@
+video.img-fluid.rounded 
+{
+  border: 1px solid #dee2e6 !important;
+  border-color: var(--border-color) !important;
+  width:100%;
+}
+.my-video.position-absolute.rounded.overflow-hidden.border
+{
+  border: none !important;
+}
+.video-action-btn.position-absolute.p-2.rounded
+{
+    z-index: 2;
+}
+.video-action-btn .btn
+{
+  margin-left: 4px;
+}
+.video-action-btn .btn:active {
+    outline: 1px solid #91caff;
+    outline-offset: 1px;
+    transition: outline-offset 0s,outline 0s;
+}

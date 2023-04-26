@@ -57,7 +57,6 @@ const Home = observer(
                 <RegisterError />
                 <RegisterModal />
                 <Menu />
-                <RtcTest />
                 <TabContent activeChatId={activeChatId} setActiveChatId={checkAndSetActivateChat} />
                 {activeChatId === null ? (
                     <NoneActiveChatBody />
