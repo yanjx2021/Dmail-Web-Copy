@@ -43,7 +43,7 @@ export const ChatSidebar = observer(
             }),
             [visitUser]
         )
-        if (visitUser !== null)
+        if (visitUser !== null) // 查看群成员
             return (
                 <div className="user-detail-sidebar py-xl-4 py-3 px-xl-4 px-3">
                     <div className="d-flex flex-column">
@@ -53,7 +53,7 @@ export const ChatSidebar = observer(
                 </div>
             )
 
-        return (
+        return ( // 群聊
             <div className="user-detail-sidebar py-xl-4 py-3 px-xl-4 px-3">
                 <div className="d-flex flex-column">
                     <ChatSidebarHeader title={title} chatId={chat.chatId} />

@@ -281,8 +281,18 @@ export class Chat {
         makeAutoObservable(this, {}, { autoBind: true })
     }
 
+    removeGroupChatMember(userId: number) {
+        this.userIds && this.userIds.indexOf(userId) > -1 && this.userIds.splice(this.userIds.indexOf(userId), 1)
+        this.adminIds && this.adminIds.indexOf(userId) > -1 && this.adminIds.splice(this.adminIds.indexOf(userId), 1)
+        userId === this.ownerId && console.log('真的要踢出群主吗')
+    }
+
     setGroupChatUserIds(userIds: number[]) {
         this.userIds = userIds
+    }
+
+    isAdmin(userId: number) {
+        return this.adminIds && this.adminIds.indexOf(userId) > -1
     }
 
     setGroupChatOwnerId(userId: number) {

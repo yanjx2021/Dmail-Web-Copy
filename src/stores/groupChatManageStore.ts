@@ -5,6 +5,7 @@ import {
     ReceiveGetGroupAdminResponseData,
     ReceiveGetGroupOwnerResponseData,
     ReceiveGetGroupUsersResponseData,
+    ReceiveRemoveGroupMemberResponseData,
     ReceiveSetGroupAdminResponseData,
     Send,
 } from '../utils/message'
@@ -19,6 +20,7 @@ export class GroupChatManageStore {
         MessageServer.on(Receive.GetGroupUsersResponse, this.GetGroupUsersResponseHandler)
         MessageServer.on(Receive.GetGroupAdminResponse, this.GetGroupAdminResponseHandler)
         MessageServer.on(Receive.SetGroupAdminResponse, this.SetGroupAdminResponseHandler)
+        MessageServer.on(Receive.RemoveGroupMemberResponse, this.RemoveGroupMemberResponseHandler)
     }
 
     sendSetGroupAdmin(userId: number, chatId: number) {
@@ -27,6 +29,40 @@ export class GroupChatManageStore {
             chatId,
         })
     }
+
+    sendRemoveGroupMember(userId: number, chatId: number) {
+        MessageServer.Instance().send<Send.RemoveGroupMember>(Send.RemoveGroupMember, {
+            userId,
+            chatId
+        })
+    }
+
+    RemoveGroupMemberResponseHandler(response: ReceiveRemoveGroupMemberResponseData) {
+        switch (response.state) {
+            case 'Success':
+                chatStore.getChat(response.chatId!).removeGroupChatMember(response.userId!)
+                break
+            case 'NoPermission':
+                this.errors = '权限不足'
+                break
+            case 'DatabaseError':
+                this.errors = '数据库异常'
+                break
+            case 'SameUser':
+                this.errors = '不能踢出自己'
+                break
+            case 'UserNotInChat':
+                this.errors = '用户不在群聊中'
+                break
+            case 'ServerError':
+                this.errors = '服务器异常'
+                break
+            default:
+                this.errors = '未知错误'
+                break
+        }
+    }
+
     SetGroupAdminResponseHandler(response: ReceiveSetGroupAdminResponseData) {
         switch (response.state) {
             case 'Success':

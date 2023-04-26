@@ -276,6 +276,12 @@ export interface ReceiveRevokeMessageResponseData {
     inChatId: number
 }
 
+export interface ReceiveRemoveGroupMemberResponseData {
+    state: 'Success' | 'SameUser' | 'NoPermission' | 'UserNotInChat' | 'DatabaseError' | 'ServerError'
+    chatId?: number
+    userId?: number
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -323,6 +329,7 @@ export enum Receive {
     MediaCallAnswer = 'MediaCallAnswer',
     MediaIceCandidate = 'MediaIceCandidate',
     RevokeMessageResponse = 'RevokeMessageResponse',
+    RemoveGroupMemberResponse = 'RemoveGroupMemberResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -430,6 +437,11 @@ export interface MediaIceCandidate {
     serializedCandidate: string
 }
 
+export interface SendRemoveGroupMemberData {
+    chatId: number
+    userId: number
+}
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -464,6 +476,7 @@ export enum Send {
     MediaCall = 'MediaCall',
     MediaCallAnswer = 'MediaCallAnswer',
     MediaIceCandidate = 'MediaIceCandidate',
+    RemoveGroupMember = 'RemoveGroupMember',
 }
 
 // COMMAND和DATA类型捆绑
@@ -512,6 +525,7 @@ export interface MessageReceiveData {
     [Receive.MediaCallAnswer]: MediaCallAnswerData
     [Receive.MediaIceCandidate]: MediaIceCandidate
     [Receive.RevokeMessageResponse]: ReceiveRevokeMessageResponseData
+    [Receive.RemoveGroupMemberResponse]: ReceiveRemoveGroupMemberResponseData
 }
 
 export interface MessageSendData {
@@ -547,6 +561,7 @@ export interface MessageSendData {
     [Send.MediaCall]: MediaCallData
     [Send.MediaCallAnswer]: MediaCallAnswerData
     [Send.MediaIceCandidate]: MediaIceCandidate
+    [Send.RemoveGroupMember]: SendRemoveGroupMemberData
 }
 
 // 封装消息包

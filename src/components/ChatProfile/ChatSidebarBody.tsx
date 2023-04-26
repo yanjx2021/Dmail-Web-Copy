@@ -176,18 +176,18 @@ export const GroupTitle = ({ chatName }: { chatName: string }) => {
     )
 }
 
-export const MembersHoverOption = ({ user, chatId }: { user: User, chatId: number }) => {
+export const MembersHoverOption = observer(({ user, chat }: { user: User, chat: Chat }) => {
     return (
         <div className="hover_action">
-            <SidebarUserDropDown user={user} chatId={chatId}/>
+            <SidebarUserDropDown user={user} chat={chat}/>
         </div>
     )
-}
+})
 
-export const UserCard = observer(({ user, showHover, chatId }: { user: User; showHover: boolean, chatId: number }) => {
+export const UserCard = observer(({ user, showHover, chat }: { user: User; showHover: boolean, chat: Chat }) => {
     return (
         <li>
-            {showHover && <MembersHoverOption user={user} chatId={chatId} />}
+            {showHover && <MembersHoverOption user={user} chat={chat} />}
             <a className="card">
                 <div className="card-body">
                     <div className="media">
@@ -222,7 +222,7 @@ const ChatList = observer(({ chat }: { chat: Chat }) => {
                     key={chat.ownerId}
                     user={userStore.getUser(chat.ownerId)}
                     showHover={false}
-                    chatId={chat.chatId}
+                    chat={chat}
                 />
             )}
             <li className="header d-flex justify-content-between ps-3 pe-3 mb-1">
@@ -240,7 +240,7 @@ const ChatList = observer(({ chat }: { chat: Chat }) => {
                                 showHover={
                                     authStore.userId !== userId && authStore.userId === chat.ownerId
                                 }
-                                chatId={chat.chatId}
+                                chat={chat}
                             />
                         )
                     })}
@@ -267,7 +267,7 @@ const MemberList = observer(({ chat }: { chat: Chat }) => {
                                     (chat.adminIds !== null &&
                                         chat.adminIds.indexOf(authStore.userId) > -1))
                             }
-                            chatId={chat.chatId}
+                            chat={chat}
                         />
                     )
                 })}
@@ -327,7 +327,7 @@ export const HeaderTab = () => {
 export const ChatSidebarBody = observer(
     ({ chat, visitUser }: { chat: Chat; visitUser: User | null }) => {
         // TODO-后续群聊和用户可以复用
-        if (visitUser) {
+        if (visitUser) { // 群聊用户
             return (
                 <div className="body mt-4">
                     <ChatSidebarAvatar id={visitUser.userId} />
@@ -336,7 +336,7 @@ export const ChatSidebarBody = observer(
                 </div>
             )
         }
-        if (chat.chatType === ChatType.Private) {
+        if (chat.chatType === ChatType.Private) { // 私聊
             return (
                 <div className="body mt-4">
                     <ChatSidebarAvatar id={1} />
@@ -345,10 +345,11 @@ export const ChatSidebarBody = observer(
                 </div>
             )
         }
-        return (
+        return ( // 群聊
             <div className="body">
                 <HeaderTab />
                 <SidebarTabContent chat={chat} />
+                <QuitGroupButton chatId={chat.chatId}/>
             </div>
         )
     }

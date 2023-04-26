@@ -13,8 +13,8 @@ export const GetServerAddress = () => {
     // } else {
     //     return ''
     // }
-    return 'wss://dmail.r1ntaro.com:8080/ws'
-    return 'wss://127.0.0.1:8080/ws'
+    // return 'wss://dmail.r1ntaro.com:8080/ws'
+    return 'ws://127.0.0.1:8080/ws'
 
 }
 
