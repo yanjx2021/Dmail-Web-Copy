@@ -15,6 +15,7 @@ import { LockedChatView } from '../components/LockedChatView'
 import { RegisterModal } from '../components/Box/Modal'
 import { FileTest } from '../components/FileTest'
 import { RtcTest } from '../components/RtcTest'
+import { Settings } from '../components/Settings/Settings'
 
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore; chatStore: ChatStore }) => {
@@ -57,7 +58,6 @@ const Home = observer(
                 <RegisterError />
                 <RegisterModal />
                 <Menu />
-                <RtcTest />
                 <TabContent activeChatId={activeChatId} setActiveChatId={checkAndSetActivateChat} />
                 {activeChatId === null ? (
                     <NoneActiveChatBody />

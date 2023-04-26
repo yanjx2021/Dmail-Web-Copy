@@ -130,6 +130,7 @@ export const ColorSelectDot = ({
     const ref :any =useRef(null);
     const handleTheme = (e:any) => {
         var $body: any = document.querySelector('#layout')
+        var $box: any = document.querySelector('.ant-modal-root')
         var $this:any = ref.current
         console.log($this?.getAttribute('data-theme'))
         var existTheme: any = document
@@ -141,6 +142,7 @@ export const ColorSelectDot = ({
         $body.classList.remove('theme-' + existTheme)
         $this.classList.add('active')
         $body.classList.add('theme-' +$this.getAttribute('data-theme') )
+        $box?.parentNode.setAttribute("class", 'theme-' +$this.getAttribute('data-theme') )
     }
     return (
         <li

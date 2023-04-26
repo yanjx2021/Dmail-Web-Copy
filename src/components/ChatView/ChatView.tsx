@@ -25,6 +25,7 @@ import { messageSelectStore, userSelectStore } from '../MessagesBox/Selector'
 import { MessageServer } from '../../utils/networkWs'
 import { Send } from '../../utils/message'
 import { groupChatManageStore } from '../../stores/groupChatManageStore'
+import { VideoCall } from './VideoCall'
 
 export const ChatView = observer(({ chat }: { chat: Chat }) => {
     const [messages, setMessages] = useImmer<ChatMessage[]>([])
@@ -169,6 +170,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         <div className={'main px-xl-5 px-lg-4 px-3 ' + chatSideStore.sidebarState}>
             <div className="chat-body" ref={dropRef}>
                 <ChatViewHeader chat={chat} />
+                
                 <ChatMessageContent chat={chat} messages={messages} setMessages={setMessages} />
                 {messageSelectStore.showSelector ? (
                     <MessageSelectedFooter />
