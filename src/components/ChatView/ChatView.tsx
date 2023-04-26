@@ -67,7 +67,6 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         action(() => {
             if (!secureAuthStore.showSecureBox) {
                 chat.setReadCuser()
-                chat.chatType !== ChatType.Private && groupChatManageStore.sendGetGroupManage(chat.chatId)
             }
         }),
         [chat, secureAuthStore.showSecureBox]

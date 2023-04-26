@@ -270,6 +270,12 @@ export enum ReceiveMediaCallResponse {
     DatabaseError = 'DatabaseError',
 }
 
+export interface ReceiveRevokeMessageResponseData {
+    state: 'Success' | 'TimeLimitExceeded' | 'PermissionsDenied' | 'DatabaseError' | 'MessageNotExisted'
+    chatId: number
+    inChatId: number
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -316,6 +322,7 @@ export enum Receive {
     MediaCallOffer = 'MediaCallOffer',
     MediaCallAnswer = 'MediaCallAnswer',
     MediaIceCandidate = 'MediaIceCandidate',
+    RevokeMessageResponse = 'RevokeMessageResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -504,6 +511,7 @@ export interface MessageReceiveData {
     [Receive.MediaCallOffer]: MediaCallData
     [Receive.MediaCallAnswer]: MediaCallAnswerData
     [Receive.MediaIceCandidate]: MediaIceCandidate
+    [Receive.RevokeMessageResponse]: ReceiveRevokeMessageResponseData
 }
 
 export interface MessageSendData {

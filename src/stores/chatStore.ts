@@ -7,6 +7,7 @@ import {
     ReceiveGetGroupUsersResponseData,
     ReceivePullResponseData,
     ReceiveQuitGroupChatResponseData,
+    ReceiveRevokeMessageResponseData,
     ReceiveSetAlreadyReadResponseData,
     ReceiveUnfriendResponseData,
     Send,
@@ -288,7 +289,7 @@ export class Chat {
         this.ownerId = userId
     }
     addGroupChatAdminId(userId: number) {
-        this.adminIds && this.adminIds.indexOf(userId) > -1 && this.adminIds.push(userId)
+        this.adminIds && this.adminIds.indexOf(userId) === -1 && this.adminIds.push(userId)
     }
     setGroupChatAdminIds(userIds: number[]) {
         this.adminIds = userIds
@@ -623,6 +624,7 @@ export class ChatStore {
         MessageServer.on(Receive.ReadCursors, this.ReadCusersHandler)
         MessageServer.on(Receive.SetAlreadyReadResponse, this.SetAlreadyReadResponseHandler)
         MessageServer.on(Receive.QuitGroupChatResponse, this.QuitGroupResponseHandler)
+        MessageServer.on(Receive.RevokeMessageResponse, this.RevokeMessageResponseHandler)
     }
 
     reset() {
@@ -828,6 +830,23 @@ export class ChatStore {
             response,
             response.chatId === this.activeChatId ? this.setViewMessages : undefined
         )
+    }
+
+    private RevokeMessageResponseHandler(response: ReceiveRevokeMessageResponseData) {
+        switch (response.state) {
+            case 'Success':
+                //TODO revoke
+                break
+            case 'PermissionsDenied':
+                this.errors = '无权撤回'
+                break
+            case 'TimeLimitExceeded':
+                this.errors = '超时，无法撤回'
+                break
+            default:
+                console.log('懒得处理了')
+                break
+        }
     }
 
     private ReceiveMessageHandler(serialized: SerializedReceiveChatMessage) {

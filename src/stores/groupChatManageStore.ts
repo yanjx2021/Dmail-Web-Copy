@@ -1,14 +1,20 @@
-import { makeAutoObservable } from "mobx";
-import { MessageServer } from "../utils/networkWs";
-import { Receive, ReceiveGetGroupAdminResponseData, ReceiveGetGroupOwnerResponseData, ReceiveGetGroupUsersResponseData, ReceiveSetGroupAdminResponseData, Send } from "../utils/message";
-import { chatStore } from "./chatStore";
-
+import { makeAutoObservable } from 'mobx'
+import { MessageServer } from '../utils/networkWs'
+import {
+    Receive,
+    ReceiveGetGroupAdminResponseData,
+    ReceiveGetGroupOwnerResponseData,
+    ReceiveGetGroupUsersResponseData,
+    ReceiveSetGroupAdminResponseData,
+    Send,
+} from '../utils/message'
+import { chatStore } from './chatStore'
 
 export class GroupChatManageStore {
     errors: string = ''
 
     constructor() {
-        makeAutoObservable(this, {}, {autoBind: true})
+        makeAutoObservable(this, {}, { autoBind: true })
         MessageServer.on(Receive.GetGroupOwnerResponse, this.getGroupOwnerResponseHandler)
         MessageServer.on(Receive.GetGroupUsersResponse, this.GetGroupUsersResponseHandler)
         MessageServer.on(Receive.GetGroupAdminResponse, this.GetGroupAdminResponseHandler)
@@ -18,12 +24,13 @@ export class GroupChatManageStore {
     sendSetGroupAdmin(userId: number, chatId: number) {
         MessageServer.Instance().send<Send.SetGroupAdmin>(Send.SetGroupAdmin, {
             userId,
-            chatId
+            chatId,
         })
     }
     SetGroupAdminResponseHandler(response: ReceiveSetGroupAdminResponseData) {
         switch (response.state) {
             case 'Success':
+                console.log('haha')
                 chatStore.getChat(response.chatId!).addGroupChatAdminId(response.userId!)
                 break
             case 'AlreadyAdmin':
@@ -79,7 +86,7 @@ export class GroupChatManageStore {
     }
 
     private getGroupOwnerResponseHandler(response: ReceiveGetGroupOwnerResponseData) {
-        switch(response.state) {
+        switch (response.state) {
             case 'Success':
                 chatStore.getChat(response.chatId!).setGroupChatOwnerId(response.userId!)
                 break
@@ -101,7 +108,6 @@ export class GroupChatManageStore {
         MessageServer.Instance().send<Send.GetGroupOwner>(Send.GetGroupOwner, chatId)
         MessageServer.Instance().send<Send.GetGroupAdmin>(Send.GetGroupAdmin, chatId)
     }
-
 }
 
 export const groupChatManageStore = new GroupChatManageStore()

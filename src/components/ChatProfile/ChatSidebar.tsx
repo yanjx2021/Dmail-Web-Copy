@@ -9,6 +9,7 @@ import { useEffect } from 'react'
 import { User } from '../../stores/userStore'
 import { useImmer } from 'use-immer'
 import { groupChatManageStore } from '../../stores/groupChatManageStore'
+import { chatSideStore } from '../../stores/chatSideStore'
 
 const getInfo = action((chat: Chat) => {
     console.log('拉取')
@@ -23,12 +24,13 @@ const getInfo = action((chat: Chat) => {
 export const ChatSidebar = observer(
     ({ chat, visitUser }: { chat: Chat; visitUser: User | null }) => {
         const [title, setTitle] = useImmer<string>('')
+
         useEffect(
-            action(() => {
-                getInfo(chat)
+            action(action(() => {
+                chatSideStore.open && getInfo(chat)
                 setTitle(chat.sidebarName)
-            }),
-            [chat]
+            })),
+            [chat, chatSideStore.open]
         )
 
         useEffect(
