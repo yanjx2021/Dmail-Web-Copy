@@ -3,7 +3,7 @@ import { rtcStore } from '../../stores/rtcStore'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import { off } from 'process'
 import { action } from 'mobx'
-import "../../styles/VideoCall.css"
+import '../../styles/VideoCall.css'
 
 export enum StreamVideoPlayerState {
     Waiting,
@@ -33,6 +33,7 @@ export const StreamVideoPlayer = ({
 
 export const VideoCall = observer(() => {
     const [friendId, setFriendId] = useState(1)
+    const [viewSwap, setViewSwap] = useState(false)
 
     return (
         <div className="d-flex justify-content-left align-items-top h-100 text-center py-2">
@@ -69,22 +70,25 @@ export const VideoCall = observer(() => {
                         </button>
                         <button
                             type="submit"
+                            onClick={() => {
+                                setViewSwap(!viewSwap)
+                                console.log(viewSwap)
+                            }}
                             className="btn btn-sm btn-default"
                             data-toggle="tooltip"
-                            title="小窗">
-                            <i className="zmdi zmdi-comments"></i>
+                            title="翻转">
+                            <i className="zmdi zmdi-videocam-switch"></i>
                         </button>
                     </div>
-
                     <div className="my-video position-absolute rounded overflow-hidden border">
                         <StreamVideoPlayer
-                            stream={rtcStore.localStream}
+                            stream={viewSwap ? rtcStore.remoteStream : rtcStore.localStream}
                             state={StreamVideoPlayerState.Waiting}
                         />
                     </div>
 
                     <StreamVideoPlayer
-                        stream={rtcStore.remoteStream}
+                        stream={viewSwap ? rtcStore.localStream : rtcStore.remoteStream}
                         state={StreamVideoPlayerState.Waiting}
                     />
 
