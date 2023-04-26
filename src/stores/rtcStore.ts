@@ -1,0 +1,288 @@
+import { action, makeAutoObservable, runInAction } from 'mobx'
+import { off, traceDeprecation } from 'process'
+import { MessageServer } from '../utils/networkWs'
+import { MediaCallType, Receive, Send } from '../utils/message'
+import { MediaCallAnswerData } from '../utils/message'
+import { MediaCallData } from '../utils/message'
+import { MediaIceCandidate } from '../utils/message'
+import { UserId, authStore } from './authStore'
+
+export enum RtcState {
+    None = 0,
+    WaitingUser = 1,
+    WaitngLocalStream = 2,
+    WaitingAnswer = 3,
+    WatingCandidate = 4,
+    Connecting = 5,
+    Connected = 6,
+}
+
+export class RtcStore {
+    localStream: MediaStream | null
+    remoteStream: MediaStream | null
+
+    peerConnection: RTCPeerConnection | undefined
+
+    state: RtcState = RtcState.None
+
+    remoteUserId: number | undefined
+
+    unsolvedOffer: MediaCallData | undefined
+
+    stashedCandidates: string[]
+
+    constructor() {
+        makeAutoObservable(this, {}, { autoBind: true })
+
+        MessageServer.on(Receive.MediaCallAnswer, this.onReceiveMediaCallAnswer)
+        MessageServer.on(Receive.MediaCallOffer, this.onReceiveMediaCallOffer)
+        MessageServer.on(Receive.MediaIceCandidate, this.onReceiveMediaCandidate)
+
+        this.stashedCandidates = []
+        this.localStream = null
+        this.remoteStream = null
+    }
+
+    async startMediaCall(friendId: UserId, callType: MediaCallType) {
+        this.remoteUserId = friendId
+        const offer = await this.startPeerConnection(callType)
+
+        runInAction(() => {
+            MessageServer.Instance().send<Send.MediaCall>(Send.MediaCall, {
+                friendId,
+                callType,
+                serializedOffer: JSON.stringify(offer),
+            })
+        })
+    }
+
+    refusedUnsolvedOffer() {
+        MessageServer.Instance().send<Send.MediaCallAnswer>(Send.MediaCallAnswer, {
+            friendId: this.unsolvedOffer!.friendId,
+            accept: false,
+        })
+        this.resetConnection()
+    }
+
+    async approvedUnsolvedOffer() {
+        try {
+            this.remoteUserId = this.unsolvedOffer!.friendId
+
+            const offer = JSON.parse(this.unsolvedOffer!.serializedOffer)
+            const answer = await this.receivePeerConnectionOffer(
+                offer,
+                this.unsolvedOffer!.callType
+            )
+
+            runInAction(() => {
+                MessageServer.Instance().send<Send.MediaCallAnswer>(Send.MediaCallAnswer, {
+                    friendId: this.remoteUserId!,
+                    accept: true,
+                    serializedAnswer: JSON.stringify(answer),
+                })
+            })
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    private onReceiveMediaCandidate(data: MediaIceCandidate) {
+        if (data.friendId !== this.remoteUserId) {
+            return
+        }
+
+        try {
+            this.peerConnection?.addIceCandidate(JSON.parse(data.serializedCandidate))
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    private onReceiveMediaCallAnswer(data: MediaCallAnswerData) {
+        if (data.friendId !== this.remoteUserId || this.state !== RtcState.WaitingAnswer) {
+            return
+        }
+
+        if (!data.accept) {
+            // 被拒绝
+            console.log('视频通话被拒绝')
+            this.resetConnection()
+        } else {
+            console.log('视频通话请求通过')
+            try {
+                this.receivePeerConnectionAnswer(JSON.parse(data.serializedAnswer!))
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    }
+
+    private onReceiveMediaCallOffer(data: MediaCallData) {
+        if (this.state !== RtcState.None) {
+            this.refusedUnsolvedOffer()
+        }
+
+        this.unsolvedOffer = data
+        this.state = RtcState.WaitingUser
+    }
+
+    private sendStashedCandidate() {
+        console.log(this.stashedCandidates)
+        this.stashedCandidates.forEach((serialized) => {
+            MessageServer.Instance().send<Send.MediaIceCandidate>(Send.MediaIceCandidate, {
+                friendId: this.remoteUserId!,
+                serializedCandidate: serialized,
+            })
+        })
+        this.stashedCandidates = []
+    }
+
+    private onFoundIceCandidate(event: any) {
+        if (!event.candidate) {
+            return
+        }
+
+        if (this.state < RtcState.WatingCandidate) {
+            this.stashedCandidates.push(JSON.stringify(event.candidate))
+        } else {
+            MessageServer.Instance().send<Send.MediaIceCandidate>(Send.MediaIceCandidate, {
+                friendId: this.remoteUserId!,
+                serializedCandidate: JSON.stringify(event.candidate),
+            })
+        }
+    }
+
+    private onReceiveRemoteTrack(event: any) {
+        if (!event.streams) {
+            return
+        }
+        const [stream] = event.streams
+        this.remoteStream = stream
+    }
+
+    private onConnected() {
+        this.state = RtcState.Connected
+        console.log('连接成功')
+    }
+
+    private onConnecting() {
+        this.state = RtcState.Connecting
+        console.log('正在连接')
+    }
+
+    private resetConnection() {
+        this.state = RtcState.None
+        console.log('连接断开')
+        this.localStream?.getTracks().forEach((track) => {
+            track.stop()
+        })
+        this.localStream = null
+        this.remoteStream?.getTracks().forEach((track) => {
+            track.stop()
+        })
+        this.remoteStream = null
+        this.peerConnection = undefined
+        this.remoteUserId = undefined
+        this.unsolvedOffer = undefined
+        this.stashedCandidates = []
+    }
+
+    private onDisconnected() {
+        this.resetConnection()
+    }
+
+    private onConnectionStateChange(event: any) {
+        if (this.peerConnection?.connectionState === 'connected') {
+            this.onConnected()
+        } else if (this.peerConnection?.connectionState === 'connecting') {
+            this.onConnecting()
+        } else if (this.peerConnection?.connectionState === 'disconnected') {
+            this.onDisconnected()
+        }
+    }
+
+    private createPeerConnection() {
+        const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+        const peerConnection = new RTCPeerConnection(configuration)
+        peerConnection.addEventListener('track', this.onReceiveRemoteTrack)
+        peerConnection.addEventListener('connectionstatechange', this.onConnectionStateChange)
+        peerConnection.addEventListener('icecandidate', this.onFoundIceCandidate)
+        return peerConnection
+    }
+
+    private async getLocalStreamFromCamera(callType: MediaCallType) {
+        if (!this.peerConnection) {
+            console.error('需要先创建PeerConnection')
+            return
+        }
+
+        try {
+            const constraints =
+                callType === 'Video' ? { video: true, audio: true } : { audio: true }
+            const stream = await navigator.mediaDevices.getUserMedia(constraints)
+            runInAction(() => {
+                this.localStream = stream
+
+                this.localStream.getTracks().forEach(
+                    action((track) => {
+                        this.peerConnection?.addTrack(track, this.localStream!)
+                    })
+                )
+            })
+        } catch (error) {
+            console.error('Error opening video camera.', error)
+        }
+    }
+
+    private async startPeerConnection(callType: MediaCallType) {
+        this.peerConnection = this.createPeerConnection()
+
+        this.state = RtcState.WaitngLocalStream
+        await this.getLocalStreamFromCamera(callType)
+
+        runInAction(() => {
+            this.state = RtcState.WaitingAnswer
+        })
+
+        const offer = await this.peerConnection.createOffer()
+        await runInAction(async () => {
+            await this.peerConnection!.setLocalDescription(offer)
+        })
+
+        return offer
+    }
+
+    private async receivePeerConnectionOffer(
+        offer: RTCSessionDescriptionInit,
+        callType: MediaCallType
+    ) {
+        this.peerConnection = this.createPeerConnection()
+
+        this.state = RtcState.WaitngLocalStream
+        await this.getLocalStreamFromCamera(callType)
+
+        runInAction(() => {
+            this.peerConnection!.setRemoteDescription(new RTCSessionDescription(offer))
+        })
+
+        const answer = await this.peerConnection.createAnswer()
+        await runInAction(async () => {
+            await this.peerConnection!.setLocalDescription(answer)
+        })
+
+        runInAction(() => {
+            this.state = RtcState.WatingCandidate
+            this.sendStashedCandidate()
+        })
+
+        return answer
+    }
+
+    private receivePeerConnectionAnswer(answer: RTCSessionDescriptionInit) {
+        this.peerConnection?.setRemoteDescription(new RTCSessionDescription(answer))
+        this.state = RtcState.WatingCandidate
+        this.sendStashedCandidate()
+    }
+}
+
+export const rtcStore = new RtcStore()

@@ -8,6 +8,7 @@ import useMessage from 'antd/es/message/useMessage'
 import { message } from 'antd'
 import '../styles/Login.css'
 import { duration } from '../constants/messageContent'
+import { RtcTest } from '../components/RtcTest'
 
 const EmailInput = observer(({ authStore }: { authStore: AuthStore }) => {
     return (

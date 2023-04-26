@@ -1,8 +1,9 @@
 import { RequestContentType, RequestState } from '../stores/requestStore'
 
-import { ChatId, ChatMessageFileInfo, ChatMessageType } from "../stores/chatStore"
-import { UserId } from "../stores/authStore"
-import { UploadId } from "../stores/fileStore"
+import { ChatId, ChatMessageFileInfo, ChatMessageType } from '../stores/chatStore'
+import { UserId } from '../stores/authStore'
+import { UploadId } from '../stores/fileStore'
+import { interceptReads } from 'mobx/dist/internal'
 
 /*--------------------Receive数据类型----------------------*/
 export enum SetConnectionPubKeyState {
@@ -119,7 +120,7 @@ export interface ReceiveChatInfo {
 export type SerializedReceiveChatInfo = string
 
 export interface ReceiveChatMessage {
-    type : ChatMessageType
+    type: ChatMessageType
     chatId: number
     senderId: number
     inChatId: number
@@ -153,9 +154,9 @@ export interface UserRequest {
 }
 
 export interface UserUploadFileRequestData {
-    suffix : string,
-    userHash : string,
-    size : number
+    suffix: string
+    userHash: string
+    size: number
 }
 
 export type SerializedUserRequest = string
@@ -208,22 +209,30 @@ export interface ReceiveSetAlreadyReadResponseData {
 }
 
 export interface ReceiveUserUploadFileRequestResponse {
-    userHash: string,
-    state: 'Approve' | 'Existed' | 'OSSError' | 'DatabaseError' | 'FileTooLarge',
-    url?: string,
-    uploadId?: UploadId,
+    userHash: string
+    state: 'Approve' | 'Existed' | 'OSSError' | 'DatabaseError' | 'FileTooLarge'
+    url?: string
+    uploadId?: UploadId
 }
 
 export interface ReceiveUserFileUploadedResponse {
-    uploadId : number,
-    state : 'Success' | 'FileHashError' | 'FileSizeError' | 'NotUploader' | 'ReqeustNotFound' | 'DatabaseError' | 'ObjectNotFound' | 'OSSError'
-    url? : string
+    uploadId: number
+    state:
+        | 'Success'
+        | 'FileHashError'
+        | 'FileSizeError'
+        | 'NotUploader'
+        | 'ReqeustNotFound'
+        | 'DatabaseError'
+        | 'ObjectNotFound'
+        | 'OSSError'
+    url?: string
 }
 
 export interface ReceiveGetFileUrlResponse {
-    hash : string,
-    state : 'Success' | 'FileNotExisted' | 'OSSError',
-    url? : string
+    hash: string
+    state: 'Success' | 'FileNotExisted' | 'OSSError'
+    url?: string
 }
 
 export interface ReceiveGetGroupUsersResponseData {
@@ -255,6 +264,12 @@ export interface ReceiveSetGroupAdminResponseData {
     userId?: number
 }
 
+export enum ReceiveMediaCallResponse {
+    Success = 'Success',
+    NotFriend = 'NotFriend',
+    DatabaseError = 'DatabaseError',
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -283,9 +298,9 @@ export enum Receive {
     UserSetting = 'UserSetting',
     SetUserSettingResponse = 'SetUserSettingResponse',
     UpdateUserInfoResponse = 'UpdateUserInfoResponse',
-    UploadFileRequestResponse = "UploadFileRequestResponse",
-    FileUploadedResponse = "FileUploadedResponse",
-    GetFileUrlResponse = "GetFileUrlResponse",
+    UploadFileRequestResponse = 'UploadFileRequestResponse',
+    FileUploadedResponse = 'FileUploadedResponse',
+    GetFileUrlResponse = 'GetFileUrlResponse',
     UnfriendResponse = 'UnfriendResponse',
     DeleteChat = 'DeleteChat',
     ReadCursors = 'ReadCursors',
@@ -297,6 +312,10 @@ export enum Receive {
     GetGroupOwnerResponse = 'GetGroupOwnerResponse',
     GetGroupAdminResponse = 'GetGroupAdminResponse',
     SetGroupAdminResponse = 'SetGroupAdminResponse',
+    MediaCallResponse = 'MediaCallResponse',
+    MediaCallOffer = 'MediaCallOffer',
+    MediaCallAnswer = 'MediaCallAnswer',
+    MediaIceCandidate = 'MediaIceCandidate',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -313,10 +332,10 @@ export interface SendLoginData {
     emailCode?: number
 }
 export interface SendSendMessageData {
-    type : ChatMessageType
+    type: ChatMessageType
     clientId: number
     chatId: number
-    timestamp : number
+    timestamp: number
     serializedContent: string
 }
 
@@ -375,14 +394,33 @@ export interface SendSetAlreadyReadData {
 }
 
 export interface SendRevokeMessageData {
-    chatId: number,
-    inChatId: number,
+    chatId: number
+    inChatId: number
     method: 'Sender' | 'GroupAdmin'
 }
 
 export interface SendSetGroupAdminData {
     chatId: number
     userId: number
+}
+
+export type MediaCallType = 'Video' | 'Voice'
+
+export interface MediaCallData {
+    friendId: number
+    callType: MediaCallType
+    serializedOffer: string
+}
+
+export interface MediaCallAnswerData {
+    friendId: number
+    accept: boolean
+    serializedAnswer?: string
+}
+
+export interface MediaIceCandidate {
+    friendId: number
+    serializedCandidate: string
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -416,6 +454,9 @@ export enum Send {
     GetGroupOwner = 'GetGroupOwner',
     GetGroupAdmin = 'GetGroupAdmin',
     SetGroupAdmin = 'SetGroupAdmin',
+    MediaCall = 'MediaCall',
+    MediaCallAnswer = 'MediaCallAnswer',
+    MediaIceCandidate = 'MediaIceCandidate',
 }
 
 // COMMAND和DATA类型捆绑
@@ -445,20 +486,24 @@ export interface MessageReceiveData {
     [Receive.UpdateUserInfoResponse]: ReceiveUpdateUserInfoResponseData
     [Receive.UserSetting]: string
     [Receive.SetUserSettingResponse]: ReceiveSetUserSettingResponseData
-    [Receive.UploadFileRequestResponse] : ReceiveUserUploadFileRequestResponse
-    [Receive.FileUploadedResponse] : ReceiveUserFileUploadedResponse
+    [Receive.UploadFileRequestResponse]: ReceiveUserUploadFileRequestResponse
+    [Receive.FileUploadedResponse]: ReceiveUserFileUploadedResponse
     [Receive.UnfriendResponse]: ReceiveUnfriendResponseData
     [Receive.DeleteChat]: number
     [Receive.ReadCursors]: [number, number][]
     [Receive.SetAlreadyReadResponse]: ReceiveSetAlreadyReadResponseData
     [Receive.GetFileUrlResponse] : ReceiveGetFileUrlResponse
-    [Receive.Notice]: string,
-    [Receive.Notices]: string[],
-    [Receive.GetGroupUsersResponse]: ReceiveGetGroupUsersResponseData,
-    [Receive.QuitGroupChatResponse]: ReceiveQuitGroupChatResponseData,
-    [Receive.GetGroupOwnerResponse]: ReceiveGetGroupOwnerResponseData,
-    [Receive.GetGroupAdminResponse]: ReceiveGetGroupAdminResponseData,
-    [Receive.SetGroupAdminResponse]: ReceiveSetGroupAdminResponseData,
+    [Receive.Notice]: string
+    [Receive.Notices]: string[]
+    [Receive.GetGroupUsersResponse]: ReceiveGetGroupUsersResponseData
+    [Receive.QuitGroupChatResponse]: ReceiveQuitGroupChatResponseData
+    [Receive.GetGroupOwnerResponse]: ReceiveGetGroupOwnerResponseData
+    [Receive.GetGroupAdminResponse]: ReceiveGetGroupAdminResponseData
+    [Receive.SetGroupAdminResponse]: ReceiveSetGroupAdminResponseData
+    [Receive.MediaCallResponse]: ReceiveMediaCallResponse
+    [Receive.MediaCallOffer]: MediaCallData
+    [Receive.MediaCallAnswer]: MediaCallAnswerData
+    [Receive.MediaIceCandidate]: MediaIceCandidate
 }
 
 export interface MessageSendData {
@@ -482,8 +527,8 @@ export interface MessageSendData {
     [Send.PullUserSetting]: UserId
     [Send.Unfriend]: UserId
     [Send.UpdateUserInfo]: SendUpdateUserInfoData
-    [Send.UploadFileRequest] : UserUploadFileRequestData
-    [Send.FileUploaded] : UploadId
+    [Send.UploadFileRequest]: UserUploadFileRequestData
+    [Send.FileUploaded]: UploadId
     [Send.SetAlreadyRead]: SendSetAlreadyReadData
     [Send.RevokeMessage]: SendRevokeMessageData
     [Send.GetGroupUsers]: ChatId
@@ -491,6 +536,9 @@ export interface MessageSendData {
     [Send.GetGroupOwner]: number
     [Send.GetGroupAdmin]: number
     [Send.SetGroupAdmin]: SendSetGroupAdminData
+    [Send.MediaCall]: MediaCallData
+    [Send.MediaCallAnswer]: MediaCallAnswerData
+    [Send.MediaIceCandidate]: MediaIceCandidate
 }
 
 // 封装消息包
