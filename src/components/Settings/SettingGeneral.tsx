@@ -85,7 +85,7 @@ const DeleteUser=()=>{
           <div className="col-12 col-md-6">
               <h5>注销您的账号</h5>
               <p className="text-muted mb-md-0">
-              请注意,删除您的帐户是一项永久性操作,一旦完成将无法恢复。
+              请注意，删除您的帐户是一项永久性操作，一旦完成将无法恢复。
               </p>
           </div>
           <div className="col-auto">

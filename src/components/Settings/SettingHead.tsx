@@ -6,7 +6,7 @@ export const SettingHead = () => {
                   <div className="col-12">
                       <div className="media">
                           <div className="avatar sm">
-                              <a href="index.html" title="" className="link">
+                              <a href="#" title="" className="link">
                                   <i className="zmdi zmdi-arrow-left zmdi-hc-lg"></i>
                               </a>
                           </div>
