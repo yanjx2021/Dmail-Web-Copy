@@ -4,6 +4,7 @@ import { RefObject, useEffect, useRef, useState } from 'react'
 import { off } from 'process'
 import { action } from 'mobx'
 import '../../styles/VideoCall.css'
+import { useImmer } from 'use-immer'
 
 export enum StreamVideoPlayerState {
     Waiting,
@@ -32,7 +33,7 @@ export const StreamVideoPlayer = ({
 }
 
 export const VideoCall = observer(() => {
-    const [friendId, setFriendId] = useState(1)
+    const [friendId, setFriendId] = useImmer<string>('')
     const [viewSwap, setViewSwap] = useState(false)
 
     return (
@@ -93,17 +94,18 @@ export const VideoCall = observer(() => {
 
                     <p> {rtcStore.state}</p>
                     <div>
-                        <p>好友id：</p>
+                        <p>好友id: </p>
                         <input
                             value={friendId}
                             onChange={(e) => {
-                                setFriendId(Number(e.target.value))
+                                const input = e.target.value.replace(/[^0-9]/g, '')
+                                setFriendId(input)
                             }}></input>
                     </div>
 
                     <button
                         onClick={action(() => {
-                            rtcStore.startMediaCall(friendId, 'Video')
+                            rtcStore.startMediaCall(parseInt(friendId), 'Video')
                         })}>
                         {' '}
                         发送视频通话请求{' '}

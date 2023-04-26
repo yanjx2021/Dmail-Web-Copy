@@ -176,13 +176,13 @@ export const GroupTitle = ({ chatName }: { chatName: string }) => {
     )
 }
 
-export const MembersHoverOption = observer(({ user, chat }: { user: User, chat: Chat }) => {
+export const MembersHoverOption = ({ user, chat }: { user: User, chat: Chat }) => {
     return (
         <div className="hover_action">
             <SidebarUserDropDown user={user} chat={chat}/>
         </div>
     )
-})
+}
 
 export const UserCard = observer(({ user, showHover, chat }: { user: User; showHover: boolean, chat: Chat }) => {
     return (

@@ -5,6 +5,7 @@ import {
     ReceiveGetGroupAdminResponseData,
     ReceiveGetGroupOwnerResponseData,
     ReceiveGetGroupUsersResponseData,
+    ReceiveGroupOwnerTransferResponseData,
     ReceiveRemoveGroupMemberResponseData,
     ReceiveSetGroupAdminResponseData,
     Send,
@@ -21,6 +22,7 @@ export class GroupChatManageStore {
         MessageServer.on(Receive.GetGroupAdminResponse, this.GetGroupAdminResponseHandler)
         MessageServer.on(Receive.SetGroupAdminResponse, this.SetGroupAdminResponseHandler)
         MessageServer.on(Receive.RemoveGroupMemberResponse, this.RemoveGroupMemberResponseHandler)
+        MessageServer.on(Receive.GroupOwnerTransferResponse, this.GroupOwnerTransferResponseHandler)
     }
 
     sendSetGroupAdmin(userId: number, chatId: number) {
@@ -30,11 +32,41 @@ export class GroupChatManageStore {
         })
     }
 
+    sendGroupOwnerTransfer(userId: number, chatId: number) {
+        MessageServer.Instance().send<Send.GroupOwnerTransfer>(Send.GroupOwnerTransfer, {
+            userId,
+            chatId
+        })
+    }
+
     sendRemoveGroupMember(userId: number, chatId: number) {
         MessageServer.Instance().send<Send.RemoveGroupMember>(Send.RemoveGroupMember, {
             userId,
             chatId
         })
+    }
+
+    GroupOwnerTransferResponseHandler(response: ReceiveGroupOwnerTransferResponseData) {
+        switch (response.state) {
+            case "Success":
+                chatStore.getChat(response.chatId!).ownerId = response.userId!
+                break
+            case 'UserNotInChat':
+                this.errors = '用户不在群聊中'
+                break
+            case 'DatabaseError':
+                this.errors = '数据库异常'
+                break
+            case 'NotOwner':
+                this.errors = '你不是群主，无权移交群主'
+                break
+            case 'ServerError':
+                this.errors = '服务器异常'
+                break
+            default:
+                this.errors = '未知错误'
+                break
+        }
     }
 
     RemoveGroupMemberResponseHandler(response: ReceiveRemoveGroupMemberResponseData) {

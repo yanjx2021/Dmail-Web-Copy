@@ -38,6 +38,15 @@ export const SidebarUserDropDown = observer(({ user, chat }: { user: User; chat:
                         )}
                     />
                 )}
+                {chat.ownerId && chat.ownerId === authStore.userId && (
+                    <DropDownItem
+                        text="移交群主"
+                        handleClick={action(() => {
+                            groupChatManageStore.sendGroupOwnerTransfer(user.userId, chat.chatId)
+                        })}
+                    />
+                )}
+
             </div>
         </div>
     )

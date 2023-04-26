@@ -170,7 +170,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         <div className={'main px-xl-5 px-lg-4 px-3 ' + chatSideStore.sidebarState}>
             <div className="chat-body" ref={dropRef}>
                 <ChatViewHeader chat={chat} />
-                
+                {/* <VideoCall /> */}
                 <ChatMessageContent chat={chat} messages={messages} setMessages={setMessages} />
                 {messageSelectStore.showSelector ? (
                     <MessageSelectedFooter />

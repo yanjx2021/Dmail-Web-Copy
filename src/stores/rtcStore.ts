@@ -12,7 +12,7 @@ export enum RtcState {
     WaitingUser = 1,
     WaitngLocalStream = 2,
     WaitingAnswer = 3,
-    WatingCandidate = 4,
+    WaitngCandidate = 4,
     Connecting = 5,
     Connected = 6,
 }
@@ -142,7 +142,7 @@ export class RtcStore {
             return
         }
 
-        if (this.state < RtcState.WatingCandidate) {
+        if (this.state < RtcState.WaitngCandidate) {
             this.stashedCandidates.push(JSON.stringify(event.candidate))
         } else {
             MessageServer.Instance().send<Send.MediaIceCandidate>(Send.MediaIceCandidate, {
@@ -271,7 +271,7 @@ export class RtcStore {
         })
 
         runInAction(() => {
-            this.state = RtcState.WatingCandidate
+            this.state = RtcState.WaitngCandidate
             this.sendStashedCandidate()
         })
 
@@ -280,7 +280,7 @@ export class RtcStore {
 
     private receivePeerConnectionAnswer(answer: RTCSessionDescriptionInit) {
         this.peerConnection?.setRemoteDescription(new RTCSessionDescription(answer))
-        this.state = RtcState.WatingCandidate
+        this.state = RtcState.WaitngCandidate
         this.sendStashedCandidate()
     }
 }

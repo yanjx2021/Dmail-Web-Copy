@@ -282,6 +282,12 @@ export interface ReceiveRemoveGroupMemberResponseData {
     userId?: number
 }
 
+export interface ReceiveGroupOwnerTransferResponseData {
+    state: 'Success' | 'DatabaseError' | 'NotOwner' | 'UserNotInChat' | 'ServerError'
+    chatId: number
+    userId: number
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -330,6 +336,7 @@ export enum Receive {
     MediaIceCandidate = 'MediaIceCandidate',
     RevokeMessageResponse = 'RevokeMessageResponse',
     RemoveGroupMemberResponse = 'RemoveGroupMemberResponse',
+    GroupOwnerTransferResponse = 'GroupOwnerTransferResponse'
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -442,6 +449,11 @@ export interface SendRemoveGroupMemberData {
     userId: number
 }
 
+export interface SendGroupOwnerTransferData {
+    chatId: number
+    userId: number
+}
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -477,6 +489,7 @@ export enum Send {
     MediaCallAnswer = 'MediaCallAnswer',
     MediaIceCandidate = 'MediaIceCandidate',
     RemoveGroupMember = 'RemoveGroupMember',
+    GroupOwnerTransfer = 'GroupOwnerTransfer'
 }
 
 // COMMAND和DATA类型捆绑
@@ -526,6 +539,7 @@ export interface MessageReceiveData {
     [Receive.MediaIceCandidate]: MediaIceCandidate
     [Receive.RevokeMessageResponse]: ReceiveRevokeMessageResponseData
     [Receive.RemoveGroupMemberResponse]: ReceiveRemoveGroupMemberResponseData
+    [Receive.GroupOwnerTransferResponse]: ReceiveGroupOwnerTransferResponseData
 }
 
 export interface MessageSendData {
@@ -562,6 +576,7 @@ export interface MessageSendData {
     [Send.MediaCallAnswer]: MediaCallAnswerData
     [Send.MediaIceCandidate]: MediaIceCandidate
     [Send.RemoveGroupMember]: SendRemoveGroupMemberData
+    [Send.GroupOwnerTransfer]: SendGroupOwnerTransferData
 }
 
 // 封装消息包
