@@ -72,7 +72,6 @@ export const VideoCall = observer(() => {
                             type="submit"
                             onClick={() => {
                                 setViewSwap(!viewSwap)
-                                console.log(viewSwap)
                             }}
                             className="btn btn-sm btn-default"
                             data-toggle="tooltip"
