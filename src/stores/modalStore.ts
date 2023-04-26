@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { ChatMessage, ChatMessageTransferInfo, chatStore } from "./chatStore";
+import { Chat, ChatMessage, ChatMessageTransferInfo, chatStore } from "./chatStore";
 import { ReceiveChatMessage } from "../utils/message";
 
 
@@ -7,7 +7,7 @@ import { ReceiveChatMessage } from "../utils/message";
 export class ModalStore {
     isOpen: boolean = false
     isLoading: boolean = false
-    modalType: '' | 'AddFriend' | 'CreateGroup' | 'ChangePassword' |'RemoveSecure' | 'SetSecure' | 'TransferChat' | 'TransferChatBox' | 'JoinGroup' = ''
+    modalType: '' | 'AddFriend' | 'CreateGroup' | 'ChangePassword' |'RemoveSecure' | 'SetSecure' | 'TransferChat' | 'TransferChatBox' | 'JoinGroup' | 'ChangeGroupName' = ''
     transferInfo: ChatMessageTransferInfo | undefined = undefined
 
 

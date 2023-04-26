@@ -259,7 +259,13 @@ export interface ReceiveGetGroupAdminResponseData {
 }
 
 export interface ReceiveSetGroupAdminResponseData {
-    state: 'Success' | 'NotOwner' | 'UserNotInChat' | 'AlreadyAdmin' | 'DatabaseError' | 'ServerError'
+    state:
+        | 'Success'
+        | 'NotOwner'
+        | 'UserNotInChat'
+        | 'AlreadyAdmin'
+        | 'DatabaseError'
+        | 'ServerError'
     chatId?: number
     userId?: number
 }
@@ -271,13 +277,24 @@ export enum ReceiveMediaCallResponse {
 }
 
 export interface ReceiveRevokeMessageResponseData {
-    state: 'Success' | 'TimeLimitExceeded' | 'PermissionsDenied' | 'DatabaseError' | 'MessageNotExisted'
+    state:
+        | 'Success'
+        | 'TimeLimitExceeded'
+        | 'PermissionsDenied'
+        | 'DatabaseError'
+        | 'MessageNotExisted'
     chatId: number
     inChatId: number
 }
 
 export interface ReceiveRemoveGroupMemberResponseData {
-    state: 'Success' | 'SameUser' | 'NoPermission' | 'UserNotInChat' | 'DatabaseError' | 'ServerError'
+    state:
+        | 'Success'
+        | 'SameUser'
+        | 'NoPermission'
+        | 'UserNotInChat'
+        | 'DatabaseError'
+        | 'ServerError'
     chatId?: number
     userId?: number
 }
@@ -286,6 +303,16 @@ export interface ReceiveGroupOwnerTransferResponseData {
     state: 'Success' | 'DatabaseError' | 'NotOwner' | 'UserNotInChat' | 'ServerError'
     chatId: number
     userId: number
+}
+
+export interface ReceiveUpdateGroupInfoResponseData {
+    state:
+        | 'Success'
+        | 'GroupNameFormatError'
+        | 'AvaterFormatError'
+        | 'NoPermission'
+        | 'DatabaseError'
+        | 'ServerError'
 }
 
 /*--------------------Receive数据类型----------------------*/
@@ -336,7 +363,8 @@ export enum Receive {
     MediaIceCandidate = 'MediaIceCandidate',
     RevokeMessageResponse = 'RevokeMessageResponse',
     RemoveGroupMemberResponse = 'RemoveGroupMemberResponse',
-    GroupOwnerTransferResponse = 'GroupOwnerTransferResponse'
+    GroupOwnerTransferResponse = 'GroupOwnerTransferResponse',
+    UpdateGroupInfoResponse = 'UpdateGroupInfoResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -454,6 +482,23 @@ export interface SendGroupOwnerTransferData {
     userId: number
 }
 
+export interface SendSendGroupNoticeData {
+    chatId: number
+    notice: string
+    clientId: number
+}
+
+export interface UpdateGroupInfoContent {
+    type: 'GroupName' | 'Avater'
+    newName?: string
+    newAvater?: string
+}
+
+export interface SendUpdateGroupInfoData {
+    chatId: number
+    content: UpdateGroupInfoContent
+}
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -489,7 +534,9 @@ export enum Send {
     MediaCallAnswer = 'MediaCallAnswer',
     MediaIceCandidate = 'MediaIceCandidate',
     RemoveGroupMember = 'RemoveGroupMember',
-    GroupOwnerTransfer = 'GroupOwnerTransfer'
+    GroupOwnerTransfer = 'GroupOwnerTransfer',
+    SendGroupNotice = 'SendGroupNotice',
+    UpdateGroupInfo = 'UpdateGroupInfo',
 }
 
 // COMMAND和DATA类型捆绑
@@ -525,7 +572,7 @@ export interface MessageReceiveData {
     [Receive.DeleteChat]: number
     [Receive.ReadCursors]: [number, number][]
     [Receive.SetAlreadyReadResponse]: ReceiveSetAlreadyReadResponseData
-    [Receive.GetFileUrlResponse] : ReceiveGetFileUrlResponse
+    [Receive.GetFileUrlResponse]: ReceiveGetFileUrlResponse
     [Receive.Notice]: string
     [Receive.Notices]: string[]
     [Receive.GetGroupUsersResponse]: ReceiveGetGroupUsersResponseData
@@ -540,6 +587,7 @@ export interface MessageReceiveData {
     [Receive.RevokeMessageResponse]: ReceiveRevokeMessageResponseData
     [Receive.RemoveGroupMemberResponse]: ReceiveRemoveGroupMemberResponseData
     [Receive.GroupOwnerTransferResponse]: ReceiveGroupOwnerTransferResponseData
+    [Receive.UpdateGroupInfoResponse]: ReceiveUpdateGroupInfoResponseData
 }
 
 export interface MessageSendData {
@@ -577,6 +625,8 @@ export interface MessageSendData {
     [Send.MediaIceCandidate]: MediaIceCandidate
     [Send.RemoveGroupMember]: SendRemoveGroupMemberData
     [Send.GroupOwnerTransfer]: SendGroupOwnerTransferData
+    [Send.SendGroupNotice]: SendSendGroupNoticeData
+    [Send.UpdateGroupInfo]: SendUpdateGroupInfoData
 }
 
 // 封装消息包

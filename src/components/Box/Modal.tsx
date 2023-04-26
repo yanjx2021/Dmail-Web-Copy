@@ -17,6 +17,7 @@ import { Chat, chatStore } from '../../stores/chatStore'
 import { MessageBox } from '../MessagesBox/MessageBox'
 import { useEffect } from 'react'
 import '../../styles/Modal.css'
+import { updateGroupStore } from '../../stores/updateGroupStore'
 
 export const ModalInput = ({
     label,
@@ -343,10 +344,38 @@ export const TransferChatBoxModalView = observer(({ title }: { title: string }) 
     )
 })
 
+export const ChangeGroupNameModalView = observer(({ title }: { title: string }) => {
+    return (
+        <Modal
+            footer={[
+                <Button
+                    key="remove"
+                    onClick={() => {
+                        updateGroupStore.sendUpdateGroupInfo()
+                        console.log('111')
+                    }}>
+                    确认更改
+                </Button>,
+            ]}
+            onCancel={modalStore.handleCancel}
+            title={title}
+            open={modalStore.isOpen}>
+            <ModalInput
+                type="text"
+                label="新的群名"
+                value={updateGroupStore.newGroupName}
+                setValue={action((e: any) => {
+                    updateGroupStore.newGroupName = e.target.value
+                })}
+            />
+        </Modal>
+    )
+})
+
 export const RegisterModal = observer(() => {
     useEffect(() => {
-        var $box: any = document.querySelector('.ant-modal-root')
-        var $this: any = document.querySelector('.choose-skin li.active')
+        let $box: any = document.querySelector('.ant-modal-root')
+        let $this: any = document.querySelector('.choose-skin li.active')
         $box?.parentNode.classList.add('theme-' + $this.getAttribute('data-theme'))
     })
     switch (modalStore.modalType) {
@@ -366,6 +395,8 @@ export const RegisterModal = observer(() => {
             return <TransferChatBoxModalView title="聊天记录" />
         case 'JoinGroup':
             return <JoinGroupModalView title="申请加入群聊" />
+        case 'ChangeGroupName':
+            return <ChangeGroupNameModalView title="更改群聊名称" />
         default:
             return <></>
     }

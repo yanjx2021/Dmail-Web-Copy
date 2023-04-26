@@ -281,6 +281,10 @@ export class Chat {
         makeAutoObservable(this, {}, { autoBind: true })
     }
 
+    setGroupName(newName: string) {
+        this.groupName = newName
+    }
+
     removeGroupChatMember(userId: number) {
         this.userIds && this.userIds.indexOf(userId) > -1 && this.userIds.splice(this.userIds.indexOf(userId), 1)
         this.adminIds && this.adminIds.indexOf(userId) > -1 && this.adminIds.splice(this.adminIds.indexOf(userId), 1)

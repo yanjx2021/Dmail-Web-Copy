@@ -11,6 +11,8 @@ import { action } from 'mobx'
 import { useEffect } from 'react'
 import { SidebarUserDropDown } from '../DropDown/SidebarUserDropDown'
 import { authStore } from '../../stores/authStore'
+import { modalStore } from '../../stores/modalStore'
+import { updateGroupStore } from '../../stores/updateGroupStore'
 
 const ChatSidebarAvatar = ({ id }: { id: number }) => {
     return (
@@ -167,49 +169,65 @@ export const QuitGroupButton = ({ chatId }: { chatId: number }) => {
     )
 }
 
-export const GroupTitle = ({ chatName }: { chatName: string }) => {
+export const GroupTitle = observer(({ chat }: { chat: Chat }) => {
     return (
         <div className="text-center mt-3 mb-5">
-            <h4>{chatName}</h4>
+            <h4>
+                {chat.name}
+                <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={action(() => {
+                        updateGroupStore.chat = chat
+                        updateGroupStore.updateType = 'GroupName'
+                        modalStore.modalType = 'ChangeGroupName'
+                        modalStore.isOpen = true
+                    })}>
+                    <i className="zmdi zmdi-edit"></i>
+                </button>
+            </h4>
+
             <span className="text-muted"></span>
         </div>
     )
-}
+})
 
-export const MembersHoverOption = ({ user, chat }: { user: User, chat: Chat }) => {
+export const MembersHoverOption = ({ user, chat }: { user: User; chat: Chat }) => {
     return (
         <div className="hover_action">
-            <SidebarUserDropDown user={user} chat={chat}/>
+            <SidebarUserDropDown user={user} chat={chat} />
         </div>
     )
 }
 
-export const UserCard = observer(({ user, showHover, chat }: { user: User; showHover: boolean, chat: Chat }) => {
-    return (
-        <li>
-            {showHover && <MembersHoverOption user={user} chat={chat} />}
-            <a className="card">
-                <div className="card-body">
-                    <div className="media">
-                        <div className="avatar me-3">
-                            <span className="rounded-circle"></span>
-                            <div className="avatar rounded-circle no-image timber">
-                                <span>
-                                    {user.showName.slice(0, Math.min(2, user.showName.length))}
-                                </span>
+export const UserCard = observer(
+    ({ user, showHover, chat }: { user: User; showHover: boolean; chat: Chat }) => {
+        return (
+            <li>
+                {showHover && <MembersHoverOption user={user} chat={chat} />}
+                <a className="card">
+                    <div className="card-body">
+                        <div className="media">
+                            <div className="avatar me-3">
+                                <span className="rounded-circle"></span>
+                                <div className="avatar rounded-circle no-image timber">
+                                    <span>
+                                        {user.showName.slice(0, Math.min(2, user.showName.length))}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="media-body overflow-hidden">
-                            <div className="d-flex align-items-center mb-1">
-                                <h6 className="text-truncate mb-0 me-auto">{user.showName}</h6>
+                            <div className="media-body overflow-hidden">
+                                <div className="d-flex align-items-center mb-1">
+                                    <h6 className="text-truncate mb-0 me-auto">{user.showName}</h6>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </a>
-        </li>
-    )
-})
+                </a>
+            </li>
+        )
+    }
+)
 
 const ChatList = observer(({ chat }: { chat: Chat }) => {
     return (
@@ -283,15 +301,15 @@ export const GroupMembers = ({ chat }: { chat: Chat }) => {
     )
 }
 
-export const GroupDetails = observer(({ chat }: { chat: Chat }) => {
+export const GroupDetails = ({ chat }: { chat: Chat }) => {
     return (
         <div className="tab-pane fade active show" id="GroupChat-Details" role="tabpanel">
             <ChatSidebarAvatar id={1} />
-            <GroupTitle chatName={chat.name} />
+            <GroupTitle chat={chat} />
             <ChatList chat={chat} />
         </div>
     )
-})
+}
 
 export const SidebarTabContent = ({ chat }: { chat: Chat }) => {
     return (
@@ -327,7 +345,8 @@ export const HeaderTab = () => {
 export const ChatSidebarBody = observer(
     ({ chat, visitUser }: { chat: Chat; visitUser: User | null }) => {
         // TODO-后续群聊和用户可以复用
-        if (visitUser) { // 群聊用户
+        if (visitUser) {
+            // 群聊用户
             return (
                 <div className="body mt-4">
                     <ChatSidebarAvatar id={visitUser.userId} />
@@ -336,7 +355,8 @@ export const ChatSidebarBody = observer(
                 </div>
             )
         }
-        if (chat.chatType === ChatType.Private) { // 私聊
+        if (chat.chatType === ChatType.Private) {
+            // 私聊
             return (
                 <div className="body mt-4">
                     <ChatSidebarAvatar id={1} />
@@ -345,11 +365,12 @@ export const ChatSidebarBody = observer(
                 </div>
             )
         }
-        return ( // 群聊
+        return (
+            // 群聊
             <div className="body">
                 <HeaderTab />
                 <SidebarTabContent chat={chat} />
-                <QuitGroupButton chatId={chat.chatId}/>
+                <QuitGroupButton chatId={chat.chatId} />
             </div>
         )
     }
