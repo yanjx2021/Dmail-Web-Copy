@@ -13,7 +13,7 @@ import { useState, useCallback, useEffect, LegacyRef } from 'react'
 import { ChatViewFooter, MessageSelectedFooter } from './ChatViewFooter'
 import { authStore } from '../../stores/authStore'
 import { useImmer } from 'use-immer'
-import { action, runInAction } from 'mobx'
+import { action, autorun, runInAction } from 'mobx'
 import { ChatSidebar } from '../ChatProfile/ChatSidebar'
 import { UserSidebar } from '../ChatProfile/UserSidebar'
 import { chatSideStore } from '../../stores/chatSideStore'
@@ -26,6 +26,10 @@ import { MessageServer } from '../../utils/networkWs'
 import { Send } from '../../utils/message'
 import { groupChatManageStore } from '../../stores/groupChatManageStore'
 import { VideoCall } from './VideoCall'
+import { RtcState, rtcStore } from '../../stores/rtcStore'
+import { Button, Space, notification } from 'antd'
+import { userStore } from '../../stores/userStore'
+import { key } from 'localforage'
 
 export const ChatView = observer(({ chat }: { chat: Chat }) => {
     const [messages, setMessages] = useImmer<ChatMessage[]>([])
@@ -171,15 +175,18 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         <div className={'main px-xl-5 px-lg-4 px-3 ' + chatSideStore.sidebarState}>
             <div className="chat-body" ref={dropRef}>
                 <ChatViewHeader chat={chat} />
-                {/* <VideoCall /> */}
-                <ChatMessageContent chat={chat} messages={messages} setMessages={setMessages} />
+                {rtcStore.showMediaWindow ? (
+                    <VideoCall />
+                ) : (
+                    <ChatMessageContent chat={chat} messages={messages} setMessages={setMessages} />
+                )}
                 {messageSelectStore.showSelector ? (
                     <MessageSelectedFooter />
                 ) : (
                     <ChatViewFooter handleSend={sendTextMessageHanlder} />
                 )}
             </div>
-            <ChatSidebar chat={chat} visitUser={chatSideStore.visitUser}/>
+            <ChatSidebar chat={chat} visitUser={chatSideStore.visitUser} />
             <UserSidebar chat={chat} />
         </div>
     )

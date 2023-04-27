@@ -6,6 +6,9 @@ import { MediaCallAnswerData } from '../utils/message'
 import { MediaCallData } from '../utils/message'
 import { MediaIceCandidate } from '../utils/message'
 import { UserId, authStore } from './authStore'
+import { MediaCallOfferNotification } from '../components/ChatView/VideoCall'
+import { chatStore } from './chatStore'
+
 
 export enum RtcState {
     None = 0,
@@ -56,6 +59,10 @@ export class RtcStore {
         })
     }
 
+    get showMediaWindow() {
+        return this.state >= 1
+    }
+
     refusedUnsolvedOffer() {
         MessageServer.Instance().send<Send.MediaCallAnswer>(Send.MediaCallAnswer, {
             friendId: this.unsolvedOffer!.friendId,
@@ -74,6 +81,14 @@ export class RtcStore {
                 this.unsolvedOffer!.callType
             )
 
+            const chatId = chatStore.userToChat(this.unsolvedOffer!.friendId) as number | undefined
+
+            if (!chatId) {
+                // TODO : Throw Error
+                console.error('没有找到ChatId')
+                return
+            }
+
             runInAction(() => {
                 MessageServer.Instance().send<Send.MediaCallAnswer>(Send.MediaCallAnswer, {
                     friendId: this.remoteUserId!,
@@ -81,9 +96,15 @@ export class RtcStore {
                     serializedAnswer: JSON.stringify(answer),
                 })
             })
+
+            chatStore.setActiveChatId && chatStore.setActiveChatId(chatId)
         } catch (error) {
             console.error(error)
         }
+    }
+
+    closeMediaCall() {
+        this.resetConnection()
     }
 
     private onReceiveMediaCandidate(data: MediaIceCandidate) {
@@ -124,6 +145,7 @@ export class RtcStore {
 
         this.unsolvedOffer = data
         this.state = RtcState.WaitingUser
+        MediaCallOfferNotification()
     }
 
     private sendStashedCandidate() {
@@ -201,8 +223,37 @@ export class RtcStore {
         }
     }
 
+    get rtcStateTip() {
+        switch (this.state) {
+            case RtcState.None:
+                return '没有进行通话'
+            case RtcState.Connecting:
+                return '正在连接'
+            case RtcState.Connected:
+                return '已连接'
+            case RtcState.WaitingAnswer:
+                return '等待对方回应'
+            case RtcState.WaitingUser:
+                return '等待确认'
+            case RtcState.WaitngCandidate:
+                return '正在连接'
+            case RtcState.WaitngLocalStream:
+                return '等待开启媒体设备'
+        }
+    }
+
     private createPeerConnection() {
-        const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+        const configuration: RTCConfiguration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                {
+                    urls: ['turn:dmail.r1ntaro.com:3478'],
+                    username: 'dmail',
+                    credential: 'dmailturn',
+                },
+            ],
+            // iceTransportPolicy: "relay",
+        }
         const peerConnection = new RTCPeerConnection(configuration)
         peerConnection.addEventListener('track', this.onReceiveRemoteTrack)
         peerConnection.addEventListener('connectionstatechange', this.onConnectionStateChange)

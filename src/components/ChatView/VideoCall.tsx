@@ -1,10 +1,12 @@
 import { observer } from 'mobx-react-lite'
-import { rtcStore } from '../../stores/rtcStore'
+import { RtcState, rtcStore } from '../../stores/rtcStore'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import { off } from 'process'
 import { action } from 'mobx'
 import '../../styles/VideoCall.css'
 import { useImmer } from 'use-immer'
+import { Button, Space, notification } from 'antd'
+import { userStore } from '../../stores/userStore'
 
 export enum StreamVideoPlayerState {
     Waiting,
@@ -59,7 +61,10 @@ export const VideoCall = observer(() => {
                             type="submit"
                             className="btn btn-sm btn-danger"
                             data-toggle="tooltip"
-                            title="结束视频">
+                            title="结束视频"
+                            onClick={() => {
+                                rtcStore.closeMediaCall()
+                            }}>
                             <i className="zmdi zmdi-phone"></i>
                         </button>
                         <button
@@ -92,28 +97,61 @@ export const VideoCall = observer(() => {
                         state={StreamVideoPlayerState.Waiting}
                     />
 
-                    <p> {rtcStore.state}</p>
-                    <div>
-                        <p>好友id: </p>
-                        <input
-                            value={friendId}
-                            onChange={(e) => {
-                                const input = e.target.value.replace(/[^0-9]/g, '')
-                                setFriendId(input)
-                            }}></input>
-                    </div>
-
-                    <button
-                        onClick={action(() => {
-                            rtcStore.startMediaCall(parseInt(friendId), 'Video')
-                        })}>
-                        {' '}
-                        发送视频通话请求{' '}
-                    </button>
-
-                    <button onClick={rtcStore.approvedUnsolvedOffer}>接受视频通话请求</button>
+                    <p> {rtcStore.rtcStateTip}</p>
                 </div>
             </div>
         </div>
     )
 })
+
+export const MediaCallOfferNotification = () => {
+    if (rtcStore.state === RtcState.WaitingUser && rtcStore.unsolvedOffer?.friendId) {
+        const friendId = rtcStore.unsolvedOffer.friendId
+        const duration = 15
+        const timeout = setTimeout(() => {
+            if (rtcStore.state === RtcState.WaitingUser) {
+                rtcStore.refusedUnsolvedOffer()
+            }
+        }, duration * 1000)
+        const btn = (
+            <Space>
+                <Button
+                    onClick={() => {
+                        rtcStore.approvedUnsolvedOffer()
+                        clearTimeout(timeout)
+                        notification.destroy()
+                    }}>
+                    同意
+                </Button>
+                <Button
+                    onClick={() => {
+                        rtcStore.refusedUnsolvedOffer()
+                        clearTimeout(timeout)
+                        notification.destroy()
+                    }}>
+                    拒绝
+                </Button>
+            </Space>
+        )
+
+        if (rtcStore.unsolvedOffer?.callType === 'Video') {
+            notification.open({
+                message: '视频通话请求',
+                description: `好友${userStore.getUser(friendId).showName}邀请您进行视频通话`,
+                key: friendId,
+                btn,
+                duration: duration,
+                placement: 'bottomRight',
+            })
+        } else {
+            notification.open({
+                message: '语音通话请求',
+                description: `好友${userStore.getUser(friendId).showName}邀请您进行语音通话`,
+                key: friendId,
+                btn,
+                duration: duration,
+                placement: 'bottomRight',
+            })
+        }
+    }
+}

@@ -674,6 +674,16 @@ export class ChatStore {
         return friendMap
     }
 
+    userToChat(userId: number) {
+        let result : any
+        this.chats.forEach((chat, chatId) => {
+            if (chat.bindUser && chat.bindUser.userId === userId) {
+                result = chatId
+            }
+        })
+        return result
+    }
+
     get privateChatGroup() {
         const chats: Chat[] = []
         const nonChineseChats: Chat[] = []
