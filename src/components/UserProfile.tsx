@@ -10,6 +10,7 @@ import { UploadingFile, fileStore } from '../stores/fileStore'
 import { imageStore } from '../stores/imageStore'
 import { Progress, Image } from 'antd'
 import { PhotoItem } from './ChatView/PhotoItem'
+import "../styles/UserProfile.css"
 
 export const ProfileHeader = () => {
     return (
@@ -25,6 +26,7 @@ export const ProfileHeader = () => {
 }
 
 export const CardAvatar = observer(({ avaterHash }: { avaterHash: string }) => {
+    
     const handleChange = (event: any) => {
         event.target.files[0] &&
             fileStore.requestUpload(
@@ -35,6 +37,9 @@ export const CardAvatar = observer(({ avaterHash }: { avaterHash: string }) => {
                     updateUserStore.sendUpdateUserInfo()
                 })
             )
+    }
+    const handlefile=()=>{
+      document.getElementById('userphoto')?.click()
     }
     return (
         <div className="card-user-avatar">
@@ -47,8 +52,9 @@ export const CardAvatar = observer(({ avaterHash }: { avaterHash: string }) => {
                 alt="avatar"
             />
             
-            <input type="file" accept="image/*" onChange={handleChange}></input>
-            <button type="button" className="btn btn-secondary btn-sm">
+            <input className="photoinputer" id="userphoto" type="file" accept="image/*" onChange={handleChange} ></input>
+
+            <button type="button" className="btn btn-secondary btn-sm" onClick={handlefile}>
                 <i className="zmdi zmdi-edit"></i>
             </button>
         </div>
