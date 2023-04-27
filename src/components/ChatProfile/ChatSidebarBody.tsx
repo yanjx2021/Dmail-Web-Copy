@@ -220,7 +220,7 @@ export const GroupTitle = observer(({ chat }: { chat: Chat }) => {
                 {chat.name}
                 <button
                     type="button"
-                    className="btn btn-secondary btn-sm"
+                    className="btn btn-secondary btn-sm btn-nameeditor"
                     onClick={action(() => {
                         updateGroupStore.chat = chat
                         updateGroupStore.updateType = 'GroupName'

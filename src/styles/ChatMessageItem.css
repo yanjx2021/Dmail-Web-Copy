@@ -54,3 +54,11 @@
   left:6.5px;
   top:3px;
 }
+.btn-nameeditor
+{
+  max-height:25px;
+  max-width:25px;
+  padding: .1rem .4rem;
+  margin-left: 10px;
+  border-radius: 1rem;
+}
