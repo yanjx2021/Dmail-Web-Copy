@@ -24,7 +24,7 @@ export const UserSidebarUsersItemCard = observer(({ user }: { user: User }) => {
                     <div className="avatar me-3">
                         <span className="status rounded-circle"></span>
                         <div className={'avatar rounded-circle no-image ' + 'timber'}>
-                            <span>{user.userId}</span>
+                            <img className='avatar rounded-circle' src={user.getAvaterUrl} alt='avatar'/>
                         </div>
                     </div>
                     <div className="media-body overflow-hidden">

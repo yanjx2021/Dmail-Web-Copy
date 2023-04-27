@@ -22,7 +22,7 @@ export const SidebarUserDropDown = observer(({ user, chat }: { user: User; chat:
                 <i className="zmdi zmdi-more-vert"></i>
             </a>
             <div className="dropdown-menu dropdown-menu-right">
-                {chat.ownerId && chat.ownerId === authStore.userId && (
+                {chat.ownerId && chat.ownerId === authStore.userId && !chat.isAdmin(user.userId) && (
                     <DropDownItem
                         text="设置管理员"
                         handleClick={action(() => {
@@ -30,7 +30,8 @@ export const SidebarUserDropDown = observer(({ user, chat }: { user: User; chat:
                         })}
                     />
                 )}
-                {chat.isAdmin(authStore.userId) && (
+                {(chat.ownerId === authStore.userId ||
+                    (chat.isAdmin(authStore.userId) && !chat.isAdmin(user.userId))) && (
                     <DropDownItem
                         text="踢出群聊"
                         handleClick={action(() =>
@@ -46,7 +47,6 @@ export const SidebarUserDropDown = observer(({ user, chat }: { user: User; chat:
                         })}
                     />
                 )}
-
             </div>
         </div>
     )

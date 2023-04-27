@@ -1,12 +1,18 @@
-import { action, makeAutoObservable } from "mobx"
-import { Chat, ChatMessage, ChatMessageState, ChatMessageType, chatStore } from "../../stores/chatStore"
-import { observer } from "mobx-react-lite"
-import { modalStore } from "../../stores/modalStore"
-import { Send, SendSendMessageData } from "../../utils/message"
-import { authStore } from "../../stores/authStore"
-import { User } from "../../stores/userStore"
-import { MessageServer } from "../../utils/networkWs"
-import { requestStore } from "../../stores/requestStore"
+import { action, makeAutoObservable } from 'mobx'
+import {
+    Chat,
+    ChatMessage,
+    ChatMessageState,
+    ChatMessageType,
+    chatStore,
+} from '../../stores/chatStore'
+import { observer } from 'mobx-react-lite'
+import { modalStore } from '../../stores/modalStore'
+import { Send, SendSendMessageData } from '../../utils/message'
+import { authStore } from '../../stores/authStore'
+import { User } from '../../stores/userStore'
+import { MessageServer } from '../../utils/networkWs'
+import { requestStore } from '../../stores/requestStore'
 
 export class MessageSelectStore {
     msgs: Map<number, ChatMessage> = new Map()
@@ -17,7 +23,8 @@ export class MessageSelectStore {
         makeAutoObservable(this, {}, { autoBind: true })
     }
 
-    transfer() { // 转发
+    transfer() {
+        // 转发
         if (this.chat === undefined) {
             this.errors = '请选择一个聊天进行消息转发'
             return
@@ -81,7 +88,6 @@ export class MessageSelectStore {
         }
     }
 
-
     get msgsList() {
         const list: ChatMessage[] = []
         this.msgs.forEach((msg, inChatId) => {
@@ -107,7 +113,7 @@ export const MessageSelector = observer(({ msg }: { msg: ChatMessage }) => {
     )
 })
 
-export const ChatSelector = (({ chat }: { chat: Chat }) => {
+export const ChatSelector = ({ chat }: { chat: Chat }) => {
     return (
         <label className="c_checkbox">
             <input
@@ -118,7 +124,7 @@ export const ChatSelector = (({ chat }: { chat: Chat }) => {
             <span className="checkmark"></span>
         </label>
     )
-})
+}
 
 export class UserSelectStore {
     users: Map<number, User> = new Map()
@@ -182,6 +188,10 @@ export const UserSelector = observer(({ user }: { user: User }) => {
             <input
                 readOnly={true}
                 type="checkbox"
+                onChange={() => {
+                    userSelectStore.toggleCheckUser(user)
+                    createGroupFromAllFriendsSelectStore.reset()
+                }}
                 checked={userSelectStore.hasSelectUser(user.userId)}
             />
             <span className="checkmark"></span>

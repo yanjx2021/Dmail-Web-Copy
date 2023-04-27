@@ -92,13 +92,13 @@ export class Request {
             case RequestContentType.MakeFriend:
                 if (this.isSender) {
                     if (this.receiveUser) {
-                        return imageStore.getImageUrl(this.receiveUser.avaterHash).url
+                        return this.receiveUser.getAvaterUrl
                     } else {
                         return 'assets/images/user.png'
                     }
                 } else {
                     if (this.sendUser) {
-                        return imageStore.getImageUrl(this.sendUser.avaterHash).url
+                        return this.sendUser.getAvaterUrl
                     } else {
                         return 'assets/images/user.png'
                     }
@@ -112,7 +112,7 @@ export class Request {
                     }
                 } else {
                     if (this.sendUser) {
-                        return imageStore.getImageUrl(this.sendUser.avaterHash).url
+                        return this.sendUser.getAvaterUrl
                     } else {
                         return 'assets/images/user.png'
                     }
@@ -120,20 +120,20 @@ export class Request {
             case RequestContentType.GroupInvitation:
                 if (this.isSender) {
                     if (this.receiveUser) {
-                        return imageStore.getImageUrl(this.receiveUser.avaterHash).url
+                        return this.receiveUser.getAvaterUrl
                     } else {
                         return 'assets/images/user.png'
                     }
                 } else {
                     if (this.sendUser) {
-                        return imageStore.getImageUrl(this.sendUser.avaterHash).url
+                        return this.sendUser.getAvaterUrl
                     } else {
                         return 'assets/images/user.png'
                     }
                 }
             case RequestContentType.InvitedJoinGroup:
                 if (this.sendUser) {
-                    return imageStore.getImageUrl(this.sendUser.avaterHash).url
+                    return this.sendUser.getAvaterUrl
                 } else {
                     return 'assets/images/user.png'
                 }

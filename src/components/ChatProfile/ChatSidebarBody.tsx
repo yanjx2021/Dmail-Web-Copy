@@ -322,6 +322,7 @@ const MemberList = observer(({ chat }: { chat: Chat }) => {
                             key={userId}
                             user={user}
                             showHover={
+                                chat.ownerId !== userId &&
                                 authStore.userId !== userId &&
                                 (authStore.userId === chat.ownerId ||
                                     (chat.adminIds !== null &&
