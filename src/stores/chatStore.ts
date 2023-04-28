@@ -344,6 +344,8 @@ export class Chat {
     userIds: number[] | null = null
     groupName: string | null = null
     groupAvaterPath: string | null = null
+    atYou: boolean = false
+
 
     constructor(chatId: number) {
         this.chatId = chatId

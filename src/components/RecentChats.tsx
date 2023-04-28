@@ -67,6 +67,8 @@ const RecentChatItem = observer(
                                 <div className="text-truncate">
                                     {chat.lastMessage !== undefined ? chat.lastMessage.asShort : ''}
                                 </div>
+                                {/* TODO: yjx有人at时，出现红色字提示 */}
+                                {chat.atYou ? <p color='red'>有人@你</p> : <></>}
                             </div>
                         </div>
                     </div>

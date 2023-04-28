@@ -78,6 +78,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
             if (!secureAuthStore.showSecureBox) {
                 chat.setReadCuser()
                 MessageServer.Instance().send<Send.GetChatInfo>(Send.GetChatInfo, chat.chatId)
+                chat.atYou = false
             }
         }),
         [chat, secureAuthStore.showSecureBox]
