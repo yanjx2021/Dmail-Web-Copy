@@ -703,6 +703,8 @@ export class Chat {
 export class ChatStore {
     private chats: Map<ChatId, Chat> = new Map()
 
+    topChatIds: number[] = []
+
     activeChatId: undefined | ChatId = undefined
     setViewMessages: undefined | Updater<ChatMessage[]> = undefined
     setActiveChatId: undefined | React.Dispatch<React.SetStateAction<number | null>> = undefined
@@ -812,12 +814,49 @@ export class ChatStore {
         }
     }
 
+    isTopChat(chatId: number) {
+        return this.topChatIds.indexOf(chatId) > -1
+    }
+
+    addTopChat(chatId: number) {
+        if (this.topChatIds.indexOf(chatId) === -1) {
+            this.topChatIds.push(chatId)
+            userSettingStore.setTop(this.topChatIds)
+        }
+    }
+
+    removeTopChat(chatId: number) {
+        if (this.topChatIds.indexOf(chatId) > -1) {
+            this.topChatIds.splice(this.topChatIds.indexOf(chatId), 1)
+            userSettingStore.setTop(this.topChatIds)
+        }
+    }
+
+    get topChats() {
+        const topChats: Chat[] = [] 
+        this.topChatIds.forEach((chatId, _) => {
+            topChats.push(this.getChat(chatId))
+        })
+        return topChats
+    }
+
     get recentChatsView() {
         // 1.数据有序
         // 2.timestamp在一定范围
 
         // TODO : listView使用二叉树维护
         // O(nlogn + rank) => O(rank+logn)
+        if (this.topChats.length !== 0) {
+            console.log(this.topChatIds)
+            const chatArray: Chat[] = []
+            this.chats.forEach((chat) => {
+                if (chat.lastMessage !== undefined && this.topChatIds.indexOf(chat.chatId) === -1) {
+                    chatArray.push(chat)
+                }
+            })
+            return this.topChats.concat(chatArray)
+        }
+
         const chatArray: Chat[] = []
         this.chats.forEach((chat) => {
             if (chat.lastMessage !== undefined) {

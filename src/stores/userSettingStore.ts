@@ -6,6 +6,7 @@ import { LocalDatabase } from './localData'
 import { secureAuthStore } from './secureAuthStore'
 import { notificationStore } from './notificationStore'
 import { notification } from 'antd'
+import { chatStore } from './chatStore'
 
 export interface UserSetting {
     secondaryCheckChats: [number, string][] // 保存需要进行二次验证的chatid
@@ -15,6 +16,7 @@ export interface UserSetting {
         show: boolean
         muteChatIds: number[]
     }
+    topChatIds: number[]
 }
 
 export class UserSettingStore {
@@ -26,6 +28,7 @@ export class UserSettingStore {
             show: false,
             muteChatIds: [],
         },
+        topChatIds: [],
     }
     errors: string = ''
     constructor() {
@@ -43,6 +46,7 @@ export class UserSettingStore {
                 show: false,
                 muteChatIds: [],
             },
+            topChatIds: [],
         }
     }
 
@@ -75,9 +79,15 @@ export class UserSettingStore {
         this.userSetting.secondaryCheckChats.forEach(([chatId, _]) => {
             secureAuthStore.setVerifyState(chatId, false)
         })
-        notificationStore.muteChats = this.userSetting.notification.muteChatIds
-        notificationStore.show = this.userSetting.notification.show
-        notificationStore.slient = this.userSetting.notification.slient
+        notificationStore.muteChats = this.userSetting.notification.muteChatIds || [] 
+        notificationStore.show = this.userSetting.notification.show || false
+        notificationStore.slient = this.userSetting.notification.slient || true
+        chatStore.topChatIds = this.userSetting.topChatIds || []
+    }
+
+    setTop(topChatIds: number[]) {
+        this.userSetting.topChatIds = topChatIds
+        this.sendUserSetting()
     }
 
     setSlient(slient: boolean) {
