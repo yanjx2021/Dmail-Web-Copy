@@ -315,6 +315,24 @@ export interface ReceiveUpdateGroupInfoResponseData {
         | 'ServerError'
 }
 
+export interface ReceiveSetOppositeReadCursorData {
+    chatId: number
+    inChatId: number
+}
+
+export interface ReceiveGetUserReadInGroupResponseData {
+    state: 'Success' | 'NotGroupChat' | 'UserNotInChat' | 'DatabaseError' | 'ServerError'
+    chatId?: number
+    inChatId?: number
+    userIds?: number[]
+}
+
+export interface ReceiveGetUserReadInPrivateResponseData {
+    state: 'Success' | 'NotPrivateChat' | 'UserNotInChat' | 'DatabaseError' | 'ServerError'
+    chatId?: number
+    inChatId?: number
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -365,6 +383,9 @@ export enum Receive {
     RemoveGroupMemberResponse = 'RemoveGroupMemberResponse',
     GroupOwnerTransferResponse = 'GroupOwnerTransferResponse',
     UpdateGroupInfoResponse = 'UpdateGroupInfoResponse',
+    SetOppositeReadCursor = 'SetOppositeReadCursor',
+    GetUserReadInGroupResponse = 'GetUserReadInGroupResponse',
+    GetUserReadInPrivateResponse = 'GetUserReadInPrivateResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -440,6 +461,7 @@ export type SendUpdateUserInfoData = UpdateUserName | UpdatePassword | UpdateAva
 export interface SendSetAlreadyReadData {
     chatId: number
     inChatId: number
+    private: boolean
 }
 
 export interface SendRevokeMessageData {
@@ -499,6 +521,15 @@ export interface SendUpdateGroupInfoData {
     content: UpdateGroupInfoContent
 }
 
+export interface SendGetUserReadInPrivate {
+    chatId: number
+}
+
+export interface SendGetUserReadInGroup {
+    chatId: number
+    inChatId: number
+}
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -537,6 +568,8 @@ export enum Send {
     GroupOwnerTransfer = 'GroupOwnerTransfer',
     SendGroupNotice = 'SendGroupNotice',
     UpdateGroupInfo = 'UpdateGroupInfo',
+    GetUserReadInGroup = 'GetUserReadInGroup',
+    GetUserReadInPrivate = 'GetUserReadInPrivate',
 }
 
 // COMMAND和DATA类型捆绑
@@ -588,6 +621,9 @@ export interface MessageReceiveData {
     [Receive.RemoveGroupMemberResponse]: ReceiveRemoveGroupMemberResponseData
     [Receive.GroupOwnerTransferResponse]: ReceiveGroupOwnerTransferResponseData
     [Receive.UpdateGroupInfoResponse]: ReceiveUpdateGroupInfoResponseData
+    [Receive.SetOppositeReadCursor]: ReceiveSetOppositeReadCursorData
+    [Receive.GetUserReadInPrivateResponse]: ReceiveGetUserReadInPrivateResponseData
+    [Receive.GetUserReadInGroupResponse]: ReceiveGetUserReadInGroupResponseData
 }
 
 export interface MessageSendData {
@@ -627,6 +663,8 @@ export interface MessageSendData {
     [Send.GroupOwnerTransfer]: SendGroupOwnerTransferData
     [Send.SendGroupNotice]: SendSendGroupNoticeData
     [Send.UpdateGroupInfo]: SendUpdateGroupInfoData
+    [Send.GetUserReadInGroup]: SendGetUserReadInGroup
+    [Send.GetUserReadInPrivate]: number
 }
 
 // 封装消息包
