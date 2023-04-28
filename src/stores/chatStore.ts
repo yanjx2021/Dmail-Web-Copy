@@ -79,6 +79,7 @@ export enum ChatMessageType {
     Deleted = 'Deleted',
     Transfer = 'Transfer',
     Revoked = 'Revoked',
+    MentionText = 'MentionText',
 }
 
 export type ChatMessageContentType =
@@ -86,6 +87,12 @@ export type ChatMessageContentType =
     | ChatMessageFileInfo
     | ImageHash
     | ChatMessageTransferInfo
+    | MentionTextContent
+
+export interface MentionTextContent {
+    userIds: number[]
+    text: string
+}
 
 export interface ChatMessageTransferInfo {
     userId: number
@@ -347,6 +354,19 @@ export class Chat {
         if (this.avaterHash && this.avaterHash !== '')
             return imageStore.getImageUrl(this.avaterHash).url
         return 'assets/images/user.png'
+    }
+
+    get mentionUserList() {
+        if (this.chatType === ChatType.Private) return []
+        if (!this.userIds) return []
+        const mentionOptionList = this.userIds.map((userId) => {
+            return {
+                value: `${userStore.getUser(userId).originName}(${userId})`,
+                label: `${userStore.getUser(userId).originName} (ID: ${userId})`,
+                key: userId.toString(),
+            }
+        })
+        return mentionOptionList
     }
 
     get avaterHash() {
@@ -651,6 +671,38 @@ export class Chat {
         return msg
     }
 
+    sendMentionMessage(text: string, userIds: number[]) {
+        const timestamp = Date.now()
+        const data: SendSendMessageData = {
+            type: ChatMessageType.MentionText,
+            clientId: ++this.lastClientId,
+            serializedContent: JSON.stringify({
+                text,
+                userIds,
+            }),
+            chatId: this.chatId,
+            timestamp,
+        }
+        let msg = new ChatMessage({
+            type: ChatMessageType.MentionText,
+            content: {
+                text,
+                userIds,
+            },
+            timestamp,
+            inChatId: undefined,
+            senderId: authStore.userId,
+            state: ChatMessageState.Sending,
+            chatId: this.chatId,
+        })
+        msg.clientId = data.clientId
+
+        // TODO : Response超时
+        this.sendingMessages.push(msg)
+        MessageServer.Instance().send<Send.SendMessage>(Send.SendMessage, data)
+        return msg
+    }
+
     sendTextMessage(text: string) {
         const timestamp = Date.now()
         const data: SendSendMessageData = {
@@ -833,7 +885,7 @@ export class ChatStore {
     }
 
     get topChats() {
-        const topChats: Chat[] = [] 
+        const topChats: Chat[] = []
         this.topChatIds.forEach((chatId, _) => {
             topChats.push(this.getChat(chatId))
         })

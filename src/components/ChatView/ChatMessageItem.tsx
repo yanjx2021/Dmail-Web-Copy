@@ -8,6 +8,7 @@ import {
     ChatMessageFileInfo,
     ChatMessageTransferInfo,
     ChatMessageType,
+    MentionTextContent,
 } from '../../stores/chatStore'
 import { authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
@@ -32,6 +33,13 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
                 {renderFormatUrl(msg.content)}
+            </div>
+        )
+    } else if (msg.type === ChatMessageType.MentionText) {
+        const content: any = msg.content
+        return (
+            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                {renderFormatUrl(content.text)}
             </div>
         )
     } else if (msg.type === ChatMessageType.Image && typeof msg.content === 'string') {
@@ -110,15 +118,15 @@ export const ChatMessageItem = observer(
                             type="button"
                             onClick={action(() => chatSideStore.visitUsertoggle(user))}>
                             <div className="avatar mr-lg-3 me-2">
-                                    <img
-                                        className={'avatar rounded-circle no-image ' + ''}
-                                        src={
-                                            !user.avaterHash || user.avaterHash === ''
-                                                ? 'assets/images/user.png'
-                                                : imageStore.getImageUrl(user.avaterHash).url
-                                        }
-                                        alt="avatar"
-                                    />
+                                <img
+                                    className={'avatar rounded-circle no-image ' + ''}
+                                    src={
+                                        !user.avaterHash || user.avaterHash === ''
+                                            ? 'assets/images/user.png'
+                                            : imageStore.getImageUrl(user.avaterHash).url
+                                    }
+                                    alt="avatar"
+                                />
                             </div>
                         </a>
                     ) : (
