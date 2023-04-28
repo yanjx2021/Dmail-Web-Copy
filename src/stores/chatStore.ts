@@ -109,11 +109,33 @@ export class ChatMessage {
 
     bindUploading?: UploadingFile
 
-    private revokeMethod(): 'Sender' | 'GroupAdmin' {
-        if (chatStore.getChat(this.chatId).chatType === ChatType.Private) {
+    get showRevokeButton() {
+        const chat = chatStore.getChat(this.chatId)
+        // 系统消息
+        if (this.senderId === 0) return false
+        // 自己发送的消息
+        if (this.senderId === authStore.userId) return true
+        // 是群主
+        if (chat.ownerId === authStore.userId) return true
+        // 是管理员并且不是群主发的消息
+        if (chat.isAdmin(authStore.userId) && !chat.isAdmin(this.senderId)) return true
+        return false
+    }
+
+    get revokeMethod(): 'Sender' | 'GroupAdmin' | 'GroupOwner' {
+        const chat = chatStore.getChat(this.chatId)
+        if (chat.chatType === ChatType.Private) {
             return 'Sender'
         }
-        //TODO-群聊身份完成后，在此添加判断撤回群聊消息的逻辑
+        if (chat.chatType === ChatType.Group) {
+            if (chat.ownerId === authStore.userId) {
+                return 'GroupOwner'
+            }
+            if (chat.isAdmin(authStore.userId)) {
+                return 'GroupAdmin'
+            }
+            return 'Sender'
+        }
         return 'Sender'
     }
 
@@ -121,7 +143,7 @@ export class ChatMessage {
         MessageServer.Instance().send<Send.RevokeMessage>(Send.RevokeMessage, {
             chatId: this.chatId,
             inChatId: this.inChatId!,
-            method: this.revokeMethod(),
+            method: this.revokeMethod,
         })
     }
 
@@ -283,7 +305,8 @@ export class Chat {
     }
 
     get getAvaterUrl() {
-        if (this.avaterHash && this.avaterHash !== '') return imageStore.getImageUrl(this.avaterHash).url
+        if (this.avaterHash && this.avaterHash !== '')
+            return imageStore.getImageUrl(this.avaterHash).url
         return 'assets/images/user.png'
     }
 
@@ -301,8 +324,12 @@ export class Chat {
     }
 
     removeGroupChatMember(userId: number) {
-        this.userIds && this.userIds.indexOf(userId) > -1 && this.userIds.splice(this.userIds.indexOf(userId), 1)
-        this.adminIds && this.adminIds.indexOf(userId) > -1 && this.adminIds.splice(this.adminIds.indexOf(userId), 1)
+        this.userIds &&
+            this.userIds.indexOf(userId) > -1 &&
+            this.userIds.splice(this.userIds.indexOf(userId), 1)
+        this.adminIds &&
+            this.adminIds.indexOf(userId) > -1 &&
+            this.adminIds.splice(this.adminIds.indexOf(userId), 1)
         userId === this.ownerId && console.log('真的要踢出群主吗')
     }
 
@@ -675,7 +702,7 @@ export class ChatStore {
     }
 
     userToChat(userId: number) {
-        let result : any
+        let result: any
         this.chats.forEach((chat, chatId) => {
             if (chat.bindUser && chat.bindUser.userId === userId) {
                 result = chatId

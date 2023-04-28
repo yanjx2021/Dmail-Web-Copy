@@ -445,7 +445,7 @@ export interface SendSetAlreadyReadData {
 export interface SendRevokeMessageData {
     chatId: number
     inChatId: number
-    method: 'Sender' | 'GroupAdmin'
+    method: 'Sender' | 'GroupAdmin' | 'GroupOwner'
 }
 
 export interface SendSetGroupAdminData {

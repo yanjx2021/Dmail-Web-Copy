@@ -3,7 +3,7 @@ import { secureAuthStore } from '../../stores/secureAuthStore'
 import { action } from 'mobx'
 import { modalStore } from '../../stores/modalStore'
 import { DropDownItem } from './ChatDropDown'
-import { ChatMessage } from '../../stores/chatStore'
+import { ChatMessage, chatStore } from '../../stores/chatStore'
 import { messageSelectStore } from '../MessagesBox/Selector'
 import { authStore } from '../../stores/authStore'
 
@@ -39,7 +39,9 @@ export const MessageDropDown = observer(
                         />
                     )}
 
-                    {msg.senderId === authStore.userId && <DropDownItem text='撤回' handleClick={() => msg.revokeMessage()}/>}
+                    {msg.showRevokeButton && (
+                            <DropDownItem text="撤回" handleClick={() => msg.revokeMessage()} />
+                        )}
                     <DropDownItem
                         text="删除"
                         handleClick={() => {
