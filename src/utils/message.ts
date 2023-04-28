@@ -238,6 +238,7 @@ export interface ReceiveGetFileUrlResponse {
 export interface ReceiveGetGroupUsersResponseData {
     state: 'Success' | 'ServerError' | 'NotGroupChat'
     chatId?: number
+    inChatId?: number
     userIds?: number[]
 }
 

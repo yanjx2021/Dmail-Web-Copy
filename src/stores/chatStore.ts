@@ -43,6 +43,7 @@ import {
     userSelectStore,
 } from '../components/MessagesBox/Selector'
 import { imageStore } from './imageStore'
+import { modalStore } from './modalStore'
 
 export type ChatId = number
 
@@ -119,16 +120,20 @@ export class ChatMessage {
     bindUploading?: UploadingFile
 
     get showRevokeButton() {
-        const chat = chatStore.getChat(this.chatId)
         // 系统消息
         if (this.senderId === 0) return false
         // 自己发送的消息
         if (this.senderId === authStore.userId) return true
         // 是群主
-        if (chat.ownerId === authStore.userId) return true
+        if (this.bindChat.ownerId === authStore.userId) return true
         // 是管理员并且不是群主发的消息
-        if (chat.isAdmin(authStore.userId) && !chat.isAdmin(this.senderId)) return true
+        if (this.bindChat.isAdmin(authStore.userId) && !this.bindChat.isAdmin(this.senderId))
+            return true
         return false
+    }
+
+    get showGetReadersButton() {
+        return this.bindChat.chatType === ChatType.Group
     }
 
     get revokeMethod(): 'Sender' | 'GroupAdmin' | 'GroupOwner' {
@@ -153,6 +158,17 @@ export class ChatMessage {
             chatId: this.chatId,
             inChatId: this.inChatId!,
             method: this.revokeMethod,
+        })
+    }
+
+    getGroupReaders() {
+        if (this.bindChat.chatType !== ChatType.Group || !this.inChatId) {
+            return
+        }
+        chatStore.getGroupMessageReadersToken = [this.chatId, this.inChatId]
+        MessageServer.Instance().send<Send.GetUserReadInGroup>(Send.GetUserReadInGroup, {
+            chatId: this.chatId,
+            inChatId: this.inChatId,
         })
     }
 
@@ -691,6 +707,9 @@ export class ChatStore {
     setViewMessages: undefined | Updater<ChatMessage[]> = undefined
     setActiveChatId: undefined | React.Dispatch<React.SetStateAction<number | null>> = undefined
 
+    // [chatId, inChatId]
+    getGroupMessageReadersToken: [number, number] | undefined = undefined
+
     errors: string = ''
 
     constructor() {
@@ -716,6 +735,7 @@ export class ChatStore {
             this.ReceiveGetUserReadInPrivateResponseHandler
         )
         MessageServer.on(Receive.SetOppositeReadCursor, this.ReceiveSetOppositeReadCursor)
+        MessageServer.on(Receive.GetUserReadInGroupResponse, this.ReceiveGetUserReadInGroupResponse)
     }
 
     reset() {
@@ -1016,6 +1036,21 @@ export class ChatStore {
 
     private ReceiveSetOppositeReadCursor(data: ReceiveSetOppositeReadCursorData) {
         this.getChat(data.chatId!).oppositeReadCursor = data.inChatId!
+    }
+
+    private ReceiveGetUserReadInGroupResponse(data: ReceiveGetGroupUsersResponseData) {
+        if (data.state !== 'Success') {
+            this.errors = '拉取群聊Readers错误'
+            return
+        }
+        if (
+            !this.getGroupMessageReadersToken ||
+            this.getGroupMessageReadersToken[0] !== data.chatId! ||
+            this.getGroupMessageReadersToken[1] !== data.inChatId!
+        ) {
+            return
+        }
+        modalStore.groupMessageReaders = data.userIds!
     }
 }
 

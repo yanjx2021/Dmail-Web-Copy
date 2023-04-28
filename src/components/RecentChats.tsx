@@ -21,12 +21,11 @@ const RecentChatItem = observer(
     }) => {
         useEffect(
             action(() => {
-                console.log('show')
                 if (!document.hasFocus() && chat.unreadCount !== 0) {
                     showMessageNotification(
                         chat.name,
                         `您有${chat.unreadCount}条未读消息`,
-                        `chat: ${chat.chatId}`,
+                        `chat: ${chat.chatId}`
                     )
                 }
             }),

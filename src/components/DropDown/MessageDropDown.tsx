@@ -40,8 +40,19 @@ export const MessageDropDown = observer(
                     )}
 
                     {msg.showRevokeButton && (
-                            <DropDownItem text="撤回" handleClick={() => msg.revokeMessage()} />
-                        )}
+                        <DropDownItem text="撤回" handleClick={() => msg.revokeMessage()} />
+                    )}
+
+                    {msg.showGetReadersButton && msg.inChatId && (
+                        <DropDownItem
+                            text="查询已读成员"
+                            handleClick={() => {
+                                msg.getGroupReaders()
+                                modalStore.modalType = 'GroupMessageReaders'
+                                modalStore.isOpen = true
+                            }}
+                        />
+                    )}
                     <DropDownItem
                         text="删除"
                         handleClick={() => {

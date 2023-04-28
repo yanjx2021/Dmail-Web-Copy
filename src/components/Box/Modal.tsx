@@ -18,6 +18,7 @@ import { MessageBox } from '../MessagesBox/MessageBox'
 import { useEffect } from 'react'
 import '../../styles/Modal.css'
 import { updateGroupStore } from '../../stores/updateGroupStore'
+import { userStore } from '../../stores/userStore'
 
 export const ModalInput = ({
     label,
@@ -329,7 +330,6 @@ export const TransferChatModalView = observer(({ title }: { title: string }) => 
 })
 
 export const TransferChatBoxModalView = observer(({ title }: { title: string }) => {
-    console.log('转发消息', modalStore.transferData)
     return (
         <Modal
             footer={[]}
@@ -372,6 +372,32 @@ export const ChangeGroupNameModalView = observer(({ title }: { title: string }) 
     )
 })
 
+export const GroupMessageReadersModalView = observer(({ title }: { title: string }) => {
+    return (
+        <Modal
+            footer={[
+                <Button key="okok" onClick={modalStore.handleCancel}>
+                    确认
+                </Button>,
+            ]}
+            onCancel={modalStore.handleCancel}
+            title={title}
+            open={modalStore.isOpen}>
+            {modalStore.groupMessageReaders ? (
+                <ul>
+                    {modalStore.groupMessageReaders.map((userId) => (
+                        <li key={userId}>
+                            <p>{userStore.getUser(userId).name}</p>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p> 加载中</p>
+            )}
+        </Modal>
+    )
+})
+
 export const RegisterModal = observer(() => {
     useEffect(() => {
         let $box: any = document.querySelector('.ant-modal-root')
@@ -397,6 +423,8 @@ export const RegisterModal = observer(() => {
             return <JoinGroupModalView title="申请加入群聊" />
         case 'ChangeGroupName':
             return <ChangeGroupNameModalView title="更改群聊名称" />
+        case 'GroupMessageReaders':
+            return <GroupMessageReadersModalView title="已读成员" />
         default:
             return <></>
     }
