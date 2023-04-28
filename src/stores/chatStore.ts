@@ -227,7 +227,7 @@ export class ChatMessage {
 
         tip += ' ' + this.state
 
-        if (this.bindChat.chatType === ChatType.Private) {
+        if (this.bindChat.chatType === ChatType.Private && this.senderId === authStore.userId) {
             if (this.alreadyRead) {
                 tip += ' 已读'
             } else {
@@ -238,7 +238,6 @@ export class ChatMessage {
         return tip
     }
     get asShort() {
-        console.log(this.type)
         if (this.type === ChatMessageType.Text) {
             return this.content as string
         } else if (this.type === ChatMessageType.Transfer) {
@@ -763,11 +762,7 @@ export class ChatStore {
         //为特殊字符添加编号#
         groupCounts[26] !== 0 && groups.push('#')
         groupCounts = groupCounts.filter((value, _) => value !== 0)
-        console.log({
-            chats: chats,
-            groups: groups,
-            groupCounts: groupCounts,
-        })
+
         return {
             chats: chats,
             groups: groups,
