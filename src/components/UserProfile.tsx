@@ -10,7 +10,8 @@ import { UploadingFile, fileStore } from '../stores/fileStore'
 import { imageStore } from '../stores/imageStore'
 import { Progress, Image } from 'antd'
 import { PhotoItem } from './ChatView/PhotoItem'
-import "../styles/UserProfile.css"
+import '../styles/UserProfile.css'
+import { notificationStore } from '../stores/notificationStore'
 
 export const ProfileHeader = () => {
     return (
@@ -26,7 +27,6 @@ export const ProfileHeader = () => {
 }
 
 export const CardAvatar = observer(({ avaterHash }: { avaterHash: string }) => {
-    
     const handleChange = (event: any) => {
         event.target.files[0] &&
             fileStore.requestUpload(
@@ -38,21 +38,27 @@ export const CardAvatar = observer(({ avaterHash }: { avaterHash: string }) => {
                 })
             )
     }
-    const handlefile=()=>{
-      document.getElementById('userphoto')?.click()
+    const handlefile = () => {
+        document.getElementById('userphoto')?.click()
     }
     return (
         <div className="card-user-avatar">
-            <Image className="avatar xxl rounded-circle"
+            <Image
+                className="avatar xxl rounded-circle"
                 src={
-                    !avaterHash || avaterHash === '' 
+                    !avaterHash || avaterHash === ''
                         ? 'assets/images/user.png'
                         : imageStore.getImageUrl(avaterHash).url
                 }
                 alt="avatar"
             />
-            
-            <input className="photoinputer" id="userphoto" type="file" accept="image/*" onChange={handleChange} ></input>
+
+            <input
+                className="photoinputer"
+                id="userphoto"
+                type="file"
+                accept="image/*"
+                onChange={handleChange}></input>
 
             <button type="button" className="btn btn-secondary btn-sm" onClick={handlefile}>
                 <i className="zmdi zmdi-edit"></i>
@@ -159,15 +165,15 @@ export const ColorSelectDot = ({
 }) => {
     const ref: any = useRef(null)
     const handleTheme = (e: any) => {
-        var $body: any = document.querySelector('#layout')
-        var $box: any = document.querySelector('.ant-modal-root')
-        var $this: any = ref.current
+        let $body: any = document.querySelector('#layout')
+        let $box: any = document.querySelector('.ant-modal-root')
+        let $this: any = ref.current
         console.log($this?.getAttribute('data-theme'))
-        var existTheme: any = document
+        let existTheme: any = document
             .querySelector('.choose-skin li.active')
             ?.getAttribute('data-theme')
-        var theme: any = document.querySelectorAll('.choose-skin li')
-        for (var i = 0; i < theme.length; i++) {
+        let theme: any = document.querySelectorAll('.choose-skin li')
+        for (let i = 0; i < theme.length; i++) {
             theme[i].classList.remove('active')
         }
         $body.classList.remove('theme-' + existTheme)
@@ -203,29 +209,40 @@ export const ColorScheme = () => {
     )
 }
 
-export const DesktopNotification = () => {
+export const DesktopNotification = observer(() => {
     return (
         <li className="list-group-item d-flex justify-content-between align-items-center">
             <span>桌面消息提醒</span>
             <label className="c_checkbox">
-                <input type="checkbox" />
+                <input
+                    type="checkbox"
+                    onChange={action(() => {
+                        notificationStore.toggleShow()
+                        console.log(notificationStore.show)
+                    })}
+                    checked={notificationStore.show}
+                />
                 <span className="checkmark"></span>
             </label>
         </li>
     )
-}
+})
 
-export const SoundNotification = () => {
+export const SoundNotification = observer(() => {
     return (
         <li className="list-group-item d-flex justify-content-between align-items-center">
             <span>消息提示音</span>
             <label className="c_checkbox">
-                <input type="checkbox" />
+                <input
+                    type="checkbox"
+                    onChange={action(() => notificationStore.toggleSlient())}
+                    checked={!notificationStore.slient}
+                />
                 <span className="checkmark"></span>
             </label>
         </li>
     )
-}
+})
 
 export const ChangePassword = () => {
     return (

@@ -1,24 +1,35 @@
-import { makeAutoObservable } from "mobx"
-import { MessageServer } from "../utils/networkWs"
-import { Receive, ReceiveSetUserSettingResponseData, Send } from "../utils/message"
-import { userStore } from "./userStore"
-import { LocalDatabase } from "./localData"
-import { secureAuthStore } from "./secureAuthStore"
-
+import { makeAutoObservable } from 'mobx'
+import { MessageServer } from '../utils/networkWs'
+import { Receive, ReceiveSetUserSettingResponseData, Send } from '../utils/message'
+import { userStore } from './userStore'
+import { LocalDatabase } from './localData'
+import { secureAuthStore } from './secureAuthStore'
+import { notificationStore } from './notificationStore'
+import { notification } from 'antd'
 
 export interface UserSetting {
     secondaryCheckChats: [number, string][] // 保存需要进行二次验证的chatid
     userNickname: [number, string][] // [userId, nickname]格式存储用户昵称
+    notification: {
+        slient: boolean
+        show: boolean
+        muteChatIds: number[]
+    }
 }
 
 export class UserSettingStore {
     userSetting: UserSetting = {
         secondaryCheckChats: [],
-        userNickname: []
+        userNickname: [],
+        notification: {
+            slient: false,
+            show: false,
+            muteChatIds: [],
+        },
     }
     errors: string = ''
     constructor() {
-        makeAutoObservable(this, {}, {autoBind: true})
+        makeAutoObservable(this, {}, { autoBind: true })
         MessageServer.on(Receive.UserSetting, this.ReceiveUserSettingHandler)
         MessageServer.on(Receive.SetUserSettingResponse, this.UserSettingResponseHandler)
     }
@@ -26,7 +37,12 @@ export class UserSettingStore {
     reset() {
         this.userSetting = {
             secondaryCheckChats: [],
-            userNickname: []
+            userNickname: [],
+            notification: {
+                slient: false,
+                show: false,
+                muteChatIds: [],
+            },
         }
     }
 
@@ -59,7 +75,38 @@ export class UserSettingStore {
         this.userSetting.secondaryCheckChats.forEach(([chatId, _]) => {
             secureAuthStore.setVerifyState(chatId, false)
         })
-        //TODO
+        notificationStore.muteChats = this.userSetting.notification.muteChatIds
+        notificationStore.show = this.userSetting.notification.show
+        notificationStore.slient = this.userSetting.notification.slient
+    }
+
+    setSlient(slient: boolean) {
+        this.userSetting.notification.slient = slient
+        this.sendUserSetting()
+    }
+
+    setShow(show: boolean) {
+        this.userSetting.notification.show = show
+        this.sendUserSetting()
+    }
+
+    hasMuted(chatId: number) {
+        return this.userSetting.notification.muteChatIds.indexOf(chatId) > -1
+        
+    }
+
+    setMuteChat(chatId: number) {
+        !this.hasMuted(chatId) && this.userSetting.notification.muteChatIds.push(chatId)
+        this.sendUserSetting()
+    }
+
+    removeMuteChat(chatId: number) {
+        this.hasMuted(chatId) &&
+            this.userSetting.notification.muteChatIds.splice(
+                this.userSetting.notification.muteChatIds.indexOf(chatId),
+                1
+            )
+        this.sendUserSetting()
     }
 
     getSecondaryCode(chatId: number) {
@@ -67,7 +114,10 @@ export class UserSettingStore {
     }
 
     sendUserSetting() {
-        MessageServer.Instance().send<Send.SetUserSetting>(Send.SetUserSetting, JSON.stringify(this.userSetting))
+        MessageServer.Instance().send<Send.SetUserSetting>(
+            Send.SetUserSetting,
+            JSON.stringify(this.userSetting)
+        )
     }
 
     setChatVerify(chatId: number, code: string) {
@@ -94,7 +144,8 @@ export class UserSettingStore {
         this.sendUserSetting()
     }
 
-    setUserNickName(userId: number, nickname: string) { // nickname为空表示删除备注
+    setUserNickName(userId: number, nickname: string) {
+        // nickname为空表示删除备注
         const userNicknameTupleIndex = this.userSetting.userNickname.findIndex(([user, _]) => {
             return user === userId
         })

@@ -16,6 +16,7 @@ import { updateGroupStore } from '../../stores/updateGroupStore'
 import { CachedImage, imageStore } from '../../stores/imageStore'
 import { Image } from 'antd'
 import { UploadingFile, fileStore } from '../../stores/fileStore'
+import { secureAuthStore } from '../../stores/secureAuthStore'
 
 
 const ChatSidebarUserAvatar = observer(({user} : {user: User}) => {

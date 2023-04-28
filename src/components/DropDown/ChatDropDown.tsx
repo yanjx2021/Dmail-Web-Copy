@@ -5,6 +5,7 @@ import { modalStore } from '../../stores/modalStore'
 import { Chat, ChatType } from '../../stores/chatStore'
 import { createGroupFromAllFriendsSelectStore, userSelectStore } from '../MessagesBox/Selector'
 import { chatSideStore } from '../../stores/chatSideStore'
+import { notificationStore } from '../../stores/notificationStore'
 
 export const DropDownItem = ({ text, handleClick }: { text: string; handleClick: any }) => {
     return (
@@ -73,6 +74,17 @@ export const ChatDropDown = observer(({ chat }: { chat: Chat }) => {
                 ) : (
                     <></>
                 )}
+                {!notificationStore.hasMuted(chat.chatId) ? <DropDownItem
+                        text="设置免打扰"
+                        handleClick={action(() => {
+                            notificationStore.muteChat(chat.chatId)
+                        })}
+                    /> : <DropDownItem
+                    text="取消免打扰"
+                    handleClick={action(() => {
+                        notificationStore.unMuteChat(chat.chatId)
+                    })}
+                />}
             </div>
         </div>
     )

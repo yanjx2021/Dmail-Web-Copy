@@ -6,8 +6,9 @@ import { Badge } from 'antd'
 import { HoverOption } from './AllChats'
 import { ChatSelector, messageSelectStore } from './MessagesBox/Selector'
 import { secureAuthStore } from '../stores/secureAuthStore'
-import { useEffect } from 'react'
-import { showMessageNotification } from '../utils/notification'
+import { useEffect, useState } from 'react'
+import { useImmer } from 'use-immer'
+import { notificationStore } from '../stores/notificationStore'
 
 const RecentChatItem = observer(
     ({
@@ -21,12 +22,11 @@ const RecentChatItem = observer(
     }) => {
         useEffect(
             action(() => {
-                console.log('show')
-                if (!document.hasFocus() && chat.unreadCount !== 0) {
-                    showMessageNotification(
+                if (chat.unreadCount !== 0) {
+                    notificationStore.showNotification(
+                        chat.chatId,
                         chat.name,
-                        `您有${chat.unreadCount}条未读消息`,
-                        `chat: ${chat.chatId}`,
+                        `您有${chat.unreadCount}条未读消息`
                     )
                 }
             }),
