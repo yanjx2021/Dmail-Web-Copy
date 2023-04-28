@@ -17,7 +17,6 @@ const getInfo = action((chat: Chat) => {
         MessageServer.Instance().send<Send.GetUserInfo>(Send.GetUserInfo, chat.bindUser!.userId)
     } else {
         groupChatManageStore.sendGetGroupManage(chat.chatId)
-        // TODO-拉取群聊信息
     }
 
 })
@@ -27,10 +26,12 @@ export const ChatSidebar = observer(
         const [title, setTitle] = useImmer<string>('')
 
         useEffect(
-            action(action(() => {
-                chatSideStore.open && getInfo(chat)
-                setTitle(chat.sidebarName)
-            })),
+            action(
+                action(() => {
+                    chatSideStore.open && getInfo(chat)
+                    setTitle(chat.sidebarName)
+                })
+            ),
             [chat, chatSideStore.open]
         )
 
@@ -44,7 +45,8 @@ export const ChatSidebar = observer(
             }),
             [visitUser]
         )
-        if (visitUser !== null) // 查看群成员
+        if (visitUser !== null)
+            // 查看群成员
             return (
                 <div className="user-detail-sidebar py-xl-4 py-3 px-xl-4 px-3">
                     <div className="d-flex flex-column">
@@ -54,7 +56,8 @@ export const ChatSidebar = observer(
                 </div>
             )
 
-        return ( // 群聊
+        return (
+            // 群聊
             <div className="user-detail-sidebar py-xl-4 py-3 px-xl-4 px-3">
                 <div className="d-flex flex-column">
                     <ChatSidebarHeader title={title} chatId={chat.chatId} />

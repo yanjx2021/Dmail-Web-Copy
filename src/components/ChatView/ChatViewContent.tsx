@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Chat, ChatMessage, ChatMessageState, MessageId, chatStore } from '../../stores/chatStore'
+import {
+    Chat,
+    ChatMessage,
+    ChatMessageState,
+    ChatType,
+    MessageId,
+    chatStore,
+} from '../../stores/chatStore'
 import { ChatMessageItem } from './ChatMessageItem'
 import { action, autorun, observe, runInAction } from 'mobx'
 import { observer } from 'mobx-react-lite'
@@ -66,6 +73,15 @@ export const ChatMessageContent = observer(
                 setShowButton(false)
             }
         }, [atBottom])
+
+        useEffect(
+            action(() => {
+                if (chat && chat.chatType === ChatType.Private) {
+                    chat.pullOppositeReadCursor()
+                }
+            }),
+            [chat]
+        )
 
         return (
             <>

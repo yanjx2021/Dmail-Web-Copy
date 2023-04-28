@@ -84,7 +84,7 @@ export class LocalDatabase {
     }
 
     static async loadImageBlob(hash: string) {
-        this.database.getItem(hash).then((blob) => {
+        this.database.getItem(LocalDatabase.imageBlobIndex(hash)).then((blob) => {
             if (blob === null) {
                 fileStore.getFileUrl(hash, (getUrl) => {
                     axios.get(getUrl, { responseType: 'blob' }).then((response) => {
@@ -195,11 +195,19 @@ export class LocalDatabase {
 
     static async revokeMessageLocal(chatId: number, inChatId: number) {
         return this.loadMessageLocal(chatId, inChatId).then((receiveMessage) => {
-            if (receiveMessage === null || receiveMessage.type === ChatMessageType.Deleted || receiveMessage.type === ChatMessageType.Revoked) return
+            if (
+                receiveMessage === null ||
+                receiveMessage.type === ChatMessageType.Deleted ||
+                receiveMessage.type === ChatMessageType.Revoked
+            )
+                return
             receiveMessage.type = ChatMessageType.Revoked
             receiveMessage.serializedContent = JSON.stringify('""')
 
-            this.database.setItem(this.messageIndex(chatId, inChatId), JSON.stringify(receiveMessage))
+            this.database.setItem(
+                this.messageIndex(chatId, inChatId),
+                JSON.stringify(receiveMessage)
+            )
         })
     }
 }

@@ -5,10 +5,12 @@ import {
     Receive,
     ReceiveChatMessage,
     ReceiveGetGroupUsersResponseData,
+    ReceiveGetUserReadInPrivateResponseData,
     ReceivePullResponseData,
     ReceiveQuitGroupChatResponseData,
     ReceiveRevokeMessageResponseData,
     ReceiveSetAlreadyReadResponseData,
+    ReceiveSetOppositeReadCursorData,
     ReceiveUnfriendResponseData,
     Send,
     SendMessageResponseState,
@@ -95,6 +97,12 @@ export interface ChatMessageFileInfo {
     size: number
 }
 
+export enum ChatType {
+    Private,
+    Group,
+    Unknown,
+}
+
 export type ImageHash = string
 
 export class ChatMessage {
@@ -106,6 +114,7 @@ export class ChatMessage {
     senderId: UserId
     state: ChatMessageState
     clientId?: ClientId
+    bindChat: Chat
 
     bindUploading?: UploadingFile
 
@@ -208,6 +217,14 @@ export class ChatMessage {
         this.senderId = senderId
         this.state = state
         this.chatId = chatId
+        this.bindChat = chatStore.getChat(chatId)
+    }
+
+    get alreadyRead() {
+        if (this.bindChat.chatType === ChatType.Private && this.inChatId) {
+            return this.bindChat.oppositeReadCursor! >= this.inChatId
+        }
+        return false
     }
 
     get getMessageBoxTip() {
@@ -231,10 +248,18 @@ export class ChatMessage {
         }
 
         tip += ' ' + this.state
+
+        if (this.bindChat.chatType === ChatType.Private && this.senderId === authStore.userId) {
+            if (this.alreadyRead) {
+                tip += ' 已读'
+            } else {
+                tip += ' 未读'
+            }
+        }
+
         return tip
     }
     get asShort() {
-        console.log(this.type)
         if (this.type === ChatMessageType.Text) {
             return this.content as string
         } else if (this.type === ChatMessageType.Transfer) {
@@ -257,6 +282,7 @@ export class ChatMessage {
         this.content = msg.content
         this.type = this.type === ChatMessageType.Deleted ? ChatMessageType.Deleted : msg.type
         this.chatId = msg.chatId
+        this.bindChat = msg.bindChat
     }
 
     deleteLocal(indexInView?: number) {
@@ -272,12 +298,6 @@ export class ChatMessage {
     }
 }
 
-export enum ChatType {
-    Private,
-    Group,
-    Unknown,
-}
-
 export class Chat {
     messages: Map<MessageId, ChatMessage> = new Map()
     private sendingMessages: ChatMessage[] = []
@@ -289,9 +309,12 @@ export class Chat {
     chatId: ChatId = 0
     chatType: ChatType = ChatType.Unknown
     lastMessage: ChatMessage | undefined = undefined
-    readCursor: number = 0
+    selfReadCursor: number = 0
+
     // 私聊部分
     bindUser: User | null = null
+    oppositeReadCursor: number | null = null
+
     // 群聊部分
     ownerId: number | null = null
     adminIds: number[] | null = null
@@ -351,6 +374,13 @@ export class Chat {
         this.adminIds = userIds
     }
 
+    pullOppositeReadCursor() {
+        MessageServer.Instance().send<Send.GetUserReadInPrivate>(
+            Send.GetUserReadInPrivate,
+            this.chatId
+        )
+    }
+
     static getLoadingChat(chatId: ChatId) {
         return new Chat(chatId)
     }
@@ -361,19 +391,19 @@ export class Chat {
     }
 
     setReadCuser() {
-        let inChatId = 0
-        if (this.lastMessage !== undefined) {
-            if (this.lastMessage.inChatId) {
-                inChatId = this.lastMessage.inChatId
-                this.readCursor = inChatId
-            } else {
-                inChatId = this.readCursor
-            }
+        let lastMsgId = 0
+        if (this.lastMessage !== undefined && this.lastMessage.inChatId) {
+            lastMsgId = this.lastMessage.inChatId
         }
-        MessageServer.Instance().send<Send.SetAlreadyRead>(Send.SetAlreadyRead, {
-            chatId: this.chatId,
-            inChatId: inChatId,
-        })
+
+        if (lastMsgId > this.selfReadCursor) {
+            this.selfReadCursor = lastMsgId
+            MessageServer.Instance().send<Send.SetAlreadyRead>(Send.SetAlreadyRead, {
+                chatId: this.chatId,
+                inChatId: lastMsgId,
+                private: this.chatType === ChatType.Private,
+            })
+        }
     }
 
     get sidebarName() {
@@ -389,7 +419,7 @@ export class Chat {
         if (this.lastMessage === undefined) {
             return 0
         }
-        return this.lastMessage.inChatId! - this.readCursor
+        return this.lastMessage.inChatId! - this.selfReadCursor
     }
 
     get name() {
@@ -402,7 +432,7 @@ export class Chat {
     }
 
     get unreadCount() {
-        return this.lastMessage === undefined ? 0 : this.lastMessage.inChatId! - this.readCursor
+        return this.lastMessage === undefined ? 0 : this.lastMessage.inChatId! - this.selfReadCursor
     }
 
     setChatInfo(info: ChatInfo) {
@@ -681,6 +711,11 @@ export class ChatStore {
         MessageServer.on(Receive.SetAlreadyReadResponse, this.SetAlreadyReadResponseHandler)
         MessageServer.on(Receive.QuitGroupChatResponse, this.QuitGroupResponseHandler)
         MessageServer.on(Receive.RevokeMessageResponse, this.RevokeMessageResponseHandler)
+        MessageServer.on(
+            Receive.GetUserReadInPrivateResponse,
+            this.ReceiveGetUserReadInPrivateResponseHandler
+        )
+        MessageServer.on(Receive.SetOppositeReadCursor, this.ReceiveSetOppositeReadCursor)
     }
 
     reset() {
@@ -749,11 +784,7 @@ export class ChatStore {
         //为特殊字符添加编号#
         groupCounts[26] !== 0 && groups.push('#')
         groupCounts = groupCounts.filter((value, _) => value !== 0)
-        console.log({
-            chats: chats,
-            groups: groups,
-            groupCounts: groupCounts,
-        })
+
         return {
             chats: chats,
             groups: groups,
@@ -807,7 +838,7 @@ export class ChatStore {
     private ReadCusersHandler(cusers: [number, number][]) {
         cusers.forEach(([chatId, cuser]) => {
             this.getChat(chatId)
-            this.chats.get(chatId)!.readCursor = cuser
+            this.chats.get(chatId)!.selfReadCursor = cuser
         })
     }
 
@@ -970,6 +1001,21 @@ export class ChatStore {
                 userSelectStore.inviteUsers(data.chatId!)
             }
         }
+    }
+
+    private ReceiveGetUserReadInPrivateResponseHandler(
+        data: ReceiveGetUserReadInPrivateResponseData
+    ) {
+        if (data.state !== 'Success') {
+            this.errors = '拉取私聊ReadCursor错误'
+            return
+        }
+
+        this.getChat(data.chatId!).oppositeReadCursor = data.inChatId!
+    }
+
+    private ReceiveSetOppositeReadCursor(data: ReceiveSetOppositeReadCursorData) {
+        this.getChat(data.chatId!).oppositeReadCursor = data.inChatId!
     }
 }
 
