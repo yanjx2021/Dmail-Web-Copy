@@ -1,11 +1,13 @@
 import { observer } from 'mobx-react-lite'
 import { Chat, ChatId, ChatStore } from '../stores/chatStore'
-import { action } from 'mobx'
+import { action, autorun } from 'mobx'
 import { ChatDropDown } from './DropDown/ChatDropDown'
 import { Badge } from 'antd'
 import { HoverOption } from './AllChats'
 import { ChatSelector, messageSelectStore } from './MessagesBox/Selector'
 import { secureAuthStore } from '../stores/secureAuthStore'
+import { useEffect } from 'react'
+import { showMessageNotification } from '../utils/notification'
 
 const RecentChatItem = observer(
     ({
@@ -17,6 +19,20 @@ const RecentChatItem = observer(
         activeChatId: ChatId | null
         setActiveChatId: (chatId: ChatId) => any
     }) => {
+        useEffect(
+            action(() => {
+                console.log('show')
+                if (!document.hasFocus() && chat.unreadCount !== 0) {
+                    showMessageNotification(
+                        chat.name,
+                        `您有${chat.unreadCount}条未读消息`,
+                        `chat: ${chat.chatId}`,
+                    )
+                }
+            }),
+            [chat.unreadCount]
+        )
+
         return (
             <li className={activeChatId === chat.chatId ? 'online active' : ''}>
                 <HoverOption chat={chat} />
@@ -28,7 +44,11 @@ const RecentChatItem = observer(
                                 <Badge count={chat.unreadCount}>
                                     <span className="rounded-circle"></span>
                                     <div className="avatar rounded-circle no-image timber">
-                                        <img className='avatar rounded-circle' src={chat.getAvaterUrl} alt='avatar'/>
+                                        <img
+                                            className="avatar rounded-circle"
+                                            src={chat.getAvaterUrl}
+                                            alt="avatar"
+                                        />
                                     </div>
                                 </Badge>
                             </div>
@@ -74,10 +94,15 @@ export const RecentChats = observer(
                 <div className="form-group input-group-lg search mb-3">
                     <i className="zmdi zmdi-search"></i>
                     <i className="zmdi zmdi-dialpad"></i>
-                    <input className="form-control text-footerform" type="text" placeholder="搜索..."></input>
+                    <input
+                        className="form-control text-footerform"
+                        type="text"
+                        placeholder="搜索..."></input>
                 </div>
                 <ul className="chat-list">
-                    <li key='chatTitle' className="header d-flex justify-content-between ps-3 pe-3 mb-1">
+                    <li
+                        key="chatTitle"
+                        className="header d-flex justify-content-between ps-3 pe-3 mb-1">
                         <span>最近的对话</span>
                     </li>
                     {chatStore.recentChatsView.map((chat) => (

@@ -19,6 +19,7 @@ const getInfo = action((chat: Chat) => {
         groupChatManageStore.sendGetGroupManage(chat.chatId)
         // TODO-拉取群聊信息
     }
+
 })
 
 export const ChatSidebar = observer(

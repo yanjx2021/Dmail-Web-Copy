@@ -29,7 +29,9 @@ const Home = observer(
             }),
             [setActiveChatId]
         )
-
+        window.onblur = () => {
+            setActiveChatId(null)
+        }
         useEffect(
             action(() => {
                 if (authStore.state !== AuthState.Logged) {

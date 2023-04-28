@@ -233,7 +233,7 @@ const SignupCard = observer(({ registerStore }: { registerStore: RegisterStore }
 
 export const SignupPage = () => {
     const navigate = useNavigate()
-
+    
     useEffect(() => {
         const disposer = autorun(() => {
             if (registerStore.errors !== '') {
