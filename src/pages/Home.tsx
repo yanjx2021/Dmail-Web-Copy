@@ -7,7 +7,7 @@ import { ChatId, ChatStore, chatStore } from '../stores/chatStore'
 import { TabContent } from '../components/TabContent'
 import { NoneActiveChatBody } from '../components/NoneActiveChatBody'
 import { ChatView } from '../components/ChatView/ChatView'
-import { action } from 'mobx'
+import { action, makeAutoObservable } from 'mobx'
 import { LocalDatabase } from '../stores/localData'
 import { RegisterError } from '../components/Box/RegisterError'
 import { secureAuthStore } from '../stores/secureAuthStore'
@@ -17,9 +17,20 @@ import { FileTest } from '../components/FileTest'
 import { RtcTest } from '../components/RtcTest'
 import { Settings } from '../components/Settings/Settings'
 
+class HomeStore {
+    openSetting = false
+
+    constructor() {
+        makeAutoObservable(this)
+    }
+}
+
+export const homeStore = new HomeStore()
+
 const Home = observer(
     ({ authStore, chatStore }: { authStore: AuthStore; chatStore: ChatStore }) => {
         const [activeChatId, setActiveChatId] = useState<ChatId | null>(null)
+
         const navigate = useNavigate()
 
         const checkAndSetActivateChat = useCallback(
@@ -29,7 +40,7 @@ const Home = observer(
             }),
             [setActiveChatId]
         )
-        
+
         useEffect(
             action(() => {
                 if (authStore.state !== AuthState.Logged) {
@@ -65,7 +76,11 @@ const Home = observer(
                     <LockedChatView />
                 ) : (
                     <>
-                    <ChatView chat={chatStore.getChat(activeChatId)} />
+                        {homeStore.openSetting ? (
+                            <Settings />
+                        ) : (
+                            <ChatView chat={chatStore.getChat(activeChatId)} />
+                        )}
                     </>
                 )}
             </>

@@ -13,6 +13,7 @@ import { lchown } from 'fs'
 import { runInAction } from 'mobx'
 import { async } from 'q'
 import { noticeStore } from './noticeStore'
+import { ExternalApiStore, externalStore } from './externalStore'
 
 const userSettingIndex = 'userSetting'
 
@@ -209,5 +210,17 @@ export class LocalDatabase {
                 JSON.stringify(receiveMessage)
             )
         })
+    }
+
+    static async saveExternal() {
+        this.database.setItem('external', JSON.stringify(externalStore))
+    }
+
+    static async loadExternal() {
+        return this.database
+            .getItem<string>('external')
+            .then((serialized) =>
+                serialized ? (JSON.parse(serialized) as ExternalApiStore) : null
+            )
     }
 }

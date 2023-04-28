@@ -5,10 +5,11 @@ import { EmailCodeInput } from '../components/EmailCodeInput'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import useMessage from 'antd/es/message/useMessage'
-import { message } from 'antd'
+import { Button, message } from 'antd'
 import '../styles/Login.css'
 import { duration } from '../constants/messageContent'
 import { RtcTest } from '../components/RtcTest'
+import axios from 'axios'
 
 const EmailInput = observer(({ authStore }: { authStore: AuthStore }) => {
     return (
@@ -100,6 +101,7 @@ const LoginCard = observer(({ authStore }: { authStore: AuthStore }) => {
                     </button>
                 </div>
             </div>
+
             <p className="text-center mb-0">
                 还没有账户?
                 <NavLink to="/signup" className="link">

@@ -3,9 +3,10 @@ import { secureAuthStore } from '../../stores/secureAuthStore'
 import { action } from 'mobx'
 import { modalStore } from '../../stores/modalStore'
 import { DropDownItem } from './ChatDropDown'
-import { ChatMessage, chatStore } from '../../stores/chatStore'
+import { ChatMessage, ChatMessageType, ChatType, chatStore } from '../../stores/chatStore'
 import { messageSelectStore } from '../MessagesBox/Selector'
 import { authStore } from '../../stores/authStore'
+import { externalStore } from '../../stores/externalStore'
 
 export const MessageDropDown = observer(
     ({ msg, indexInView }: { msg: ChatMessage; indexInView: number }) => {
@@ -53,6 +54,16 @@ export const MessageDropDown = observer(
                             }}
                         />
                     )}
+
+                    {msg.inChatId && msg.type === ChatMessageType.Text && (
+                        <DropDownItem
+                            text="翻译至中文"
+                            handleClick={action(() => {
+                                externalStore.translateByBaidu(msg, msg.content as string, 'zh')
+                            })}
+                        />
+                    )}
+
                     <DropDownItem
                         text="删除"
                         handleClick={() => {

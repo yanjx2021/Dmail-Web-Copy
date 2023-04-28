@@ -1,6 +1,8 @@
 import { observer } from 'mobx-react-lite'
 import { useEffect, useRef } from 'react'
 import { authStore } from '../stores/authStore'
+import { homeStore } from '../pages/Home'
+import { action } from 'mobx'
 
 const Menu = observer(() => {
     const handleMenu = () => {
@@ -22,6 +24,7 @@ const Menu = observer(() => {
         if (!ldToggle.classList.contains('active')) ldToggle.classList.add('active')
         else ldToggle.classList.remove('active')
     }
+
     useEffect(() => {
         var ldToggle: any = document.querySelector('.light-dark-toggle')
         var toggleSwitch: any = document.querySelector('.light-dark-toggle input[type="checkbox"]')
@@ -34,7 +37,7 @@ const Menu = observer(() => {
             }
         }
         toggleSwitch.addEventListener('change', switchTheme, false)
-    },[])
+    }, [])
 
     return (
         <div className="navigation navbar justify-content-center py-xl-4 py-md-3 py-0 px-3">
@@ -101,7 +104,13 @@ const Menu = observer(() => {
                     <i className="zmdi zmdi-brightness-2"></i>
                     <input className="light-dark-btn" type="checkbox" />
                 </a>
-                <a className="mt-xl-3 mt-md-2 nav-link d-none d-sm-block" href="#" role="tab">
+                <a
+                    className="mt-xl-3 mt-md-2 nav-link d-none d-sm-block"
+                    href="#"
+                    role="tab"
+                    onClick={action(() => {
+                        homeStore.openSetting = !homeStore.openSetting
+                    })}>
                     <i className="zmdi zmdi-settings"></i>
                 </a>
             </div>

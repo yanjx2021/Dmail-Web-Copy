@@ -119,6 +119,8 @@ export class ChatMessage {
 
     bindUploading?: UploadingFile
 
+    translatedText?: string
+
     get showRevokeButton() {
         // 系统消息
         if (this.senderId === 0) return false
@@ -833,7 +835,7 @@ export class ChatStore {
     }
 
     get topChats() {
-        const topChats: Chat[] = [] 
+        const topChats: Chat[] = []
         this.topChatIds.forEach((chatId, _) => {
             topChats.push(this.getChat(chatId))
         })

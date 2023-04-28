@@ -31,6 +31,12 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
                 {msg.content as string}
+                {msg.translatedText && (
+                    <div>
+                        <p>------翻译结果------</p>
+                        <p>{msg.translatedText}</p>
+                    </div>
+                )}
             </div>
         )
     } else if (msg.type === ChatMessageType.Image && typeof msg.content === 'string') {
@@ -109,15 +115,15 @@ export const ChatMessageItem = observer(
                             type="button"
                             onClick={action(() => chatSideStore.visitUsertoggle(user))}>
                             <div className="avatar mr-lg-3 me-2">
-                                    <img
-                                        className={'avatar rounded-circle no-image ' + ''}
-                                        src={
-                                            !user.avaterHash || user.avaterHash === ''
-                                                ? 'assets/images/user.png'
-                                                : imageStore.getImageUrl(user.avaterHash).url
-                                        }
-                                        alt="avatar"
-                                    />
+                                <img
+                                    className={'avatar rounded-circle no-image ' + ''}
+                                    src={
+                                        !user.avaterHash || user.avaterHash === ''
+                                            ? 'assets/images/user.png'
+                                            : imageStore.getImageUrl(user.avaterHash).url
+                                    }
+                                    alt="avatar"
+                                />
                             </div>
                         </a>
                     ) : (
