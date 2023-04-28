@@ -23,6 +23,7 @@ import { chatSideStore } from '../../stores/chatSideStore'
 import { FileItem, LoadingFileItem } from './FileItem'
 import { LoadingPhotoItem, PhotoItem } from './PhotoItem'
 import { Image } from 'antd'
+import { renderFormatUrl } from '../../utils/urlToLink'
 
 export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) => {
     const isRight = msg.senderId === authStore.userId
@@ -30,7 +31,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
     if (msg.type === ChatMessageType.Text && typeof msg.content === 'string') {
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                {msg.content as string}
+                {renderFormatUrl(msg.content)}
             </div>
         )
     } else if (msg.type === ChatMessageType.Image && typeof msg.content === 'string') {
