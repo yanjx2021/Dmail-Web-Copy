@@ -178,6 +178,18 @@ export const AllChatList = ({
             <div className="tab-pane fade" id="nav-tab-contact" role="tabpanel">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h3 className="mb-0 text-primary">通讯录</h3>
+                    <div>
+                    <a
+                        className="btn btn-dark"
+                        type="button"
+                        onClick={action(() => {
+                            modalStore.modalType = 'GetUserIds'
+                            modalStore.isOpen = true
+                        })}>
+                        <i className="zmdi zmdi-account-add" />
+                        查找用户
+                    </a>
+                </div>
                 </div>
                 <div className="form-group input-group-lg search mb-3">
                     <i className="zmdi zmdi-search"></i>

@@ -6,6 +6,9 @@ import {
     ReceiveChatMessage,
     ReceiveGetGroupUsersResponseData,
     ReceiveGetUserReadInPrivateResponseData,
+    ReceiveGroupNoticeResponseData,
+    ReceiveNotice,
+    ReceivePullGroupNoticeResponseData,
     ReceivePullResponseData,
     ReceiveQuitGroupChatResponseData,
     ReceiveRevokeMessageResponseData,
@@ -14,6 +17,7 @@ import {
     ReceiveUnfriendResponseData,
     Send,
     SendMessageResponseState,
+    SendSendGroupNoticeData,
     SendSendMessageData,
     SerializedReceiveChatMessage,
 } from '../utils/message'
@@ -324,6 +328,55 @@ export class ChatMessage {
     }
 }
 
+export class GroupChatNotice {
+    chatId: number
+    noticeId: number | undefined
+    notice: string
+    timestamp: number
+    senderId: number
+    clientId?: number
+
+    constructor({
+        chatId,
+        notice,
+        noticeId,
+        timestamp,
+        senderId
+    }: {
+        chatId: number
+        noticeId: number | undefined
+        notice: string
+        timestamp: number
+        senderId: number
+    }) {
+        makeAutoObservable(this, {}, { autoBind: true })
+        this.chatId = chatId
+        this.noticeId = noticeId
+        this.notice = notice
+        this.timestamp = timestamp
+        this.senderId = senderId
+    }
+
+    setToSelf(another: GroupChatNotice) {
+        this.chatId = another.chatId
+        this.notice = another.notice
+        this.noticeId = another.chatId
+        this.timestamp = another.timestamp
+        this.clientId = another.clientId
+        this.senderId = another.senderId
+    }
+
+    static createFromReceiveNotice(receiveNotice: ReceiveNotice) {
+        return new GroupChatNotice({
+            chatId: receiveNotice.chatId,
+            noticeId: receiveNotice.noticeId,
+            notice: receiveNotice.content,
+            timestamp: receiveNotice.timestamp,
+            senderId: receiveNotice.senderId,
+        })
+    }
+}
+
 export class Chat {
     messages: Map<MessageId, ChatMessage> = new Map()
     private sendingMessages: ChatMessage[] = []
@@ -348,6 +401,10 @@ export class Chat {
     groupName: string | null = null
     groupAvaterPath: string | null = null
     atYou: boolean = false
+    notices: Map<number, GroupChatNotice> = new Map()
+    sendingNotices: GroupChatNotice[] = []
+
+    private lastNoticeClientId: number = 0
 
     constructor(chatId: number) {
         this.chatId = chatId
@@ -358,6 +415,14 @@ export class Chat {
         if (this.avaterHash && this.avaterHash !== '')
             return binaryStore.getBinaryUrl(this.avaterHash).url
         return 'assets/images/user.png'
+    }
+
+    get noticeList() {
+        const list: GroupChatNotice[] = []
+        this.notices.forEach((notice, _) => {
+            list.push(notice)
+        })
+        return list
     }
 
     get mentionUserList() {
@@ -384,6 +449,13 @@ export class Chat {
 
     setGroupName(newName: string) {
         this.groupName = newName
+    }
+
+    GetNotices(lastNoticeId: number = 0) {
+        MessageServer.Instance().send<Send.PullGroupNotice>(Send.PullGroupNotice, {
+            lastNoticeId,
+            chatId: this.chatId
+        })
     }
 
     removeGroupChatMember(userId: number) {
@@ -490,6 +562,18 @@ export class Chat {
             this.chatType = ChatType.Private
         }
         LocalDatabase.saveChatInfo(this.chatId, info)
+    }
+
+    setNotice(notice: GroupChatNotice) {
+        const notice_opt = this.notices.get(notice.noticeId!)
+        let updated_notice = undefined
+        if (notice_opt === undefined) {
+            this.notices.set(notice.noticeId!, notice)
+            updated_notice = notice
+        } else {
+            updated_notice = notice_opt!
+            updated_notice.setToSelf(notice)
+        }
     }
 
     async setMessage(msg: ChatMessage) {
@@ -707,6 +791,30 @@ export class Chat {
         return msg
     }
 
+    sendGroupChatNotice(notice: string) {
+        if (this.chatType === ChatType.Private) {
+            console.log('是私聊，无法发送公告')
+            return
+        }
+        const timestamp = Date.now()
+        const sendData: SendSendGroupNoticeData = {
+            chatId: this.chatId,
+            clientId: ++this.lastNoticeClientId,
+            notice: notice,
+        }
+        let sendNotice = new GroupChatNotice({
+            timestamp: timestamp,
+            noticeId: undefined,
+            chatId: this.chatId,
+            notice: notice,
+            senderId: authStore.userId
+        })
+        sendNotice.clientId = sendData.clientId
+        this.sendingNotices.push(sendNotice)
+        MessageServer.Instance().send<Send.SendGroupNotice>(Send.SendGroupNotice, sendData)
+        return sendNotice
+    }
+
     sendTextMessage(text: string) {
         const timestamp = Date.now()
         const data: SendSendMessageData = {
@@ -731,6 +839,21 @@ export class Chat {
         this.sendingMessages.push(msg)
         MessageServer.Instance().send<Send.SendMessage>(Send.SendMessage, data)
         return msg
+    }
+
+    handleSendGroupNoticeResponse(response: ReceiveGroupNoticeResponseData) {
+        const notice = this.sendingNotices.find((notice) => notice.clientId === response.clientId)
+        if (notice === undefined) {
+            return
+        }
+        this.sendingNotices.splice(this.sendingNotices.indexOf(notice), 1)
+        if (response.state !== 'Success') {
+            this.errors = '发送群公告失败'
+            return
+        }
+        notice.noticeId = response.noticeId!
+        notice.timestamp = response.timestamp!
+        this.setNotice(notice)
     }
 
     handleSendMessageResponse(
@@ -794,6 +917,8 @@ export class ChatStore {
         )
         MessageServer.on(Receive.SetOppositeReadCursor, this.ReceiveSetOppositeReadCursor)
         MessageServer.on(Receive.GetUserReadInGroupResponse, this.ReceiveGetUserReadInGroupResponse)
+        MessageServer.on(Receive.GroupNoticeResponse, this.GroupNoticeResponseHandler)
+        MessageServer.on(Receive.PullGroupNoticeResponse, this.PullGroupNoticeResponseHandler)
     }
 
     reset() {
@@ -1044,6 +1169,19 @@ export class ChatStore {
         )
     }
 
+    private PullGroupNoticeResponseHandler(response: ReceivePullGroupNoticeResponseData) {
+        if (response.state !== 'Success') {
+            this.errors = '拉取群公告失败'
+            console.error(response)
+            return
+        }
+        response.groupNotice!.forEach((serializedNotice, _) => {
+            const notice: ReceiveNotice = JSON.parse(serializedNotice)
+            chatStore.getChat(notice.chatId).setNotice(GroupChatNotice.createFromReceiveNotice(notice))
+            console.log(chatStore.getChat(notice.chatId).noticeList)
+        })
+    }
+
     private RevokeMessageResponseHandler(response: ReceiveRevokeMessageResponseData) {
         switch (response.state) {
             case 'Success':
@@ -1116,6 +1254,15 @@ export class ChatStore {
                 userSelectStore.inviteUsers(data.chatId!)
             }
         }
+    }
+
+    private GroupNoticeResponseHandler(response: ReceiveGroupNoticeResponseData) {
+        if (response.state !== 'Success') {
+            this.errors = '发布群公告失败'
+            return
+        }
+        //TODO: 分发
+        this.getChat(response.chatId!).handleSendGroupNoticeResponse(response)
     }
 
     private ReceiveGetUserReadInPrivateResponseHandler(

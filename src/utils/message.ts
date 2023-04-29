@@ -334,6 +334,36 @@ export interface ReceiveGetUserReadInPrivateResponseData {
     inChatId?: number
 }
 
+export interface ReceiveGroupNoticeResponseData {
+    state: 'Success' | 'NoPermission' | 'LenthLimitExceeded' | 'DatabaseError' | 'ServerError'
+    chatId?: number
+    clientId?: number
+    noticeId?: number
+    timestamp?: number
+}
+
+export interface ReceiveNotice {
+    chatId: number
+    noticeId: number
+    senderId: number
+    content: string
+    timestamp: number
+}
+
+export interface ReceivePullGroupNoticeResponseData {
+    state: 'Success' | 'UserNotInChat' | 'DatabaseError' | 'ServerError'
+    groupNotice?: string[]
+}
+
+export interface ReceiveGetUserIDResponseData {
+    state: 'Success' | 'NotFound' | 'DatabaseError' | 'ServerError'
+    userIds: number[]
+}
+
+export interface ReceiveLogOffResponseData {
+    state: 'Success' | 'EmailCodeError' |'UserNotFound' | 'DatabaseError' | 'ServerError'
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -387,6 +417,10 @@ export enum Receive {
     SetOppositeReadCursor = 'SetOppositeReadCursor',
     GetUserReadInGroupResponse = 'GetUserReadInGroupResponse',
     GetUserReadInPrivateResponse = 'GetUserReadInPrivateResponse',
+    GroupNoticeResponse = 'GroupNoticeResponse',
+    PullGroupNoticeResponse = 'PullGroupNoticeResponse',
+    GetUserIDResponse = 'GetUserIDResponse',
+    LogOffResponse = 'LogOffResponse'
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -531,6 +565,11 @@ export interface SendGetUserReadInGroup {
     inChatId: number
 }
 
+export interface SendPullGroupNoticeData {
+    chatId: number,
+    lastNoticeId?: number
+}
+
 /*--------------------Send数据类型----------------------*/
 
 export enum Send {
@@ -571,6 +610,9 @@ export enum Send {
     UpdateGroupInfo = 'UpdateGroupInfo',
     GetUserReadInGroup = 'GetUserReadInGroup',
     GetUserReadInPrivate = 'GetUserReadInPrivate',
+    PullGroupNotice = 'PullGroupNotice',
+    GetUserID = 'GetUserID',
+    LogOff = 'LogOff'
 }
 
 // COMMAND和DATA类型捆绑
@@ -625,6 +667,10 @@ export interface MessageReceiveData {
     [Receive.SetOppositeReadCursor]: ReceiveSetOppositeReadCursorData
     [Receive.GetUserReadInPrivateResponse]: ReceiveGetUserReadInPrivateResponseData
     [Receive.GetUserReadInGroupResponse]: ReceiveGetUserReadInGroupResponseData
+    [Receive.GroupNoticeResponse]: ReceiveGroupNoticeResponseData
+    [Receive.PullGroupNoticeResponse]: ReceivePullGroupNoticeResponseData
+    [Receive.GetUserIDResponse]: ReceiveGetUserIDResponseData
+    [Receive.LogOffResponse]: ReceiveLogOffResponseData
 }
 
 export interface MessageSendData {
@@ -666,6 +712,9 @@ export interface MessageSendData {
     [Send.UpdateGroupInfo]: SendUpdateGroupInfoData
     [Send.GetUserReadInGroup]: SendGetUserReadInGroup
     [Send.GetUserReadInPrivate]: number
+    [Send.PullGroupNotice]: SendPullGroupNoticeData
+    [Send.GetUserID]: string
+    [Send.LogOff]: number
 }
 
 // 封装消息包

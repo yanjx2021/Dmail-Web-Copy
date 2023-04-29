@@ -19,6 +19,8 @@ import { useEffect } from 'react'
 import '../../styles/Modal.css'
 import { updateGroupStore } from '../../stores/updateGroupStore'
 import { userStore } from '../../stores/userStore'
+import { getUserIdStore } from '../../stores/getUserIdStore'
+import { manageGroupNoticeStore } from '../ChatProfile/ChatSidebarBody'
 
 export const ModalInput = ({
     label,
@@ -398,6 +400,106 @@ export const GroupMessageReadersModalView = observer(({ title }: { title: string
     )
 })
 
+export const GetUserIdModalView = observer(({ title }: { title: string }) => {
+    const [userName, setUserName] = useImmer<string>('')
+
+    return (
+        <Modal
+            footer={[
+                <Button
+                    key="close"
+                    onClick={() => {
+                        getUserIdStore.reset()
+                        getUserIdStore.findUser(userName)
+                    }}>
+                    查找
+                </Button>,
+            ]}
+            onCancel={action(() => {
+                modalStore.handleCancel()
+                getUserIdStore.reset()
+                setUserName('')
+            })}
+            title={title}
+            open={modalStore.isOpen}>
+            <ModalInput
+                type="text"
+                label="查找用户"
+                value={userName}
+                setValue={action((e: any) => {
+                    setUserName(e.target.value)
+                })}
+            />
+            <h5>搜索结果</h5>
+            <ul>
+                {getUserIdStore.users?.map((user) => (
+                    <li key={user.userId}> {`用户名: ${user.name} ID: ${user.userId}`} </li>
+                ))}
+            </ul>
+        </Modal>
+    )
+})
+
+export const SendGroupNoticeModalView = observer(({ title }: { title: string }) => {
+    const [notice, setNotice] = useImmer<string>('')
+
+    return (
+        <Modal
+            footer={[
+                <Button
+                    key="close"
+                    onClick={action(() => {
+                        manageGroupNoticeStore.chat?.sendGroupChatNotice(notice)
+                        setNotice('')
+                    })}>
+                    发送
+                </Button>,
+            ]}
+            onCancel={action(() => {
+                modalStore.handleCancel()
+                manageGroupNoticeStore.reset()
+            })}
+            title={title}
+            open={modalStore.isOpen}>
+            <ModalInput
+                type="text"
+                label="群公告内容"
+                value={notice}
+                setValue={action((e: any) => {
+                    setNotice(e.target.value)
+                })}
+            />
+        </Modal>
+    )
+})
+
+export const LogOffModalView = observer(({ title }: { title: string }) => {
+    return (
+        <Modal
+            footer={[
+                <Button
+                    key="set"
+                    onClick={action(() => {
+                        authStore.logoff()
+                    })}>
+                    注销
+                </Button>,
+            ]}
+            onCancel={modalStore.handleCancel}
+            title={title}
+            open={modalStore.isOpen}>
+            <div className="form-group">
+                <EmailCodeInput
+                    email={authStore.email}
+                    emailCode={authStore.emailCode}
+                    setErrors={action((error) => (authStore.errors = error))}
+                    setEmailCode={action((data) => (authStore.emailCode = data))}
+                />
+            </div>
+        </Modal>
+    )
+})
+
 export const RegisterModal = observer(() => {
     useEffect(() => {
         let $box: any = document.querySelector('.ant-modal-root')
@@ -425,6 +527,12 @@ export const RegisterModal = observer(() => {
             return <ChangeGroupNameModalView title="更改群聊名称" />
         case 'GroupMessageReaders':
             return <GroupMessageReadersModalView title="已读成员" />
+        case 'GetUserIds':
+            return <GetUserIdModalView title="查找用户" />
+        case 'SendGroupNotice':
+            return <SendGroupNoticeModalView title="发送群公告" />
+        case 'LogOff':
+            return <LogOffModalView title='注销账号'/>
         default:
             return <></>
     }

@@ -7,7 +7,7 @@ import { User, userStore } from '../../stores/userStore'
 import { useImmer } from 'use-immer'
 import { requestStore } from '../../stores/requestStore'
 import { ModalInput } from '../Box/Modal'
-import { action } from 'mobx'
+import { action, makeAutoObservable } from 'mobx'
 import { useEffect, useState } from 'react'
 import { SidebarUserDropDown } from '../DropDown/SidebarUserDropDown'
 import { authStore } from '../../stores/authStore'
@@ -356,11 +356,45 @@ export const GroupDetails = observer(({ chat }: { chat: Chat }) => {
     )
 })
 
+export class ManageGroupNoticeStore {
+    chat: Chat | undefined = undefined
+    constructor() {
+        makeAutoObservable(this, {}, { autoBind: true })
+    }
+
+    reset() {
+        this.chat = undefined
+    }
+}
+
+export const manageGroupNoticeStore = new ManageGroupNoticeStore()
+
+export const GroupNotices = observer(({ chat }: { chat: Chat }) => {
+    return (
+        <div className="tab-pane fade" id="GroupChat-Notices" role="tabpanel">
+            <button
+                onClick={action(() => {
+                    modalStore.modalType = 'SendGroupNotice'
+                    modalStore.isOpen = true
+                    manageGroupNoticeStore.chat = chat
+                })}>
+                点击发送群公告
+            </button>
+            <ul>
+                {chat.noticeList.map((notice) => (
+                    <li key={notice.noticeId}> {`${userStore.getUser(notice.senderId).showName}: ${notice.notice}`} </li>
+                ))}
+            </ul>
+        </div>
+    )
+})
+
 export const SidebarTabContent = ({ chat }: { chat: Chat }) => {
     return (
         <div className="tab-content py-3" id="myTabContent">
             <GroupDetails chat={chat} />
             <GroupMembers chat={chat} />
+            <GroupNotices chat={chat} />
         </div>
     )
 }

@@ -3,6 +3,7 @@ import localforage from 'localforage'
 import {
     LoginResponseState,
     Receive,
+    ReceiveLogOffResponseData,
     ReceiveLoginResponseData,
     ReceiveUpdateUserInfoResponseData,
     Send,
@@ -20,6 +21,9 @@ import { secureAuthStore } from './secureAuthStore'
 import { modalStore } from './modalStore'
 import { chatSideStore } from './chatSideStore'
 import { noticeStore } from './noticeStore'
+import { fileStore } from './fileStore'
+import { getUserIdStore } from './getUserIdStore'
+import { groupChatManageStore } from './groupChatManageStore'
 
 export type UserId = number
 
@@ -53,6 +57,16 @@ export class AuthStore {
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
         MessageServer.on(Receive.LoginResponse, this.loginResponseHandler)
+        MessageServer.on(Receive.LogOffResponse, this.logoffResponseHandler)
+    }
+
+    logoffResponseHandler(response: ReceiveLogOffResponseData) {
+        if (response.state !== 'Success') {
+            this.errors = '注销用户失败'
+            return
+        }
+        alert('哈哈，你的账户被注销啦')
+        this.logout()
     }
 
     reset() {
@@ -78,7 +92,12 @@ export class AuthStore {
         userStore.reset()
         modalStore.reset()
         chatSideStore.reset()
+        getUserIdStore.reset()
         MessageServer.destroyInstance()
+    }
+
+    logoff() {
+        MessageServer.Instance().send<Send.LogOff>(Send.LogOff, parseInt(this.emailCode))
     }
 
     login() {

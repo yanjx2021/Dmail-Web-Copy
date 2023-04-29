@@ -30,6 +30,7 @@ import { RtcState, rtcStore } from '../../stores/rtcStore'
 import { Button, Space, notification } from 'antd'
 import { userStore } from '../../stores/userStore'
 import { key } from 'localforage'
+import { AudioCall } from './AudioCall'
 import { voiceMessageStore } from '../../stores/voiceMessageStore'
 
 export const ChatView = observer(({ chat }: { chat: Chat }) => {
@@ -194,11 +195,22 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         <div className={'main px-xl-5 px-lg-4 px-3 ' + chatSideStore.sidebarState}>
             <div className="chat-body" ref={dropRef}>
                 <ChatViewHeader chat={chat} />
-                {rtcStore.showMediaWindow ? (
-                    <VideoCall />
-                ) : (
+                {!rtcStore.showMediaWindow ? (
                     <ChatMessageContent chat={chat} messages={messages} setMessages={setMessages} />
+                ) : (
+                    <>
+                        {rtcStore.remoteUserId === chat.bindUser?.userId ? (
+                            <>{rtcStore.type === 'Video' ? <VideoCall /> : <AudioCall />}</>
+                        ) : (
+                            <ChatMessageContent
+                                chat={chat}
+                                messages={messages}
+                                setMessages={setMessages}
+                            />
+                        )}
+                    </>
                 )}
+                
                 {messageSelectStore.showSelector ? (
                     <MessageSelectedFooter />
                 ) : voiceMessageStore.showVoiceFooter ? (
