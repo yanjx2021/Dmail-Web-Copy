@@ -35,8 +35,8 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                 {renderFormatUrl(msg.content)}
                 {msg.translatedText && (
                     <div>
-                        <p>{msg.translatedText}</p>
                         <p>------翻译结果------</p>
+                        <p>{msg.translatedText}</p>
                     </div>
                 )}
             </div>

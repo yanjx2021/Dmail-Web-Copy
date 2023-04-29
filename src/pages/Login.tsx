@@ -3,13 +3,17 @@ import { AuthMethod, AuthState, AuthStore, authStore } from '../stores/authStore
 import { action, autorun } from 'mobx'
 import { EmailCodeInput } from '../components/EmailCodeInput'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { Component, useEffect } from 'react'
 import useMessage from 'antd/es/message/useMessage'
 import { Button, message } from 'antd'
 import '../styles/Login.css'
 import { duration } from '../constants/messageContent'
 import { RtcTest } from '../components/RtcTest'
 import axios from 'axios'
+import { VoiceMessageFooter } from '../components/ChatView/ChatViewFooter'
+import AudioAnalyser from 'react-audio-analyser'
+import { AnyARecord } from 'dns'
+import { State } from 'spark-md5'
 
 const EmailInput = observer(({ authStore }: { authStore: AuthStore }) => {
     return (

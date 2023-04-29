@@ -10,7 +10,7 @@ import {
 import { ChatViewHeader } from './ChatViewHeader'
 import { ChatMessageContent } from './ChatViewContent'
 import { useState, useCallback, useEffect, LegacyRef } from 'react'
-import { ChatViewFooter, MessageSelectedFooter } from './ChatViewFooter'
+import { ChatViewFooter, MessageSelectedFooter, VoiceMessageFooter } from './ChatViewFooter'
 import { authStore } from '../../stores/authStore'
 import { useImmer } from 'use-immer'
 import { action, autorun, runInAction } from 'mobx'
@@ -30,6 +30,7 @@ import { RtcState, rtcStore } from '../../stores/rtcStore'
 import { Button, Space, notification } from 'antd'
 import { userStore } from '../../stores/userStore'
 import { key } from 'localforage'
+import { voiceMessageStore } from '../../stores/voiceMessageStore'
 
 export const ChatView = observer(({ chat }: { chat: Chat }) => {
     const [messages, setMessages] = useImmer<ChatMessage[]>([])
@@ -42,10 +43,13 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         [chat, messages, setMessages]
     )
 
-    const sendMentionMessageHandler = useCallback((userIds: number[], text: string) => {
-        const msg = chat.sendMentionMessage(text, userIds)
-        setMessages([...messages, msg])
-    }, [chat, messages, setMessages])
+    const sendMentionMessageHandler = useCallback(
+        (userIds: number[], text: string) => {
+            const msg = chat.sendMentionMessage(text, userIds)
+            setMessages([...messages, msg])
+        },
+        [chat, messages, setMessages]
+    )
 
     const sendFileMessageHandler = useCallback(
         (file: File) => {
@@ -188,8 +192,14 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
                 )}
                 {messageSelectStore.showSelector ? (
                     <MessageSelectedFooter />
+                ) : voiceMessageStore.showVoiceFooter ? (
+                    <VoiceMessageFooter />
                 ) : (
-                    <ChatViewFooter chat={chat} handleSendText={sendTextMessageHanlder} handleSendMention={sendMentionMessageHandler} />
+                    <ChatViewFooter
+                        chat={chat}
+                        handleSendText={sendTextMessageHanlder}
+                        handleSendMention={sendMentionMessageHandler}
+                    />
                 )}
             </div>
             <ChatSidebar chat={chat} visitUser={chatSideStore.visitUser} />

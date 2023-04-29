@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import '../../styles/ChatViewFooter.css'
 import { messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
@@ -9,6 +9,10 @@ import { useImmer } from 'use-immer'
 import { observer } from 'mobx-react-lite'
 import { MentionsOptionProps } from 'antd/es/mentions'
 import { getUserIds } from '../../utils/mentionPattern'
+import { VoiceRecorderState, voiceMessageStore } from '../../stores/voiceMessageStore'
+
+import { AnyARecord } from 'dns'
+import { AudioRecorder } from '../AudioRecorder'
 
 //针对输入框数值的一些常数
 const lineHeight = 15,
@@ -52,6 +56,68 @@ export const MessageSelectedFooter = () => {
         </div>
     )
 }
+
+export const VoiceMessageFooter = observer(() => {
+    const [status, setStatus] = useState('')
+    const [audioSrc, setAudioSrc] = useState()
+
+    const audioProps = {
+        status,
+        audioSrc,
+        timeslice: 1000, // timeslice（https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/start#Parameters）
+        backgroundColor: 'rgba(255, 255, 255, 1)',
+        strokeColor: '#000000',
+        height: 30,
+        width: 1000,
+    }
+
+    return (
+        <div className="chat-footer border-top py-xl-4 py-lg-2 py-2">
+            <div className="container-xxl">
+                <div className="row">
+                    <div className="col-12">
+                        <div className="input-group align-items-center"></div>
+
+                        <div className="input-group-append">
+                            <span className="input-group-text border-0">
+                                <button
+                                    className="btn btn-sm btn-link text-muted"
+                                    data-toggle="tooltip"
+                                    title="发送语音"
+                                    type="button"
+                                    onClick={action(() => {
+                                        voiceMessageStore.showVoiceFooter = false
+                                    })}>
+                                    <i className="zmdi zmdi-refresh font-22"></i>
+                                </button>
+                                {voiceMessageStore.state === VoiceRecorderState.Recording ? (
+                                    <>
+                                        <button
+                                            onClick={action(() => {
+                                                voiceMessageStore.state = VoiceRecorderState.Sending
+                                                setStatus('inactive')
+                                            })}>
+                                            结束录音
+                                        </button>
+                                        <AudioRecorder {...audioProps} />
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={action(() => {
+                                            voiceMessageStore.state = VoiceRecorderState.Recording
+                                            setStatus('recording')
+                                        })}>
+                                        开始录音
+                                    </button>
+                                )}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+})
 
 export const ChatViewFooter = observer(
     (props: { handleSendText: Function; chat: Chat; handleSendMention: Function }) => {
@@ -98,6 +164,21 @@ export const ChatViewFooter = observer(
                     <div className="row">
                         <div className="col-12">
                             <div className="input-group align-items-center">
+                                <div className="input-group-append d-none d-sm-block">
+                                    <span className="input-group-text border-0">
+                                        <button
+                                            className="btn btn-sm btn-link text-muted"
+                                            data-toggle="tooltip"
+                                            title="发送语音"
+                                            type="button"
+                                            onClick={action(() => {
+                                                voiceMessageStore.showVoiceFooter = true
+                                            })}>
+                                            <i className="zmdi zmdi-refresh font-22"></i>
+                                        </button>
+                                    </span>
+                                </div>
+
                                 <Mentions
                                     className="form-control border-0 pl-0 text-footerform"
                                     ref={inputRef}
@@ -113,21 +194,7 @@ export const ChatViewFooter = observer(
                                     defaultValue=""
                                     options={props.chat.mentionUserList}
                                 />
-                                <div className="input-group-append d-none d-sm-block">
-                                    <span className="input-group-text border-0">
-                                        <button
-                                            className="btn btn-sm btn-link text-muted"
-                                            data-toggle="tooltip"
-                                            title="清空"
-                                            type="button"
-                                            onClick={() => {
-                                                setText('')
-                                                inputRef!.current.style.height = `0px`
-                                            }}>
-                                            <i className="zmdi zmdi-refresh font-22"></i>
-                                        </button>
-                                    </span>
-                                </div>
+
                                 <div className="input-group-append">
                                     <span className="input-group-text border-0">
                                         <button
