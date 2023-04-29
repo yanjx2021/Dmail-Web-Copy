@@ -354,6 +354,11 @@ export interface ReceivePullGroupNoticeResponseData {
     groupNotice?: string[]
 }
 
+export interface ReceiveGetUserIDResponseData {
+    state: 'Success' | 'NotFound' | 'DatabaseError' | 'ServerError'
+    userIds: number[]
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -408,7 +413,8 @@ export enum Receive {
     GetUserReadInGroupResponse = 'GetUserReadInGroupResponse',
     GetUserReadInPrivateResponse = 'GetUserReadInPrivateResponse',
     GroupNoticeResponse = 'GroupNoticeResponse',
-    PullGroupNoticeResponse = 'PullGroupNoticeResponse'
+    PullGroupNoticeResponse = 'PullGroupNoticeResponse',
+    GetUserIDResponse = 'GetUserIDResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -598,7 +604,8 @@ export enum Send {
     UpdateGroupInfo = 'UpdateGroupInfo',
     GetUserReadInGroup = 'GetUserReadInGroup',
     GetUserReadInPrivate = 'GetUserReadInPrivate',
-    PullGroupNotice = 'PullGroupNotice'
+    PullGroupNotice = 'PullGroupNotice',
+    GetUserID = 'GetUserID',
 }
 
 // COMMAND和DATA类型捆绑
@@ -655,6 +662,7 @@ export interface MessageReceiveData {
     [Receive.GetUserReadInGroupResponse]: ReceiveGetUserReadInGroupResponseData
     [Receive.GroupNoticeResponse]: ReceiveGroupNoticeResponseData
     [Receive.PullGroupNoticeResponse]: ReceivePullGroupNoticeResponseData
+    [Receive.GetUserIDResponse]: ReceiveGetUserIDResponseData
 }
 
 export interface MessageSendData {
@@ -697,6 +705,7 @@ export interface MessageSendData {
     [Send.GetUserReadInGroup]: SendGetUserReadInGroup
     [Send.GetUserReadInPrivate]: number
     [Send.PullGroupNotice]: SendPullGroupNoticeData
+    [Send.GetUserID]: string
 }
 
 // 封装消息包

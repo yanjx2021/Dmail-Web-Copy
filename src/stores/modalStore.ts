@@ -16,7 +16,8 @@ export class ModalStore {
         | 'TransferChatBox'
         | 'JoinGroup'
         | 'ChangeGroupName'
-        | 'GroupMessageReaders' = ''
+        | 'GroupMessageReaders'
+        | 'GetUserIds' = ''
     transferInfo: ChatMessageTransferInfo | undefined = undefined
     groupMessageReaders: number[] | undefined
 
