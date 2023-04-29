@@ -9,6 +9,7 @@ import { secureAuthStore } from '../stores/secureAuthStore'
 import { useEffect, useState } from 'react'
 import { useImmer } from 'use-immer'
 import { notificationStore } from '../stores/notificationStore'
+import { rtcStore } from '../stores/rtcStore'
 
 const RecentChatItem = observer(
     ({
@@ -69,6 +70,8 @@ const RecentChatItem = observer(
                                 </div>
                                 {/* TODO: yjx有人at时，出现红色字提示 */}
                                 {chat.atYou ? <p color='red'>有人@你</p> : <></>}
+                                {rtcStore.remoteUserId === chat.bindUser?.userId && rtcStore.type === 'Voice' && <p>语音通话中...</p>}
+                                {rtcStore.remoteUserId === chat.bindUser?.userId && rtcStore.type === 'Video' && <p>视频通话中...</p>}
                             </div>
                         </div>
                     </div>

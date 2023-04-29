@@ -25,7 +25,7 @@ export class RtcStore {
     remoteStream: MediaStream | null
 
     peerConnection: RTCPeerConnection | undefined
-
+    type: MediaCallType | undefined = undefined
     state: RtcState = RtcState.None
 
     remoteUserId: number | undefined
@@ -49,7 +49,7 @@ export class RtcStore {
     async startMediaCall(friendId: UserId, callType: MediaCallType) {
         this.remoteUserId = friendId
         const offer = await this.startPeerConnection(callType)
-
+        this.type = callType
         runInAction(() => {
             MessageServer.Instance().send<Send.MediaCall>(Send.MediaCall, {
                 friendId,
@@ -80,7 +80,7 @@ export class RtcStore {
                 offer,
                 this.unsolvedOffer!.callType
             )
-
+            this.type = this.unsolvedOffer?.callType
             const chatId = chatStore.userToChat(this.unsolvedOffer!.friendId) as number | undefined
 
             if (!chatId) {
@@ -142,7 +142,7 @@ export class RtcStore {
         if (this.state !== RtcState.None) {
             this.refusedUnsolvedOffer()
         }
-
+        
         this.unsolvedOffer = data
         this.state = RtcState.WaitingUser
         MediaCallOfferNotification()
@@ -194,6 +194,7 @@ export class RtcStore {
 
     private resetConnection() {
         this.state = RtcState.None
+        this.type = undefined
         console.log('连接断开')
         this.localStream?.getTracks().forEach((track) => {
             track.stop()

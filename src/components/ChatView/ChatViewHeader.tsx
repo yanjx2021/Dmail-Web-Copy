@@ -23,13 +23,13 @@ export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
                                     className={'avatar rounded-circle no-image ' + 'timber'}>
                                     {/* TODO-昵称缩写 */}
                                     <img
-                                        className='avatar rounded-circle'
+                                        className="avatar rounded-circle"
                                         src={
                                             chat.avaterHash && chat.avaterHash !== ''
                                                 ? imageStore.getImageUrl(chat.avaterHash).url
                                                 : 'assets/images/user.png'
                                         }
-                                        alt='avatar'
+                                        alt="avatar"
                                     />
                                 </div>
                             </div>
@@ -71,11 +71,20 @@ export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
                                     </a>
                                 </li>
                             )}
-                            <li className="nav-item list-inline-item d-none d-sm-block me-3">
-                                <a href="#" className="nav-link text-muted px-3" title="语音通话">
-                                    <i className="zmdi zmdi-phone-forwarded zmdi-hc-lg"></i>
-                                </a>
-                            </li>
+                            {chat.chatType === ChatType.Private && (
+                                <li
+                                    className="nav-item list-inline-item d-none d-sm-block me-3"
+                                    onClick={() =>
+                                        rtcStore.startMediaCall(chat.bindUser!.userId, 'Voice')
+                                    }>
+                                    <a
+                                        href="#"
+                                        className="nav-link text-muted px-3"
+                                        title="语音通话">
+                                        <i className="zmdi zmdi-phone-forwarded zmdi-hc-lg"></i>
+                                    </a>
+                                </li>
+                            )}
                             <li
                                 className="nav-item list-inline-item add-user-btn"
                                 onClick={action(() => {

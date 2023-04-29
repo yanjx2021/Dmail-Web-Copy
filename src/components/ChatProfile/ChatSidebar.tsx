@@ -17,6 +17,7 @@ const getInfo = action((chat: Chat) => {
         MessageServer.Instance().send<Send.GetUserInfo>(Send.GetUserInfo, chat.bindUser!.userId)
     } else {
         groupChatManageStore.sendGetGroupManage(chat.chatId)
+        chat.GetNotices()
     }
 
 })

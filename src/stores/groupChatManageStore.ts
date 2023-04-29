@@ -171,6 +171,7 @@ export class GroupChatManageStore {
                 this.errors = '未知错误'
         }
     }
+
     sendGetGroupManage(chatId: number) {
         MessageServer.Instance().send<Send.GetGroupUsers>(Send.GetGroupUsers, chatId)
         MessageServer.Instance().send<Send.GetGroupOwner>(Send.GetGroupOwner, chatId)
