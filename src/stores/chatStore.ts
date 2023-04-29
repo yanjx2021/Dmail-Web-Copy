@@ -849,6 +849,7 @@ export class Chat {
             return
         }
         notice.noticeId = response.noticeId!
+        notice.timestamp = response.timestamp!
         this.setNotice(notice)
     }
 
@@ -1257,6 +1258,7 @@ export class ChatStore {
             this.errors = '发布群公告失败'
             return
         }
+        this.getChat(response.chatId!)
         //TODO: 分发
     }
 

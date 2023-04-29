@@ -336,9 +336,10 @@ export interface ReceiveGetUserReadInPrivateResponseData {
 
 export interface ReceiveGroupNoticeResponseData {
     state: 'Success' | 'NoPermission' | 'LenthLimitExceeded' | 'DatabaseError' | 'ServerError'
-    chatId: number
+    chatId?: number
     clientId?: number
     noticeId?: number
+    timestamp?: number
 }
 
 export interface ReceiveNotice {

@@ -7,7 +7,7 @@ import { User, userStore } from '../../stores/userStore'
 import { useImmer } from 'use-immer'
 import { requestStore } from '../../stores/requestStore'
 import { ModalInput } from '../Box/Modal'
-import { action } from 'mobx'
+import { action, makeAutoObservable } from 'mobx'
 import { useEffect, useState } from 'react'
 import { SidebarUserDropDown } from '../DropDown/SidebarUserDropDown'
 import { authStore } from '../../stores/authStore'
@@ -18,8 +18,7 @@ import { Image } from 'antd'
 import { UploadingFile, fileStore } from '../../stores/fileStore'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 
-
-const ChatSidebarUserAvatar = observer(({user} : {user: User}) => {
+const ChatSidebarUserAvatar = observer(({ user }: { user: User }) => {
     return (
         <>
             <div className="d-flex justify-content-center">
@@ -37,40 +36,38 @@ const ChatSidebarUserAvatar = observer(({user} : {user: User}) => {
     )
 })
 
-const ChatSidebarAvatar = observer(
-    ({ chat }: { chat: Chat }) => {
-        const handleChange = (event: any) => {
-            updateGroupStore.chat = chat
-            event.target.files[0] &&
-                fileStore.requestUpload(
-                    event.target.files[0],
-                    action((uploadingFile: UploadingFile) => {
-                        updateGroupStore.newAvaterHash = uploadingFile.hash!
-                        updateGroupStore.updateType = 'Avater'
-                        updateGroupStore.sendUpdateGroupInfo()
-                    })
-                )
-        }
-        return (
-            <>
-                <div className="d-flex justify-content-center">
-                    <div className="avatar xxl">
-                        <div className={'avatar xxl rounded-circle no-image ' + 'timber'}>
-                            <Image
-                                className="avatar xxl rounded-circle"
-                                src={chat.getAvaterUrl}
-                                alt="avatar"
-                            />
-                        </div>
+const ChatSidebarAvatar = observer(({ chat }: { chat: Chat }) => {
+    const handleChange = (event: any) => {
+        updateGroupStore.chat = chat
+        event.target.files[0] &&
+            fileStore.requestUpload(
+                event.target.files[0],
+                action((uploadingFile: UploadingFile) => {
+                    updateGroupStore.newAvaterHash = uploadingFile.hash!
+                    updateGroupStore.updateType = 'Avater'
+                    updateGroupStore.sendUpdateGroupInfo()
+                })
+            )
+    }
+    return (
+        <>
+            <div className="d-flex justify-content-center">
+                <div className="avatar xxl">
+                    <div className={'avatar xxl rounded-circle no-image ' + 'timber'}>
+                        <Image
+                            className="avatar xxl rounded-circle"
+                            src={chat.getAvaterUrl}
+                            alt="avatar"
+                        />
                     </div>
                 </div>
-                {chat.chatType !== ChatType.Private && chat.isAdmin(authStore.userId) && (
-                    <input type="file" onChange={handleChange} />
-                )}
-            </>
-        )
-    }
-)
+            </div>
+            {chat.chatType !== ChatType.Private && chat.isAdmin(authStore.userId) && (
+                <input type="file" onChange={handleChange} />
+            )}
+        </>
+    )
+})
 
 const ChatSidebarName = observer(({ chat, visitUser }: { chat: Chat; visitUser: User | null }) => {
     if (visitUser) {
@@ -256,7 +253,11 @@ export const UserCard = observer(
                             <div className="avatar me-3">
                                 <span className="rounded-circle"></span>
                                 <div className="avatar rounded-circle no-image timber">
-                                    <img className='avatar rounded-circle' src={user.getAvaterUrl} alt='avatar'/>
+                                    <img
+                                        className="avatar rounded-circle"
+                                        src={user.getAvaterUrl}
+                                        alt="avatar"
+                                    />
                                 </div>
                             </div>
                             <div className="media-body overflow-hidden">
@@ -355,11 +356,45 @@ export const GroupDetails = observer(({ chat }: { chat: Chat }) => {
     )
 })
 
+export class ManageGroupNoticeStore {
+    chat: Chat | undefined = undefined
+    constructor() {
+        makeAutoObservable(this, {}, { autoBind: true })
+    }
+
+    reset() {
+        this.chat = undefined
+    }
+}
+
+export const manageGroupNoticeStore = new ManageGroupNoticeStore()
+
+export const GroupNotices = observer(({ chat }: { chat: Chat }) => {
+    return (
+        <div className="tab-pane fade" id="GroupChat-Notices" role="tabpanel">
+            <button
+                onClick={action(() => {
+                    modalStore.modalType = 'SendGroupNotice'
+                    modalStore.isOpen = true
+                    manageGroupNoticeStore.chat = chat
+                })}>
+                点击发送群公告
+            </button>
+            <ul>
+                {chat.noticeList.map((notice) => (
+                    <li key={notice.noticeId}> {notice.notice} </li>
+                ))}
+            </ul>
+        </div>
+    )
+})
+
 export const SidebarTabContent = ({ chat }: { chat: Chat }) => {
     return (
         <div className="tab-content py-3" id="myTabContent">
             <GroupDetails chat={chat} />
             <GroupMembers chat={chat} />
+            <GroupNotices chat={chat} />
         </div>
     )
 }
@@ -393,7 +428,7 @@ export const ChatSidebarBody = observer(
             // 群聊用户
             return (
                 <div className="body mt-4">
-                    <ChatSidebarUserAvatar user={visitUser}/>
+                    <ChatSidebarUserAvatar user={visitUser} />
                     <ChatSidebarName chat={chat} visitUser={visitUser} />
                     <FriendshipButton userId={visitUser.userId} />
                 </div>
@@ -412,7 +447,6 @@ export const ChatSidebarBody = observer(
         return (
             // 群聊
             <div className="body">
-                <button onClick={() => chat.sendGroupChatNotice('测试一下')}>点击发送群公告</button>
                 <HeaderTab />
                 <SidebarTabContent chat={chat} />
                 <QuitGroupButton chatId={chat.chatId} />

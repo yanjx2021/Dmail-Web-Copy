@@ -17,7 +17,8 @@ export class ModalStore {
         | 'JoinGroup'
         | 'ChangeGroupName'
         | 'GroupMessageReaders'
-        | 'GetUserIds' = ''
+        | 'GetUserIds'
+        | 'SendGroupNotice' = ''
     transferInfo: ChatMessageTransferInfo | undefined = undefined
     groupMessageReaders: number[] | undefined
 
@@ -42,6 +43,7 @@ export class ModalStore {
         this.isLoading = false
         this.modalType = ''
         this.transferInfo = undefined
+        this.groupMessageReaders = undefined
     }
 
     constructor() {
