@@ -1258,8 +1258,8 @@ export class ChatStore {
             this.errors = '发布群公告失败'
             return
         }
-        this.getChat(response.chatId!)
         //TODO: 分发
+        this.getChat(response.chatId!).handleSendGroupNoticeResponse(response)
     }
 
     private ReceiveGetUserReadInPrivateResponseHandler(

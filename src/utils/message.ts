@@ -360,6 +360,10 @@ export interface ReceiveGetUserIDResponseData {
     userIds: number[]
 }
 
+export interface ReceiveLogOffResponseData {
+    state: 'Success' | 'EmailCodeError' |'UserNotFound' | 'DatabaseError' | 'ServerError'
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -416,6 +420,7 @@ export enum Receive {
     GroupNoticeResponse = 'GroupNoticeResponse',
     PullGroupNoticeResponse = 'PullGroupNoticeResponse',
     GetUserIDResponse = 'GetUserIDResponse',
+    LogOffResponse = 'LogOffResponse'
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -607,6 +612,7 @@ export enum Send {
     GetUserReadInPrivate = 'GetUserReadInPrivate',
     PullGroupNotice = 'PullGroupNotice',
     GetUserID = 'GetUserID',
+    LogOff = 'LogOff'
 }
 
 // COMMAND和DATA类型捆绑
@@ -664,6 +670,7 @@ export interface MessageReceiveData {
     [Receive.GroupNoticeResponse]: ReceiveGroupNoticeResponseData
     [Receive.PullGroupNoticeResponse]: ReceivePullGroupNoticeResponseData
     [Receive.GetUserIDResponse]: ReceiveGetUserIDResponseData
+    [Receive.LogOffResponse]: ReceiveLogOffResponseData
 }
 
 export interface MessageSendData {
@@ -707,6 +714,7 @@ export interface MessageSendData {
     [Send.GetUserReadInPrivate]: number
     [Send.PullGroupNotice]: SendPullGroupNoticeData
     [Send.GetUserID]: string
+    [Send.LogOff]: number
 }
 
 // 封装消息包

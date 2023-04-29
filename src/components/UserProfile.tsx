@@ -261,6 +261,23 @@ export const ChangePassword = () => {
     )
 }
 
+export const LogOff = () => {
+    return (
+        <li className="list-group-item border-0 mt-2">
+            <a
+                className="link"
+                type="button"
+                onClick={action(() => {
+                    modalStore.modalType = 'LogOff'
+                    modalStore.isOpen = true
+                })}>
+                <i className="zmdi zmdi-chevron-right me-2"></i>
+                {'  注销账号'}
+            </a>
+        </li>
+    )
+}
+
 export const ProfileSetting = () => {
     return (
         <div className="card border-0">
@@ -269,6 +286,7 @@ export const ProfileSetting = () => {
                 <DesktopNotification />
                 <SoundNotification />
                 <ChangePassword />
+                <LogOff />
             </ul>
             {/* <div className='card-body text-center border-top'>
             <button type='button' className='btn btn-secondary'></button>

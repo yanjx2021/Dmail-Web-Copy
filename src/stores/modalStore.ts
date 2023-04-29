@@ -18,7 +18,8 @@ export class ModalStore {
         | 'ChangeGroupName'
         | 'GroupMessageReaders'
         | 'GetUserIds'
-        | 'SendGroupNotice' = ''
+        | 'SendGroupNotice' 
+        | 'LogOff' = ''
     transferInfo: ChatMessageTransferInfo | undefined = undefined
     groupMessageReaders: number[] | undefined
 

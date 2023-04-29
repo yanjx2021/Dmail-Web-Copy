@@ -382,7 +382,7 @@ export const GroupNotices = observer(({ chat }: { chat: Chat }) => {
             </button>
             <ul>
                 {chat.noticeList.map((notice) => (
-                    <li key={notice.noticeId}> {notice.notice} </li>
+                    <li key={notice.noticeId}> {`${userStore.getUser(notice.senderId).showName}: ${notice.notice}`} </li>
                 ))}
             </ul>
         </div>

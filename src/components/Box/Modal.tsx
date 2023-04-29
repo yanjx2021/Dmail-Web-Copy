@@ -432,7 +432,9 @@ export const GetUserIdModalView = observer(({ title }: { title: string }) => {
             />
             <h5>搜索结果</h5>
             <ul>
-                {getUserIdStore.users?.map((user) => <li key={user.userId}> {`用户名: ${user.name} ID: ${user.userId}`} </li>)}
+                {getUserIdStore.users?.map((user) => (
+                    <li key={user.userId}> {`用户名: ${user.name} ID: ${user.userId}`} </li>
+                ))}
             </ul>
         </Modal>
     )
@@ -471,10 +473,32 @@ export const SendGroupNoticeModalView = observer(({ title }: { title: string }) 
     )
 })
 
-
-
-
-
+export const LogOffModalView = observer(({ title }: { title: string }) => {
+    return (
+        <Modal
+            footer={[
+                <Button
+                    key="set"
+                    onClick={action(() => {
+                        authStore.logoff()
+                    })}>
+                    注销
+                </Button>,
+            ]}
+            onCancel={modalStore.handleCancel}
+            title={title}
+            open={modalStore.isOpen}>
+            <div className="form-group">
+                <EmailCodeInput
+                    email={authStore.email}
+                    emailCode={authStore.emailCode}
+                    setErrors={action((error) => (authStore.errors = error))}
+                    setEmailCode={action((data) => (authStore.emailCode = data))}
+                />
+            </div>
+        </Modal>
+    )
+})
 
 export const RegisterModal = observer(() => {
     useEffect(() => {
@@ -504,9 +528,11 @@ export const RegisterModal = observer(() => {
         case 'GroupMessageReaders':
             return <GroupMessageReadersModalView title="已读成员" />
         case 'GetUserIds':
-            return <GetUserIdModalView title='查找用户'/>
+            return <GetUserIdModalView title="查找用户" />
         case 'SendGroupNotice':
-            return <SendGroupNoticeModalView title='发送群公告'/>
+            return <SendGroupNoticeModalView title="发送群公告" />
+        case 'LogOff':
+            return <LogOffModalView title='注销账号'/>
         default:
             return <></>
     }
