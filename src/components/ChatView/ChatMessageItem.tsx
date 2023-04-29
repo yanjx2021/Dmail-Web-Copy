@@ -14,9 +14,9 @@ import { authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
 import { userStore } from '../../stores/userStore'
 import { fileStore } from '../../stores/fileStore'
-import { createDownload } from '../../utils/file'
+import { blobToBase64, createDownload } from '../../utils/file'
 import { action, makeAutoObservable } from 'mobx'
-import { imageStore } from '../../stores/imageStore'
+import { binaryStore } from '../../stores/binaryStore'
 import { MessageDropDown } from '../DropDown/MessageDropDown'
 import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
@@ -56,9 +56,31 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                 </div>
             )
         } else {
-            const cachedUrl = imageStore.getImageUrl(msg.content)
+            const cachedUrl = binaryStore.getBinaryUrl(msg.content)
 
             return <PhotoItem cachedUrl={cachedUrl} />
+        }
+    } else if (msg.type === ChatMessageType.Voice && typeof msg.content === 'string') {
+        if (msg.bindUploading) {
+            return (
+                <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                    <LoadingPhotoItem bindUploading={msg.bindUploading} />
+                </div>
+            )
+        } else {
+            const cachedUrl = binaryStore.getBinaryUrl(msg.content)
+
+            return (
+                <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                    <audio src={cachedUrl.url} controls />
+                    {msg.translatedText && (
+                        <div>
+                            <p>------转换结果------</p>
+                            <p>{msg.translatedText}</p>
+                        </div>
+                    )}
+                </div>
+            )
         }
     } else if (msg.type === ChatMessageType.File) {
         if (msg.bindUploading) {
@@ -129,7 +151,7 @@ export const ChatMessageItem = observer(
                                     src={
                                         !user.avaterHash || user.avaterHash === ''
                                             ? 'assets/images/user.png'
-                                            : imageStore.getImageUrl(user.avaterHash).url
+                                            : binaryStore.getBinaryUrl(user.avaterHash).url
                                     }
                                     alt="avatar"
                                 />

@@ -5,7 +5,7 @@ import { action } from 'mobx'
 import { createGroupFromAllFriendsSelectStore } from '../MessagesBox/Selector'
 import { rtcStore } from '../../stores/rtcStore'
 import { Image } from 'antd'
-import { imageStore } from '../../stores/imageStore'
+import { binaryStore } from '../../stores/binaryStore'
 
 export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
     return (
@@ -23,13 +23,13 @@ export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
                                     className={'avatar rounded-circle no-image ' + 'timber'}>
                                     {/* TODO-昵称缩写 */}
                                     <img
-                                        className='avatar rounded-circle'
+                                        className="avatar rounded-circle"
                                         src={
                                             chat.avaterHash && chat.avaterHash !== ''
-                                                ? imageStore.getImageUrl(chat.avaterHash).url
+                                                ? binaryStore.getBinaryUrl(chat.avaterHash).url
                                                 : 'assets/images/user.png'
                                         }
-                                        alt='avatar'
+                                        alt="avatar"
                                     />
                                 </div>
                             </div>

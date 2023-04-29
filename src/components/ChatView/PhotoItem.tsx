@@ -3,10 +3,10 @@ import { observer } from 'mobx-react-lite'
 import { action } from 'mobx'
 import { fileStore, UploadingFile } from '../../stores/fileStore'
 
-import { CachedImage } from '../../stores/imageStore'
-import { Progress,Image } from 'antd'
+import { CachedBinary } from '../../stores/binaryStore'
+import { Progress, Image } from 'antd'
 
-export const PhotoItem = observer(({ cachedUrl }: { cachedUrl: CachedImage }) => {
+export const PhotoItem = observer(({ cachedUrl }: { cachedUrl: CachedBinary }) => {
     // TODO-在这里添加删除消息的函数
     return (
         <div className="attachment right-file">
@@ -19,7 +19,11 @@ export const LoadingPhotoItem = observer(({ bindUploading }: { bindUploading: Up
     // TODO-在这里添加删除消息的函数
     return (
         <div className="attachment right-file">
-            <Progress type="circle" size="small" percent={Math.floor(bindUploading.progress * 100)} />
+            <Progress
+                type="circle"
+                size="small"
+                percent={Math.floor(bindUploading.progress * 100)}
+            />
         </div>
     )
 })

@@ -42,7 +42,7 @@ import {
     createGroupFromAllFriendsSelectStore,
     userSelectStore,
 } from '../components/MessagesBox/Selector'
-import { imageStore } from './imageStore'
+import { binaryStore } from './binaryStore'
 import { modalStore } from './modalStore'
 
 export type ChatId = number
@@ -77,6 +77,7 @@ export enum ChatMessageType {
     Text = 'Text',
     Image = 'Image',
     Deleted = 'Deleted',
+    Voice = 'Voice',
     Transfer = 'Transfer',
     Revoked = 'Revoked',
     MentionText = 'MentionText',
@@ -348,7 +349,6 @@ export class Chat {
     groupAvaterPath: string | null = null
     atYou: boolean = false
 
-
     constructor(chatId: number) {
         this.chatId = chatId
         makeAutoObservable(this, {}, { autoBind: true })
@@ -356,7 +356,7 @@ export class Chat {
 
     get getAvaterUrl() {
         if (this.avaterHash && this.avaterHash !== '')
-            return imageStore.getImageUrl(this.avaterHash).url
+            return binaryStore.getBinaryUrl(this.avaterHash).url
         return 'assets/images/user.png'
     }
 

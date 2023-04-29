@@ -15,7 +15,7 @@ import { userStore } from '../../stores/userStore'
 import { fileStore } from '../../stores/fileStore'
 import { createDownload } from '../../utils/file'
 import { action, makeAutoObservable } from 'mobx'
-import { imageStore } from '../../stores/imageStore'
+import { binaryStore } from '../../stores/binaryStore'
 import { MessageDropDown } from '../DropDown/MessageDropDown'
 import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
@@ -41,7 +41,7 @@ export const ChatMessageBoxItemContent = observer(
                     </div>
                 )
             } else {
-                const cachedUrl = imageStore.getImageUrl(msg.content)
+                const cachedUrl = binaryStore.getBinaryUrl(msg.content)
 
                 return <PhotoItem cachedUrl={cachedUrl} />
             }

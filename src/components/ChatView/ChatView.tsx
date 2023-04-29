@@ -71,7 +71,16 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
             const msg = chat.sendFileMessage(ChatMessageType.Image, file, (hash, file) => {
                 return hash
             })
-            console.log(msg)
+            setMessages([...messages, msg])
+        },
+        [chat, messages, setMessages]
+    )
+
+    const sendVoiceMessageHandler = useCallback(
+        (file: File) => {
+            const msg = chat.sendFileMessage(ChatMessageType.Voice, file, (hash, file) => {
+                return hash
+            })
             setMessages([...messages, msg])
         },
         [chat, messages, setMessages]
@@ -193,7 +202,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
                 {messageSelectStore.showSelector ? (
                     <MessageSelectedFooter />
                 ) : voiceMessageStore.showVoiceFooter ? (
-                    <VoiceMessageFooter />
+                    <VoiceMessageFooter sendVoiceMessageHandler={sendVoiceMessageHandler} />
                 ) : (
                     <ChatViewFooter
                         chat={chat}

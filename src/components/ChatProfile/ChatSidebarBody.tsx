@@ -13,13 +13,12 @@ import { SidebarUserDropDown } from '../DropDown/SidebarUserDropDown'
 import { authStore } from '../../stores/authStore'
 import { modalStore } from '../../stores/modalStore'
 import { updateGroupStore } from '../../stores/updateGroupStore'
-import { CachedImage, imageStore } from '../../stores/imageStore'
+import { CachedBinary, binaryStore } from '../../stores/binaryStore'
 import { Image } from 'antd'
 import { UploadingFile, fileStore } from '../../stores/fileStore'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 
-
-const ChatSidebarUserAvatar = observer(({user} : {user: User}) => {
+const ChatSidebarUserAvatar = observer(({ user }: { user: User }) => {
     return (
         <>
             <div className="d-flex justify-content-center">
@@ -37,40 +36,38 @@ const ChatSidebarUserAvatar = observer(({user} : {user: User}) => {
     )
 })
 
-const ChatSidebarAvatar = observer(
-    ({ chat }: { chat: Chat }) => {
-        const handleChange = (event: any) => {
-            updateGroupStore.chat = chat
-            event.target.files[0] &&
-                fileStore.requestUpload(
-                    event.target.files[0],
-                    action((uploadingFile: UploadingFile) => {
-                        updateGroupStore.newAvaterHash = uploadingFile.hash!
-                        updateGroupStore.updateType = 'Avater'
-                        updateGroupStore.sendUpdateGroupInfo()
-                    })
-                )
-        }
-        return (
-            <>
-                <div className="d-flex justify-content-center">
-                    <div className="avatar xxl">
-                        <div className={'avatar xxl rounded-circle no-image ' + 'timber'}>
-                            <Image
-                                className="avatar xxl rounded-circle"
-                                src={chat.getAvaterUrl}
-                                alt="avatar"
-                            />
-                        </div>
+const ChatSidebarAvatar = observer(({ chat }: { chat: Chat }) => {
+    const handleChange = (event: any) => {
+        updateGroupStore.chat = chat
+        event.target.files[0] &&
+            fileStore.requestUpload(
+                event.target.files[0],
+                action((uploadingFile: UploadingFile) => {
+                    updateGroupStore.newAvaterHash = uploadingFile.hash!
+                    updateGroupStore.updateType = 'Avater'
+                    updateGroupStore.sendUpdateGroupInfo()
+                })
+            )
+    }
+    return (
+        <>
+            <div className="d-flex justify-content-center">
+                <div className="avatar xxl">
+                    <div className={'avatar xxl rounded-circle no-image ' + 'timber'}>
+                        <Image
+                            className="avatar xxl rounded-circle"
+                            src={chat.getAvaterUrl}
+                            alt="avatar"
+                        />
                     </div>
                 </div>
-                {chat.chatType !== ChatType.Private && chat.isAdmin(authStore.userId) && (
-                    <input type="file" onChange={handleChange} />
-                )}
-            </>
-        )
-    }
-)
+            </div>
+            {chat.chatType !== ChatType.Private && chat.isAdmin(authStore.userId) && (
+                <input type="file" onChange={handleChange} />
+            )}
+        </>
+    )
+})
 
 const ChatSidebarName = observer(({ chat, visitUser }: { chat: Chat; visitUser: User | null }) => {
     if (visitUser) {
@@ -256,7 +253,11 @@ export const UserCard = observer(
                             <div className="avatar me-3">
                                 <span className="rounded-circle"></span>
                                 <div className="avatar rounded-circle no-image timber">
-                                    <img className='avatar rounded-circle' src={user.getAvaterUrl} alt='avatar'/>
+                                    <img
+                                        className="avatar rounded-circle"
+                                        src={user.getAvaterUrl}
+                                        alt="avatar"
+                                    />
                                 </div>
                             </div>
                             <div className="media-body overflow-hidden">
@@ -393,7 +394,7 @@ export const ChatSidebarBody = observer(
             // 群聊用户
             return (
                 <div className="body mt-4">
-                    <ChatSidebarUserAvatar user={visitUser}/>
+                    <ChatSidebarUserAvatar user={visitUser} />
                     <ChatSidebarName chat={chat} visitUser={visitUser} />
                     <FriendshipButton userId={visitUser.userId} />
                 </div>

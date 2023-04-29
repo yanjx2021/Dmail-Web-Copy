@@ -17,7 +17,7 @@ import { authStore } from './authStore'
 import { User, userStore } from './userStore'
 import { LocalDatabase } from './localData'
 import { Chat, chatStore } from './chatStore'
-import { imageStore } from './imageStore'
+import { binaryStore } from './binaryStore'
 
 export enum RequestContentType {
     MakeFriend = 'MakeFriend',

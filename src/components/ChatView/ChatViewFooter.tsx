@@ -11,8 +11,9 @@ import { MentionsOptionProps } from 'antd/es/mentions'
 import { getUserIds } from '../../utils/mentionPattern'
 import { VoiceRecorderState, voiceMessageStore } from '../../stores/voiceMessageStore'
 
-import { AnyARecord } from 'dns'
-import { AudioRecorder } from '../AudioRecorder'
+import AudioAnalyser from '../AudioAnalyser'
+import ReactDOM from 'react-dom'
+import { authStore } from '../../stores/authStore'
 
 //针对输入框数值的一些常数
 const lineHeight = 15,
@@ -57,67 +58,99 @@ export const MessageSelectedFooter = () => {
     )
 }
 
-export const VoiceMessageFooter = observer(() => {
-    const [status, setStatus] = useState('')
-    const [audioSrc, setAudioSrc] = useState()
+export const VoiceMessageFooter = observer(
+    ({ sendVoiceMessageHandler }: { sendVoiceMessageHandler: (file: File) => void }) => {
+        const recorderRef: React.LegacyRef<AudioAnalyser> | null = useRef(null)
 
-    const audioProps = {
-        status,
-        audioSrc,
-        timeslice: 1000, // timeslice（https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/start#Parameters）
-        backgroundColor: 'rgba(255, 255, 255, 1)',
-        strokeColor: '#000000',
-        height: 30,
-        width: 1000,
-    }
+        const audioProps = {
+            ref: recorderRef,
+            audioType: 'audio/wav',
+            // audioOptions: { sampleRate: 16000 },
+            backgroundColor: 'rgba(255, 255, 255, 1)',
+            strokeColor: '#000000',
+            height: 30,
+            // TODO-yjx: 自适应宽度
+            width: window.innerWidth / 2 - 100,
+        }
 
-    return (
-        <div className="chat-footer border-top py-xl-4 py-lg-2 py-2">
-            <div className="container-xxl">
-                <div className="row">
-                    <div className="col-12">
-                        <div className="input-group align-items-center"></div>
+        return (
+            <div className="chat-footer border-top py-xl-4 py-lg-2 py-2">
+                <div className="container-xxl">
+                    <div className="row">
+                        <div className="col-12">
+                            <div className="input-group align-items-center"></div>
 
-                        <div className="input-group-append">
-                            <span className="input-group-text border-0">
-                                <button
-                                    className="btn btn-sm btn-link text-muted"
-                                    data-toggle="tooltip"
-                                    title="发送语音"
-                                    type="button"
-                                    onClick={action(() => {
-                                        voiceMessageStore.showVoiceFooter = false
-                                    })}>
-                                    <i className="zmdi zmdi-refresh font-22"></i>
-                                </button>
-                                {voiceMessageStore.state === VoiceRecorderState.Recording ? (
-                                    <>
-                                        <button
-                                            onClick={action(() => {
-                                                voiceMessageStore.state = VoiceRecorderState.Sending
-                                                setStatus('inactive')
-                                            })}>
-                                            结束录音
-                                        </button>
-                                        <AudioRecorder {...audioProps} />
-                                    </>
-                                ) : (
+                            <div className="input-group-append">
+                                <span className="input-group-text border-0">
                                     <button
+                                        className="btn btn-sm btn-link text-muted"
+                                        data-toggle="tooltip"
+                                        title="发送语音"
+                                        type="button"
                                         onClick={action(() => {
-                                            voiceMessageStore.state = VoiceRecorderState.Recording
-                                            setStatus('recording')
+                                            voiceMessageStore.showVoiceFooter = false
+                                            recorderRef.current?.stopAudio()
                                         })}>
-                                        开始录音
+                                        <i className="zmdi zmdi-comment-text font-22"></i>
                                     </button>
-                                )}
-                            </span>
+                                    <div style={{ width: '15px' }}></div>
+                                    <AudioAnalyser {...audioProps} />
+
+                                    <div style={{ width: '25px' }}></div>
+                                    {voiceMessageStore.state === VoiceRecorderState.Recording ? (
+                                        <>
+                                            <button
+                                                className="btn btn-primary"
+                                                onClick={action(() => {
+                                                    voiceMessageStore.state =
+                                                        VoiceRecorderState.Sending
+                                                    if (recorderRef.current) {
+                                                        recorderRef.current.blobReceiver = (
+                                                            blob
+                                                        ) => {
+                                                            const file = new File(
+                                                                [blob],
+                                                                'voice-' +
+                                                                    authStore.userId +
+                                                                    '-' +
+                                                                    Date.now().toString() +
+                                                                    '.wav',
+                                                                { type: 'audio/wav' }
+                                                            )
+                                                            sendVoiceMessageHandler(file)
+                                                            if (recorderRef.current) {
+                                                                recorderRef.current.blobReceiver = (
+                                                                    e
+                                                                ) => {}
+                                                            }
+                                                        }
+
+                                                        recorderRef.current.stopAudio()
+                                                    }
+                                                })}>
+                                                结束并发送录音
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={action(() => {
+                                                voiceMessageStore.state =
+                                                    VoiceRecorderState.Recording
+                                                recorderRef.current?.startAudio()
+                                            })}>
+                                            开始录音
+                                        </button>
+                                    )}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    )
-})
+        )
+    }
+)
 
 export const ChatViewFooter = observer(
     (props: { handleSendText: Function; chat: Chat; handleSendMention: Function }) => {
@@ -174,7 +207,7 @@ export const ChatViewFooter = observer(
                                             onClick={action(() => {
                                                 voiceMessageStore.showVoiceFooter = true
                                             })}>
-                                            <i className="zmdi zmdi-refresh font-22"></i>
+                                            <i className="zmdi zmdi-mic font-22"></i>
                                         </button>
                                     </span>
                                 </div>
@@ -213,7 +246,7 @@ export const ChatViewFooter = observer(
                                             data-toggle="tooltip"
                                             title="附件"
                                             type="button">
-                                            <i className="zmdi zmdi-attachment font-22"></i>
+                                            <i className="zmdi zmdi-file font-22"></i>
                                         </button>
                                     </span>
                                 </div>

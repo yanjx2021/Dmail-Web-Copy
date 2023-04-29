@@ -7,7 +7,7 @@ import { User, userStore } from './userStore'
 import { UserSetting, userSettingStore } from './userSettingStore'
 import { fileStore } from './fileStore'
 import axios from 'axios'
-import { imageStore } from './imageStore'
+import { binaryStore } from './binaryStore'
 import { serialize } from 'v8'
 import { lchown } from 'fs'
 import { runInAction } from 'mobx'
@@ -38,8 +38,8 @@ export class LocalDatabase {
     static requestIndex(reqId: number) {
         return `request:${reqId}`
     }
-    static imageBlobIndex(hash: string) {
-        return `image:${hash}`
+    static blobIndex(hash: string) {
+        return `blob:${hash}`
     }
 
     static timestampIndex() {
@@ -80,24 +80,24 @@ export class LocalDatabase {
         })
     }
 
-    static async saveImageBlob(hash: string, blob: Blob) {
-        this.database.setItem(LocalDatabase.imageBlobIndex(hash), blob)
+    static async saveBlob(hash: string, blob: Blob) {
+        this.database.setItem(LocalDatabase.blobIndex(hash), blob)
     }
 
-    static async loadImageBlob(hash: string) {
-        this.database.getItem(LocalDatabase.imageBlobIndex(hash)).then((blob) => {
+    static async loadBlob(hash: string) {
+        this.database.getItem(LocalDatabase.blobIndex(hash)).then((blob) => {
             if (blob === null) {
                 fileStore.getFileUrl(hash, (getUrl) => {
                     axios.get(getUrl, { responseType: 'blob' }).then((response) => {
-                        this.saveImageBlob(hash, response.data)
+                        this.saveBlob(hash, response.data)
                         const localUrl = URL.createObjectURL(response.data)
-                        imageStore.setImageUrl(hash, localUrl)
+                        binaryStore.setBinaryUrl(hash, localUrl, response.data.size)
                     })
                 })
                 return
             }
             const localUrl = URL.createObjectURL(blob as Blob)
-            imageStore.setImageUrl(hash, localUrl)
+            binaryStore.setBinaryUrl(hash, localUrl, (blob as Blob).size)
         })
     }
 

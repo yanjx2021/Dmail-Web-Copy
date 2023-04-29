@@ -1,9 +1,14 @@
 import { makeAutoObservable } from 'mobx'
 import { UserId } from './authStore'
 import { MessageServer } from '../utils/networkWs'
-import { Receive, ReceiveGetUserInfoResponseData, ReceiveGetUserInfoResponseState, Send } from '../utils/message'
+import {
+    Receive,
+    ReceiveGetUserInfoResponseData,
+    ReceiveGetUserInfoResponseState,
+    Send,
+} from '../utils/message'
 import { LocalDatabase } from './localData'
-import { imageStore } from './imageStore'
+import { binaryStore } from './binaryStore'
 
 export class User {
     userId: number = 0
@@ -19,7 +24,8 @@ export class User {
     }
 
     get getAvaterUrl() {
-        if (this.avaterHash && this.avaterHash !== '') return imageStore.getImageUrl(this.avaterHash).url
+        if (this.avaterHash && this.avaterHash !== '')
+            return binaryStore.getBinaryUrl(this.avaterHash).url
         return 'assets/images/user.png'
     }
 
@@ -76,7 +82,10 @@ export class UserStore {
             case ReceiveGetUserInfoResponseState.Success:
                 console.log(`接受用户${data.userId}的信息`)
                 this.setUser(data.userId!, data.userName!, data.avaterHash!)
-                LocalDatabase.saveUserInfo(data.userId!, this.createUser(data.userId!, data.userName!, data.avaterHash!))
+                LocalDatabase.saveUserInfo(
+                    data.userId!,
+                    this.createUser(data.userId!, data.userName!, data.avaterHash!)
+                )
                 break
             default:
                 this.errors = '服务器跑路了'

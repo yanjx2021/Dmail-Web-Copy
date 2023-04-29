@@ -11,7 +11,6 @@ import { duration } from '../constants/messageContent'
 import { RtcTest } from '../components/RtcTest'
 import axios from 'axios'
 import { VoiceMessageFooter } from '../components/ChatView/ChatViewFooter'
-import AudioAnalyser from 'react-audio-analyser'
 import { AnyARecord } from 'dns'
 import { State } from 'spark-md5'
 

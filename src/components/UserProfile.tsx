@@ -7,7 +7,7 @@ import { useImmer } from 'use-immer'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { modalStore } from '../stores/modalStore'
 import { UploadingFile, fileStore } from '../stores/fileStore'
-import { imageStore } from '../stores/imageStore'
+import { binaryStore } from '../stores/binaryStore'
 import { Progress, Image } from 'antd'
 import { PhotoItem } from './ChatView/PhotoItem'
 import '../styles/UserProfile.css'
@@ -48,7 +48,7 @@ export const CardAvatar = observer(({ avaterHash }: { avaterHash: string }) => {
                 src={
                     !avaterHash || avaterHash === ''
                         ? 'assets/images/user.png'
-                        : imageStore.getImageUrl(avaterHash).url
+                        : binaryStore.getBinaryUrl(avaterHash).url
                 }
                 alt="avatar"
             />
