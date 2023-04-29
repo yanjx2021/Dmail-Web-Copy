@@ -8,6 +8,7 @@ import {
     ChatMessageFileInfo,
     ChatMessageTransferInfo,
     ChatMessageType,
+    MentionTextContent,
 } from '../../stores/chatStore'
 import { authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
@@ -23,6 +24,7 @@ import { chatSideStore } from '../../stores/chatSideStore'
 import { FileItem, LoadingFileItem } from './FileItem'
 import { LoadingPhotoItem, PhotoItem } from './PhotoItem'
 import { Image } from 'antd'
+import { renderFormatUrl } from '../../utils/urlToLink'
 
 export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) => {
     const isRight = msg.senderId === authStore.userId
@@ -30,13 +32,20 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
     if (msg.type === ChatMessageType.Text && typeof msg.content === 'string') {
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                {msg.content as string}
+                {renderFormatUrl(msg.content)}
                 {msg.translatedText && (
                     <div>
-                        <p>------翻译结果------</p>
                         <p>{msg.translatedText}</p>
+                        <p>------翻译结果------</p>
                     </div>
                 )}
+            </div>
+        )
+    } else if (msg.type === ChatMessageType.MentionText) {
+        const content: any = msg.content
+        return (
+            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                {renderFormatUrl(content.text)}
             </div>
         )
     } else if (msg.type === ChatMessageType.Image && typeof msg.content === 'string') {

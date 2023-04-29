@@ -42,6 +42,11 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         [chat, messages, setMessages]
     )
 
+    const sendMentionMessageHandler = useCallback((userIds: number[], text: string) => {
+        const msg = chat.sendMentionMessage(text, userIds)
+        setMessages([...messages, msg])
+    }, [chat, messages, setMessages])
+
     const sendFileMessageHandler = useCallback(
         (file: File) => {
             const msg = chat.sendFileMessage(ChatMessageType.File, file, (hash, file) => {
@@ -73,6 +78,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
             if (!secureAuthStore.showSecureBox) {
                 chat.setReadCuser()
                 MessageServer.Instance().send<Send.GetChatInfo>(Send.GetChatInfo, chat.chatId)
+                chat.atYou = false
             }
         }),
         [chat, secureAuthStore.showSecureBox]
@@ -183,7 +189,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
                 {messageSelectStore.showSelector ? (
                     <MessageSelectedFooter />
                 ) : (
-                    <ChatViewFooter handleSend={sendTextMessageHanlder} />
+                    <ChatViewFooter chat={chat} handleSendText={sendTextMessageHanlder} handleSendMention={sendMentionMessageHandler} />
                 )}
             </div>
             <ChatSidebar chat={chat} visitUser={chatSideStore.visitUser} />

@@ -34,17 +34,19 @@ export class NoticeStore {
         this.updateTimestamp(notice.timestamp + 1)
         switch (notice.state) {
             case 'Revoked':
-                const chat = chatStore.getChat(notice.chatId)
-                const msg = chat.messages.get(notice.inChatId)
-                if (msg) {
-                    msg.type = ChatMessageType.Revoked
-                    msg.content = ''
-                    chat.setMessage(msg)
+                const chatR = chatStore.getChat(notice.chatId)
+                const msgR = chatR.messages.get(notice.inChatId)
+                if (msgR) {
+                    msgR.type = ChatMessageType.Revoked
+                    msgR.content = ''
+                    chatR.setMessage(msgR)
                 } else {
                     LocalDatabase.revokeMessageLocal(notice.chatId, notice.inChatId)
                 }
                 break
             case 'Mentioned':
+                const chatM = chatStore.getChat(notice.chatId)
+                chatM.atYou = true
                 break
             default:
                 console.log('error: 错误的协议格式 ' + notice.state)
