@@ -412,6 +412,7 @@ export const ChatSidebarBody = observer(
         return (
             // 群聊
             <div className="body">
+                <button onClick={() => chat.sendGroupChatNotice('测试一下')}>点击发送群公告</button>
                 <HeaderTab />
                 <SidebarTabContent chat={chat} />
                 <QuitGroupButton chatId={chat.chatId} />
