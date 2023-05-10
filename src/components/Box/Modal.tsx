@@ -27,16 +27,18 @@ export const ModalInput = ({
     type,
     value,
     setValue,
+    placeholder,
 }: {
     label: string
     type: 'text' | 'password'
     value: string
     setValue: any
+    placeholder: string
 }) => {
     return (
         <div className="form-group">
             <label>{label}</label>
-            <input type={type} className="form-control" value={value} onChange={setValue} />
+            <input type={type} className="form-control form-control-lg form-margin" value={value} onChange={setValue}  placeholder={placeholder}/>
         </div>
     )
 }
@@ -66,13 +68,15 @@ export const JoinGroupModalView = observer(({ title }: { title: string }) => {
                     const input = e.target.value.replace(/[^0-9]/g, '')
                     setReqId(input)
                 }}
+                placeholder="请输入群聊ID..."
             />
             <ModalInput
                 type="text"
                 label="验证消息"
                 value={requestStore.message}
                 setValue={action((e: any) => (requestStore.message = e.target.value))}
-            />
+                placeholder="请输入验证消息..."
+           />
         </Modal>
     )
 })
@@ -102,12 +106,14 @@ export const AddFriendModalView = observer(({ title }: { title: string }) => {
                     const input = e.target.value.replace(/[^0-9]/g, '')
                     setReqId(input)
                 }}
+                placeholder="请输入用户ID..."
             />
             <ModalInput
                 type="text"
                 label="验证消息"
                 value={requestStore.message}
                 setValue={action((e: any) => (requestStore.message = e.target.value))}
+                placeholder="请输入验证消息..."
             />
         </Modal>
     )
@@ -141,6 +147,7 @@ export const CreateGroupModalView = observer(({ title }: { title: string }) => {
                 setValue={(e: any) => {
                     setGroupName(e.target.value)
                 }}
+                placeholder="请输入群聊名称..."
             />
         </Modal>
     )
@@ -169,6 +176,7 @@ export const ChangePasswordModalView = observer(({ title }: { title: string }) =
                 setValue={action((e: any) => {
                     updateUserStore.newPassword = e.target.value
                 })}
+                placeholder="请输入新密码..."
             />
             <div className="form-group">
                 <label>验证消息</label>
@@ -229,6 +237,7 @@ export const SetSecureModalView = observer(({ title }: { title: string }) => {
                     setValue={action((e: any) => {
                         setOldCode(e.target.value)
                     })}
+                    placeholder="请输入原密码..."
                 />
             ) : (
                 <></>
@@ -240,6 +249,7 @@ export const SetSecureModalView = observer(({ title }: { title: string }) => {
                 setValue={action((e: any) => {
                     setCode(e.target.value)
                 })}
+                placeholder={secureAuthStore.hasSetCode ? '请输入新密码...' : '请设置密码...'}
             />
         </Modal>
     )
@@ -278,6 +288,7 @@ export const RemoveSecureModalView = observer(({ title }: { title: string }) => 
                 setValue={action((e: any) => {
                     setCode(e.target.value)
                 })}
+                placeholder="请输入原密码..."
             />
         </Modal>
     )
@@ -369,6 +380,7 @@ export const ChangeGroupNameModalView = observer(({ title }: { title: string }) 
                 setValue={action((e: any) => {
                     updateGroupStore.newGroupName = e.target.value
                 })}
+                placeholder="请输入新的群名..."
             />
         </Modal>
     )
@@ -429,6 +441,7 @@ export const GetUserIdModalView = observer(({ title }: { title: string }) => {
                 setValue={action((e: any) => {
                     setUserName(e.target.value)
                 })}
+                placeholder="请输入查找用户名..."
             />
             <h5>搜索结果</h5>
             <ul>
@@ -468,6 +481,7 @@ export const SendGroupNoticeModalView = observer(({ title }: { title: string }) 
                 setValue={action((e: any) => {
                     setNotice(e.target.value)
                 })}
+                placeholder="请输入群公告内容..."
             />
         </Modal>
     )

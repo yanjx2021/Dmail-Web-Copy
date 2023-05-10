@@ -60,13 +60,13 @@ export const EmailCodeInput = (props: {
         <div className="input-group mb-2">
             <input
                 type="text"
-                className="form-control form-control-lg"
-                placeholder="请输入验证码"
+                className="form-control form-control-lg "
+                placeholder="请输入验证码..."
                 value={emailCode}
                 onChange={onEmailCodeInputChange}
             />
             <button
-                className="btn btn-lg"
+                className="btn btn-lg btn-primary"
                 disabled={curCoolDown > 0}
                 onClick={onSendEmailButtonClicked}>
                 {curCoolDown <= 0 ? '发送验证码' : curCoolDown + 's'}

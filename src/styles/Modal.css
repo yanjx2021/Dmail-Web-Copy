@@ -31,7 +31,12 @@
   border-color: #fff;
 }
 
-.ant-modal-root .ant-modal-body .form-group .form-control
+.ant-modal-root .ant-modal-body .form-group .form-margin
+{
+  margin-top: 5px;
+  margin-bottom: 8px;
+}
+.ant-modal-root .ant-modal-body .form-group .input-group
 {
   margin-top: 5px;
   margin-bottom: 8px;
