@@ -102,16 +102,21 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         }
     } else if (msg.type === ChatMessageType.Transfer) {
         return (
-            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                <a
-                    type="button"
+            <div className={'message-content p-3 text-record' + (isRight ? ' border' : '')}>
+                <div
                     onClick={action(() => {
                         modalStore.transferInfo = msg.content as ChatMessageTransferInfo
                         modalStore.modalType = 'TransferChatBox'
                         modalStore.isOpen = true
                     })}>
-                    {'[聊天记录]'}
-                </a>
+                    <h5>{'[a和b的聊天记录]'}</h5>
+                    <div className='text-record-container'>
+                    <p>a:1zzzzzz23123</p>
+                    <p>c:12312zzzzzzzzzzzzzzzzz3</p>
+                    <p>c:123123zzzzzzzzzzzzzzzzz</p>
+                    </div>
+                    <div className='record-counter'>查看n条转发消息</div>
+                </div>
             </div>
         )
     } else if (msg.type === ChatMessageType.Revoked) {

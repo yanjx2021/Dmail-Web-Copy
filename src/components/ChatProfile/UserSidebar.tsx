@@ -93,7 +93,7 @@ export const UserSidebar = observer(({ chat }: { chat: Chat }) => {
                 <div className="body mt-4">
                     <div className="form-group input-group-lg search mb-3">
                         <i className="zmdi zmdi-search"></i>
-                        <input type="text" className="form-control" placeholder="搜索..." />
+                        <input type="text" className="form-control text-footerform" placeholder="搜索..." />
                     </div>
                     <UserSidebarUsersList />
                     <div className="text-center mt-3 mb-5">

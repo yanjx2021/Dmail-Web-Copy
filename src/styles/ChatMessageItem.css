@@ -37,6 +37,11 @@
     padding-top: .75rem !important;
 }
 
+.main .chat-body .chat-content .container-xxl p 
+{
+  margin-bottom:0px;
+}
+
 .message .c_checkbox
 {
   top: 12px;
@@ -76,4 +81,25 @@
 .audio-div .message-content
 {
   max-width: 400px!important;
+}
+.text-record.message-content
+{
+  max-width: 300px!important;
+  max-height:200px!important;
+  width:100%;
+  height:100%;
+  padding-bottom:8px!important; 
+}
+.text-record .text-record-container
+{
+  max-height: 100px;
+  height: 100%;
+  overflow-y: hidden;
+}
+.text-record.message-content .record-counter
+{
+  border-top: 1px solid #dee2e6 !important;
+  margin-top: 3px;
+  padding-top: 3px;
+  font-size: 12px;
 }
