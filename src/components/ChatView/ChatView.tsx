@@ -32,6 +32,7 @@ import { userStore } from '../../stores/userStore'
 import { key } from 'localforage'
 import { AudioCall } from './AudioCall'
 import { voiceMessageStore } from '../../stores/voiceMessageStore'
+import { modalStore } from '../../stores/modalStore'
 
 export const ChatView = observer(({ chat }: { chat: Chat }) => {
     const [messages, setMessages] = useImmer<ChatMessage[]>([])
@@ -43,6 +44,15 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         },
         [chat, messages, setMessages]
     )
+
+    const sendReplyMessageHandler = useCallback((replyId: number, text: string) => {
+        const msg = chat.sendReplyMessage(text, replyId)
+        setMessages([...messages, msg])
+    }, [chat, messages, setMessages])
+
+    useEffect(() => {
+        modalStore.sendReplyMessageHandler = sendReplyMessageHandler
+    }, [sendReplyMessageHandler])
 
     const sendMentionMessageHandler = useCallback(
         (userIds: number[], text: string) => {

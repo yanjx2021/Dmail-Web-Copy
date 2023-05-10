@@ -56,18 +56,23 @@ const ChatSidebarAvatar = observer(({ chat }: { chat: Chat }) => {
         <>
             <div className="d-flex justify-content-center">
                 <div className="avatar xxl">
-                    <div className={'card-user-avatar avatar xxl rounded-circle no-image ' + 'timber'}>
+                    <div
+                        className={
+                            'card-user-avatar avatar xxl rounded-circle no-image ' + 'timber'
+                        }>
                         <Image
                             className="avatar xxl rounded-circle"
                             src={chat.getAvaterUrl}
                             alt="avatar"
                         />
-                        <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={handlefile}>
-                            <i className="zmdi zmdi-camera-party-mode"></i>
-                        </button>
+                        {chat.chatType !== ChatType.Private && chat.isAdmin(authStore.userId) && (
+                            <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                onClick={handlefile}>
+                                <i className="zmdi zmdi-camera-party-mode"></i>
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -230,17 +235,19 @@ export const GroupTitle = observer(({ chat }: { chat: Chat }) => {
         <div className="text-center mt-3 mb-5">
             <h4>
                 {chat.name}
-                <button
-                    type="button"
-                    className="btn btn-lg btn-nameeditor"
-                    onClick={action(() => {
-                        updateGroupStore.chat = chat
-                        updateGroupStore.updateType = 'GroupName'
-                        modalStore.modalType = 'ChangeGroupName'
-                        modalStore.isOpen = true
-                    })}>
-                    <i className="zmdi zmdi-edit zmdi-hc-lg"></i>
-                </button>
+                {chat.isAdmin(authStore.userId) && (
+                    <button
+                        type="button"
+                        className="btn btn-lg btn-nameeditor"
+                        onClick={action(() => {
+                            updateGroupStore.chat = chat
+                            updateGroupStore.updateType = 'GroupName'
+                            modalStore.modalType = 'ChangeGroupName'
+                            modalStore.isOpen = true
+                        })}>
+                        <i className="zmdi zmdi-edit zmdi-hc-lg"></i>
+                    </button>
+                )}
             </h4>
 
             <span className="text-muted"></span>
@@ -386,14 +393,16 @@ export const manageGroupNoticeStore = new ManageGroupNoticeStore()
 export const GroupNotices = observer(({ chat }: { chat: Chat }) => {
     return (
         <div className="tab-pane fade" id="GroupChat-Notices" role="tabpanel">
-            <button
-                onClick={action(() => {
-                    modalStore.modalType = 'SendGroupNotice'
-                    modalStore.isOpen = true
-                    manageGroupNoticeStore.chat = chat
-                })}>
-                点击发送群公告
-            </button>
+            {chat.isAdmin(authStore.userId) && (
+                <button
+                    onClick={action(() => {
+                        modalStore.modalType = 'SendGroupNotice'
+                        modalStore.isOpen = true
+                        manageGroupNoticeStore.chat = chat
+                    })}>
+                    点击发送群公告
+                </button>
+            )}
             <ul>
                 {chat.noticeList.map((notice) => (
                     <li key={notice.noticeId}>

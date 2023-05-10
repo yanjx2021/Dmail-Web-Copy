@@ -25,11 +25,22 @@ export const MessageDropDown = observer(
                 </a>
 
                 <div className="dropdown-menu dropdown-menu-right">
+                    {msg.showReplyButton && (
+                        <DropDownItem
+                            text="回复"
+                            handleClick={action(() => {
+                                modalStore.modalType = 'ReplyText'
+                                modalStore.isOpen = true
+                                modalStore.replyMessageId = msg.inChatId
+                            })}
+                        />
+                    )}
                     {messageSelectStore.showSelector ? (
                         <DropDownItem
                             text="取消多选"
                             handleClick={action(() => {
                                 messageSelectStore.reset()
+                                modalStore.isOpen = true
                             })}
                         />
                     ) : (

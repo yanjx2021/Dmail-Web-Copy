@@ -19,9 +19,12 @@ export class ModalStore {
         | 'GroupMessageReaders'
         | 'GetUserIds'
         | 'SendGroupNotice' 
-        | 'LogOff' = ''
+        | 'LogOff'
+        | 'ReplyText' = ''
     transferInfo: ChatMessageTransferInfo | undefined = undefined
     groupMessageReaders: number[] | undefined
+    replyMessageId: number | undefined
+    sendReplyMessageHandler: any
 
     handleCancel() {
         this.isOpen = false
@@ -45,6 +48,7 @@ export class ModalStore {
         this.modalType = ''
         this.transferInfo = undefined
         this.groupMessageReaders = undefined
+        this.replyMessageId = undefined
     }
 
     constructor() {

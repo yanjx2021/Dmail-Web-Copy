@@ -8,7 +8,8 @@ import {
     ChatMessageFileInfo,
     ChatMessageTransferInfo,
     ChatMessageType,
-    MentionTextContent,
+    ReplyTextContent,
+    chatStore,
 } from '../../stores/chatStore'
 import { authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
@@ -118,8 +119,16 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>{'消息已撤回'}</div>
         )
+    } else if (msg.type === ChatMessageType.ReplyText) {
+        const content: ReplyTextContent = msg.content as ReplyTextContent
+        const repliedMessage = chatStore.getChat(msg.chatId)
+        return <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+            回复消息{content.inChatId}:
+            <p>-------------------</p>
+            {content.text}
+        </div>
     }
-    return <div></div>
+    return <div className={'message-content p-3' + (isRight ? ' border' : '')}>当前版本不支持该消息类型，请升级至最新版本</div>
 })
 
 export const ChatMessageItem = observer(

@@ -85,6 +85,7 @@ export enum ChatMessageType {
     Transfer = 'Transfer',
     Revoked = 'Revoked',
     MentionText = 'MentionText',
+    ReplyText = 'ReplyText',
 }
 
 export type ChatMessageContentType =
@@ -93,6 +94,12 @@ export type ChatMessageContentType =
     | ImageHash
     | ChatMessageTransferInfo
     | MentionTextContent
+    | ReplyTextContent
+
+export interface ReplyTextContent {
+    inChatId: number
+    text: string
+}
 
 export interface MentionTextContent {
     userIds: number[]
@@ -144,6 +151,13 @@ export class ChatMessage {
         if (this.bindChat.isAdmin(authStore.userId) && !this.bindChat.isAdmin(this.senderId))
             return true
         return false
+    }
+
+    get showReplyButton() {
+        if (this.senderId === 0) return false
+        if (this.senderId === authStore.userId) return false
+        if (this.type === ChatMessageType.Revoked) return false
+        return true
     }
 
     get showGetReadersButton() {
@@ -360,7 +374,7 @@ export class GroupChatNotice {
     setToSelf(another: GroupChatNotice) {
         this.chatId = another.chatId
         this.notice = another.notice
-        this.noticeId = another.chatId
+        this.noticeId = another.noticeId
         this.timestamp = another.timestamp
         this.clientId = another.clientId
         this.senderId = another.senderId
@@ -753,6 +767,38 @@ export class Chat {
             chatId: this.chatId,
         })
         msg.clientId = data.clientId
+        // TODO : Response超时
+        this.sendingMessages.push(msg)
+        MessageServer.Instance().send<Send.SendMessage>(Send.SendMessage, data)
+        return msg
+    }
+
+    sendReplyMessage(text: string, replyId: number) {
+        const timestamp = Date.now()
+        const data: SendSendMessageData = {
+            type: ChatMessageType.ReplyText,
+            clientId: ++this.lastClientId,
+            serializedContent: JSON.stringify({
+                text,
+                inChatId: replyId
+            }),
+            chatId: this.chatId,
+            timestamp,
+        }
+        let msg = new ChatMessage({
+            type: ChatMessageType.ReplyText,
+            content: {
+                text,
+                inChatId: replyId,
+            },
+            timestamp,
+            inChatId: undefined,
+            senderId: authStore.userId,
+            state: ChatMessageState.Sending,
+            chatId: this.chatId,
+        })
+        msg.clientId = data.clientId
+
         // TODO : Response超时
         this.sendingMessages.push(msg)
         MessageServer.Instance().send<Send.SendMessage>(Send.SendMessage, data)

@@ -13,7 +13,7 @@ import { userSettingStore } from '../../stores/userSettingStore'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 import { secondaryCodeHash } from '../../constants/passwordHash'
 import { ChatSelector, messageSelectStore } from '../MessagesBox/Selector'
-import { Chat, chatStore } from '../../stores/chatStore'
+import { Chat, ReplyTextContent, chatStore } from '../../stores/chatStore'
 import { MessageBox } from '../MessagesBox/MessageBox'
 import { useEffect } from 'react'
 import '../../styles/Modal.css'
@@ -473,6 +473,42 @@ export const SendGroupNoticeModalView = observer(({ title }: { title: string }) 
     )
 })
 
+export const ReplyMessageModalView = observer(({ title }: { title: string }) => {
+    const [reply, setReply] = useImmer<string>('')
+
+    return (
+        <Modal
+            footer={[
+                <Button
+                    key="close"
+                    onClick={action(() => {
+                        if (!modalStore.replyMessageId) {
+                            console.error('未选中应该回复的消息')
+                        }
+                        modalStore.sendReplyMessageHandler(modalStore.replyMessageId, reply)
+                        setReply('')
+                    })}>
+                    发送
+                </Button>,
+            ]}
+            onCancel={action(() => {
+                modalStore.handleCancel()
+                manageGroupNoticeStore.reset()
+            })}
+            title={title}
+            open={modalStore.isOpen}>
+            <ModalInput
+                type="text"
+                label="回复消息"
+                value={reply}
+                setValue={action((e: any) => {
+                    setReply(e.target.value)
+                })}
+            />
+        </Modal>
+    )
+})
+
 export const LogOffModalView = observer(({ title }: { title: string }) => {
     return (
         <Modal
@@ -499,6 +535,7 @@ export const LogOffModalView = observer(({ title }: { title: string }) => {
         </Modal>
     )
 })
+
 
 export const RegisterModal = observer(() => {
     useEffect(() => {
@@ -533,6 +570,8 @@ export const RegisterModal = observer(() => {
             return <SendGroupNoticeModalView title="发送群公告" />
         case 'LogOff':
             return <LogOffModalView title='注销账号'/>
+        case 'ReplyText':
+            return <ReplyMessageModalView title='回复消息'/>
         default:
             return <></>
     }
