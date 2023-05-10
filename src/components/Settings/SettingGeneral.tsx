@@ -8,6 +8,9 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { modalStore } from '../../stores/modalStore'
 
 export const SettingGeneral = () => {
+    const handlefile = () => {
+        document.getElementById('userphoto')?.click()
+    }
     return (
         <div className="tab-pane fade show active" id="setting-general" role="tabpanel">
             <div className="row">
@@ -22,16 +25,17 @@ export const SettingGeneral = () => {
                                 <InfInputer placeholder={'昵称...'} />
                                 <InfInputer placeholder={'手机号...'} />
                                 <InfInputer placeholder={'邮箱...'} />
-                                <InfInputer placeholder={'Facebook账号...'} />
-                                <InfInputer placeholder={'Instagram账号...'} />
-                                <InfInputer placeholder={'Linkedin账号...'} />
+                                <InfInputer placeholder={'微信帐号...'} />
+                                <InfInputer placeholder={'QQ帐号...'} />
+                                <InfInputer placeholder={'Github账号...'} />
                                 <div className="col-12">
                                     <div className="form-group">
-                                        <label>更改头像</label>
-                                        <input
-                                            type="file"
-                                            className="form-control-file text-footerform"
-                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-primary btn-sm"
+                                            onClick={handlefile}>
+                                            <i className="zmdi zmdi-edit"></i>更改头像
+                                        </button>
                                     </div>
                                 </div>
                                 <div className="col-12">
@@ -61,14 +65,14 @@ export const SettingGeneral = () => {
         </div>
     )
 }
-const InfInputer = ({ placeholder }: { placeholder: string }) => {
+export const InfInputer = ({ placeholder }: { placeholder: string }) => {
     return (
         <div className="col-lg-4 col-md-6 col-sm-12">
             <div className="form-group">
-                <div className="input-group">
+                <div className="input-group ">
                     <input
                         type="text"
-                        className="form-control form-control-lg text-footerform"
+                        className="form-control form-control-lg text-footerform "
                         placeholder={placeholder}
                     />
                 </div>
@@ -86,7 +90,14 @@ const DeleteUser = () => {
                 </p>
             </div>
             <div className="col-auto">
-                <button className="btn btn-danger">注销</button>
+                <button
+                    className="btn btn-danger"
+                    onClick={action(() => {
+                        modalStore.modalType = 'LogOff'
+                        modalStore.isOpen = true
+                    })}>
+                    注销
+                </button>
             </div>
         </div>
     )

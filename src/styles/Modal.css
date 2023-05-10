@@ -31,7 +31,12 @@
   border-color: #fff;
 }
 
-.ant-modal-root .ant-modal-body .form-group .form-control
+.ant-modal-root .ant-modal-body .form-group .form-margin
+{
+  margin-top: 5px;
+  margin-bottom: 8px;
+}
+.ant-modal-root .ant-modal-body .form-group .input-group
 {
   margin-top: 5px;
   margin-bottom: 8px;
@@ -46,7 +51,21 @@
   margin-top: 5px;
   border-radius: 8px;
 }
-.user-detail-sidebar .ant-btn:focus
+.addnew-user-sidebar .ant-btn
+{
+  background-color:var(--primary-color);
+  color:#fff;
+  padding: .4rem 1rem;
+  height:38px;
+  margin-top: 5px;
+  border-radius: 8px;
+}
+.addnew-user-sidebar .ant-btn:focus
 {
   outline: none;
+}
+.user-detail-sidebar .row.justify-content-between.mb-4
+{
+  padding-left: 15px;
+  padding-right: 10px;
 }

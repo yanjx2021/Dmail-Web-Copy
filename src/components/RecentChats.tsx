@@ -69,9 +69,29 @@ const RecentChatItem = observer(
                                     {chat.lastMessage !== undefined ? chat.lastMessage.asShort : ''}
                                 </div>
                                 {/* TODO: yjx有人at时，出现红色字提示 */}
-                                {chat.atYou ? <p color='red'>有人@你</p> : <></>}
-                                {rtcStore.remoteUserId === chat.bindUser?.userId && rtcStore.type === 'Voice' && <p>语音通话中...</p>}
-                                {rtcStore.remoteUserId === chat.bindUser?.userId && rtcStore.type === 'Video' && <p>视频通话中...</p>}
+                                {chat.atYou ? <p className="text-danger">有人@你</p> : <></>}
+                                {rtcStore.remoteUserId === chat.bindUser?.userId &&
+                                    rtcStore.type === 'Voice' && (
+                                        <p>
+                                            语音通话中
+                                            <div className="wave">
+                                                <span className="dot"></span>
+                                                <span className="dot"></span>
+                                                <span className="dot"></span>
+                                            </div>
+                                        </p>
+                                    )}
+                                {rtcStore.remoteUserId === chat.bindUser?.userId &&
+                                    rtcStore.type === 'Video' && (
+                                        <p>
+                                            视频通话中
+                                            <div className="wave">
+                                                <span className="dot"></span>
+                                                <span className="dot"></span>
+                                                <span className="dot"></span>
+                                            </div>
+                                        </p>
+                                    )}
                             </div>
                         </div>
                     </div>

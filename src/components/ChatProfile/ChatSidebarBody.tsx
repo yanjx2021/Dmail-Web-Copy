@@ -192,6 +192,7 @@ export const AddFriendModal = observer(
                     label="验证消息"
                     value={requestStore.message}
                     setValue={action((e: any) => (requestStore.message = e.target.value))}
+                    placeholder={'请输入验证消息...'}
                 />
             </Modal>
         )
@@ -393,24 +394,40 @@ export const manageGroupNoticeStore = new ManageGroupNoticeStore()
 export const GroupNotices = observer(({ chat }: { chat: Chat }) => {
     return (
         <div className="tab-pane fade" id="GroupChat-Notices" role="tabpanel">
-            {chat.isAdmin(authStore.userId) && (
-                <button
-                    onClick={action(() => {
-                        modalStore.modalType = 'SendGroupNotice'
-                        modalStore.isOpen = true
-                        manageGroupNoticeStore.chat = chat
-                    })}>
-                    点击发送群公告
-                </button>
-            )}
-            <ul>
-                {chat.noticeList.map((notice) => (
-                    <li key={notice.noticeId}>
-                        {' '}
-                        {`${userStore.getUser(notice.senderId).showName}: ${notice.notice}`}{' '}
-                    </li>
-                ))}
-            </ul>
+            <div className="row justify-content-between mb-4">
+                <div className="col-12 col-md-6">
+                    <h5>群公告</h5>
+                    <p className="text-muted mb-md-0">只有群主和群管理员可以参与编辑。</p>
+                </div>
+                {chat.isAdmin(authStore.userId) && <div className="col-auto">
+                    <button
+                        className="btn btn-warning"
+                        onClick={action(() => {
+                            modalStore.modalType = 'SendGroupNotice'
+                            modalStore.isOpen = true
+                            manageGroupNoticeStore.chat = chat
+                        })}>
+                        发送群公告
+                    </button>
+                </div>}
+            </div>
+            <div className="col-lg-12 col-md-12">
+                <div className="card bg-light border">
+                    <div className="card-body">
+                        <p className="mb-2">最近的群公告</p>
+                        <ul>
+                            {chat.noticeList.map((notice) => (
+                                <li key={notice.noticeId}>
+                                    {' '}
+                                    {`${userStore.getUser(notice.senderId).showName}: ${
+                                        notice.notice
+                                    }`}{' '}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 })
