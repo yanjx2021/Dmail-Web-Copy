@@ -70,18 +70,14 @@ const Home = observer(
                 <RegisterModal />
                 <Menu />
                 <TabContent activeChatId={activeChatId} setActiveChatId={checkAndSetActivateChat} />
-                {activeChatId === null ? (
+                {homeStore.openSetting ? (
+                    <Settings />
+                ) : activeChatId === null ? (
                     <NoneActiveChatBody />
                 ) : secureAuthStore.showSecureBox ? (
                     <LockedChatView />
                 ) : (
-                    <>
-                        {homeStore.openSetting ? (
-                            <Settings />
-                        ) : (
-                            <ChatView chat={chatStore.getChat(activeChatId)} />
-                        )}
-                    </>
+                    <ChatView chat={chatStore.getChat(activeChatId)} />
                 )}
             </>
         ) : (

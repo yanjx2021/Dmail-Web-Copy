@@ -75,8 +75,8 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                     <audio src={cachedUrl.url} controls />
                     {msg.translatedText && (
                         <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                            <p>-----转换结果-----</p>
-                            <p>111111111111111111111111111111111111111111111111</p>
+                            <p>------转换结果------</p>
+                            <p>{msg.translatedText}</p>
                         </div>
                     )}
                 </div>
@@ -109,7 +109,9 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                         modalStore.modalType = 'TransferChatBox'
                         modalStore.isOpen = true
                     })}>
+                    {/* TODO: 标题私聊时变成**与我的聊天记录，群聊时变为群聊的聊天记录 */}
                     <h5>{'[a和b的聊天记录]'}</h5>
+                    {/* TODO:获取最多三条聊天记录即可（超过的会看不见），不行的话就一条 */}
                     <div className='text-record-container'>
                     <p>a:1zzzzzz23123</p>
                     <p>c:12312zzzzzzzzzzzzzzzzz3</p>

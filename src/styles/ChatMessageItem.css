@@ -99,7 +99,7 @@
 .text-record.message-content .record-counter
 {
   border-top: 1px solid #dee2e6 !important;
-  margin-top: 3px;
-  padding-top: 3px;
+  margin-top: 5px;
+  padding-top:5px;
   font-size: 12px;
 }
