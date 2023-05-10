@@ -51,6 +51,15 @@
   margin-top: 5px;
   border-radius: 8px;
 }
+.addnew-user-sidebar .ant-btn
+{
+  background-color:var(--primary-color);
+  color:#fff;
+  padding: .4rem 1rem;
+  height:38px;
+  margin-top: 5px;
+  border-radius: 8px;
+}
 .user-detail-sidebar .ant-btn:focus
 {
   outline: none;

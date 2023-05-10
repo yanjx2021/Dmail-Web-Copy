@@ -187,6 +187,7 @@ export const AddFriendModal = observer(
                     label="验证消息"
                     value={requestStore.message}
                     setValue={action((e: any) => (requestStore.message = e.target.value))}
+                    placeholder={"请输入验证消息..."}
                 />
             </Modal>
         )
