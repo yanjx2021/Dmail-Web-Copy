@@ -60,11 +60,12 @@
   margin-top: 5px;
   border-radius: 8px;
 }
-.user-detail-sidebar .ant-btn:focus
+.addnew-user-sidebar .ant-btn:focus
 {
   outline: none;
 }
 .user-detail-sidebar .row.justify-content-between.mb-4
 {
   padding-left: 15px;
+  padding-right: 10px;
 }

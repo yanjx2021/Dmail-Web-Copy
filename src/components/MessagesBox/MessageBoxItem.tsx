@@ -65,7 +65,7 @@ export const ChatMessageBoxItemContent = observer(
             }
         } else if (msg.type === ChatMessageType.Transfer) {
             return (
-                <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                <div className={'message-content p-3 ' + (isRight ? ' border' : '')}>
                     <div
                         onClick={action(() => {
                             modalStore.transferInfo = msg.content as ChatMessageTransferInfo

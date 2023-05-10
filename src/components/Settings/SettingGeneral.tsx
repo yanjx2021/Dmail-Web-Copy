@@ -90,7 +90,14 @@ const DeleteUser = () => {
                 </p>
             </div>
             <div className="col-auto">
-                <button className="btn btn-danger">注销</button>
+                <button
+                    className="btn btn-danger"
+                    onClick={action(() => {
+                        modalStore.modalType = 'LogOff'
+                        modalStore.isOpen = true
+                    })}>
+                    注销
+                </button>
             </div>
         </div>
     )
