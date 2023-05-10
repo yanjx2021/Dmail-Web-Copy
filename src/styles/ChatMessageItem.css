@@ -59,6 +59,16 @@
   max-height:25px;
   max-width:25px;
   padding: .1rem .4rem;
-  margin-left: 10px;
+  margin-left: 4px;
   border-radius: 1rem;
+  background-color:transparent!important;
+  margin-bottom: 5px;
+}
+.card-user-avatar.xxl .btn
+{
+  padding: 0.2rem 0.4rem;
+}
+.card-user-avatar .btn
+{
+  padding: 0.2rem 0.45rem;
 }

@@ -49,21 +49,35 @@ const ChatSidebarAvatar = observer(({ chat }: { chat: Chat }) => {
                 })
             )
     }
+    const handlefile = () => {
+        document.getElementById('groupphoto')?.click()
+    }
     return (
         <>
             <div className="d-flex justify-content-center">
                 <div className="avatar xxl">
-                    <div className={'avatar xxl rounded-circle no-image ' + 'timber'}>
+                    <div className={'card-user-avatar avatar xxl rounded-circle no-image ' + 'timber'}>
                         <Image
                             className="avatar xxl rounded-circle"
                             src={chat.getAvaterUrl}
                             alt="avatar"
                         />
+                        <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={handlefile}>
+                            <i className="zmdi zmdi-camera-party-mode"></i>
+                        </button>
                     </div>
                 </div>
             </div>
             {chat.chatType !== ChatType.Private && chat.isAdmin(authStore.userId) && (
-                <input type="file" onChange={handleChange} />
+                <input
+                    className="photoinputer"
+                    id="groupphoto"
+                    type="file"
+                    onChange={handleChange}
+                />
             )}
         </>
     )
@@ -218,14 +232,14 @@ export const GroupTitle = observer(({ chat }: { chat: Chat }) => {
                 {chat.name}
                 <button
                     type="button"
-                    className="btn btn-secondary btn-sm btn-nameeditor"
+                    className="btn btn-lg btn-nameeditor"
                     onClick={action(() => {
                         updateGroupStore.chat = chat
                         updateGroupStore.updateType = 'GroupName'
                         modalStore.modalType = 'ChangeGroupName'
                         modalStore.isOpen = true
                     })}>
-                    <i className="zmdi zmdi-edit"></i>
+                    <i className="zmdi zmdi-edit zmdi-hc-lg"></i>
                 </button>
             </h4>
 
@@ -382,7 +396,10 @@ export const GroupNotices = observer(({ chat }: { chat: Chat }) => {
             </button>
             <ul>
                 {chat.noticeList.map((notice) => (
-                    <li key={notice.noticeId}> {`${userStore.getUser(notice.senderId).showName}: ${notice.notice}`} </li>
+                    <li key={notice.noticeId}>
+                        {' '}
+                        {`${userStore.getUser(notice.senderId).showName}: ${notice.notice}`}{' '}
+                    </li>
                 ))}
             </ul>
         </div>
