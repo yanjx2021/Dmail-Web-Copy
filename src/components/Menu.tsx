@@ -84,13 +84,6 @@ const Menu = observer(() => {
                     <i className="zmdi zmdi-account-circle"></i>
                 </a>
 
-                <a
-                    className="mb-xl-3 mb-md-2 nav-link d-none d-sm-block"
-                    data-toggle="pill"
-                    href="#nav-tab-pages"
-                    role="tab">
-                    <i className="zmdi zmdi-layers"></i>
-                </a>
             </div>
 
             <div
