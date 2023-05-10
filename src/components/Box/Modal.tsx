@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { ModalStore, modalStore } from '../../stores/modalStore'
-import { Button, Checkbox, Modal } from 'antd'
+import { Button, Checkbox, Modal, Select, Space, message } from 'antd'
 import { useImmer } from 'use-immer'
 import { requestStore } from '../../stores/requestStore'
 import { action } from 'mobx'
@@ -13,7 +13,14 @@ import { userSettingStore } from '../../stores/userSettingStore'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 import { secondaryCodeHash } from '../../constants/passwordHash'
 import { ChatSelector, messageSelectStore } from '../MessagesBox/Selector'
-import { Chat, ReplyTextContent, chatStore } from '../../stores/chatStore'
+import {
+    Chat,
+    ChatMessage,
+    ChatMessageType,
+    ChatType,
+    ReplyTextContent,
+    chatStore,
+} from '../../stores/chatStore'
 import { MessageBox } from '../MessagesBox/MessageBox'
 import { useEffect } from 'react'
 import '../../styles/Modal.css'
@@ -21,6 +28,7 @@ import { updateGroupStore } from '../../stores/updateGroupStore'
 import { userStore } from '../../stores/userStore'
 import { getUserIdStore } from '../../stores/getUserIdStore'
 import { manageGroupNoticeStore } from '../ChatProfile/ChatSidebarBody'
+import { type } from 'os'
 
 export const ModalInput = ({
     label,
@@ -38,7 +46,13 @@ export const ModalInput = ({
     return (
         <div className="form-group">
             <label>{label}</label>
-            <input type={type} className="form-control form-control-lg form-margin" value={value} onChange={setValue}  placeholder={placeholder}/>
+            <input
+                type={type}
+                className="form-control form-control-lg form-margin"
+                value={value}
+                onChange={setValue}
+                placeholder={placeholder}
+            />
         </div>
     )
 }
@@ -76,7 +90,7 @@ export const JoinGroupModalView = observer(({ title }: { title: string }) => {
                 value={requestStore.message}
                 setValue={action((e: any) => (requestStore.message = e.target.value))}
                 placeholder="请输入验证消息..."
-           />
+            />
         </Modal>
     )
 })
@@ -445,9 +459,13 @@ export const GetUserIdModalView = observer(({ title }: { title: string }) => {
             />
             <h5>搜索结果</h5>
             <ul>
-                {getUserIdStore.users?.map((user) => (
-                    <li key={user.userId}> {`用户名: ${user.name} ID: ${user.userId}`} </li>
-                ))}
+                {getUserIdStore.userIds?.length === 0 ? (
+                    <li key={0}>未找到该用户</li>
+                ) : (
+                    getUserIdStore.users?.map((user) => (
+                        <li key={user.userId}> {`用户名: ${user.name} ID: ${user.userId}`} </li>
+                    ))
+                )}
             </ul>
         </Modal>
     )
@@ -514,7 +532,7 @@ export const ReplyMessageModalView = observer(({ title }: { title: string }) => 
             <ModalInput
                 type="text"
                 label="回复消息"
-                placeholder='请输入消息...'
+                placeholder="请输入消息..."
                 value={reply}
                 setValue={action((e: any) => {
                     setReply(e.target.value)
@@ -551,6 +569,105 @@ export const LogOffModalView = observer(({ title }: { title: string }) => {
     )
 })
 
+export type TypeSelect = 'none' | 'file' | 'image' | 'audio'
+
+export const SelectMessageModalView = observer(({ title }: { title: string }) => {
+    const [filtedMessages, setFiltedMessages] = useImmer<ChatMessage[]>([])
+
+    const [userIdSelect, setUserIdSelect] = useImmer<number>(-1)
+
+    const [typeSelect, setTypeSelect] = useImmer<TypeSelect>('none')
+    const handleTypeChange = (value: TypeSelect) => {
+        setTypeSelect(value)
+        console.log(`Selected ${value}`)
+    }
+
+    const handleUserChange = (value: number) => {
+        setUserIdSelect(value)
+    }
+
+    const filtMessage = (message: ChatMessage) => {
+        let condition1: boolean = true
+        switch (typeSelect) {
+            case 'image':
+                condition1 = message.type === ChatMessageType.Image
+                break
+            case 'file':
+                condition1 = message.type === ChatMessageType.File
+                break
+            case 'audio':
+                condition1 = message.type === ChatMessageType.Voice
+                break
+            case 'none':
+                break
+        }
+        let condition2 = true
+        if (userIdSelect !== -1) {
+            condition2 = message.senderId === userIdSelect
+        }
+        return condition1 && condition2
+    }
+
+    return (
+        <Modal
+            footer={[]}
+            onCancel={action(() => {
+                modalStore.handleCancel()
+            })}
+            title={title}
+            open={modalStore.isOpen}>
+            <Space wrap>
+                <Select
+                    style={{ width: 120 }}
+                    onChange={handleTypeChange}
+                    defaultValue={'none'}
+                    options={[
+                        { value: 'none', label: '无' },
+                        { value: 'file', label: '文件' },
+                        { value: 'image', label: '图片' },
+                        { value: 'audio', label: '语音' },
+                    ]}
+                />
+                {modalStore.showSelectSender && (
+                    <Select
+                        style={{ width: 120 }}
+                        onChange={handleUserChange}
+                        defaultValue={-1}
+                        options={[{ value: -1, label: '无' }, ...modalStore.selectUserOption]}
+                    />
+                )}
+            </Space>
+            <button
+                className="ant-btn css-dev-only-do-not-override-1mqg3i0 ant-btn-default"
+                onClick={action(() => {
+                    const messages = modalStore.selectMessageList
+                        ? modalStore.selectMessageList
+                        : []
+                    const filtedMessages = messages.filter(filtMessage)
+                    setFiltedMessages(filtedMessages)
+                })}>
+                筛选
+            </button>
+            {modalStore.selectMessageList && (
+                <>
+                    <p>
+                        {`共${modalStore.selectMessageList.length}条消息 ` +
+                            `查询范围: ${new Date(
+                                modalStore.selectMessageList[0].timestamp
+                            ).toLocaleString()} - ${new Date(
+                                modalStore.selectMessageList[
+                                    modalStore.selectMessageList.length - 1
+                                ].timestamp
+                            ).toLocaleString()}`}
+                    </p>
+                </>
+            )}
+            <h5>筛选结果</h5>
+            <p>{`共${filtedMessages.length}条消息`}</p>
+            <MessageBox msgs={filtedMessages} userId={authStore.userId} />
+        </Modal>
+    )
+})
 
 export const RegisterModal = observer(() => {
     useEffect(() => {
@@ -584,9 +701,11 @@ export const RegisterModal = observer(() => {
         case 'SendGroupNotice':
             return <SendGroupNoticeModalView title="发送群公告" />
         case 'LogOff':
-            return <LogOffModalView title='注销账号'/>
+            return <LogOffModalView title="注销账号" />
         case 'ReplyText':
-            return <ReplyMessageModalView title='回复消息'/>
+            return <ReplyMessageModalView title="回复消息" />
+        case 'SelectMessages':
+            return <SelectMessageModalView title="筛选消息" />
         default:
             return <></>
     }

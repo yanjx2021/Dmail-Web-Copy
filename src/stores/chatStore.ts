@@ -181,6 +181,8 @@ export class ChatMessage {
         return 'Sender'
     }
 
+
+
     revokeMessage() {
         MessageServer.Instance().send<Send.RevokeMessage>(Send.RevokeMessage, {
             chatId: this.chatId,
@@ -304,16 +306,29 @@ export class ChatMessage {
         return tip
     }
     get asShort() {
-        if (this.type === ChatMessageType.Text) {
-            return this.content as string
-        } else if (this.type === ChatMessageType.Transfer) {
-            return '[聊天记录]'
-        } else if (this.type === ChatMessageType.Deleted) {
-            return '[已删除]'
-        } else if (this.type === ChatMessageType.Revoked) {
-            return '[已撤回]'
-        } else {
-            return '[文件/图片消息]'
+        switch (this.type) {
+            case ChatMessageType.Text:
+                return this.content as string
+            case ChatMessageType.Deleted:
+                return '[已删除]'
+            case ChatMessageType.Revoked:
+                return '[已撤回]'
+            case ChatMessageType.Transfer:
+                return '[聊天记录]'
+            case ChatMessageType.File:
+                return '[文件消息]'
+            case ChatMessageType.Image:
+                return '[图片消息]'
+            case ChatMessageType.Voice:
+                return '[语音消息]'
+            case ChatMessageType.ReplyText:
+                const replyContent = this.content as ReplyTextContent
+                return replyContent.text
+            case ChatMessageType.MentionText:
+                const mentionContent = this.content as MentionTextContent
+                return mentionContent.text
+            default:
+                return '当前版本尚不支持该消息'
         }
     }
 
@@ -470,6 +485,13 @@ export class Chat {
             lastNoticeId,
             chatId: this.chatId
         })
+    }
+
+    messagesList() {
+        const messageList: ChatMessage[] = []
+        this.messages.forEach((message) => messageList.push(message))
+        messageList.sort((a, b) => a.timestamp - b.timestamp)
+        return messageList
     }
 
     removeGroupChatMember(userId: number) {

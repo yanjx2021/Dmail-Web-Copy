@@ -1,6 +1,7 @@
 import { makeAutoObservable } from 'mobx'
-import { Chat, ChatMessage, ChatMessageTransferInfo, chatStore } from './chatStore'
+import { Chat, ChatMessage, ChatMessageTransferInfo, ChatType, chatStore } from './chatStore'
 import { ReceiveChatMessage } from '../utils/message'
+import { userStore } from './userStore'
 
 export class ModalStore {
     isOpen: boolean = false
@@ -20,11 +21,40 @@ export class ModalStore {
         | 'GetUserIds'
         | 'SendGroupNotice' 
         | 'LogOff'
-        | 'ReplyText' = ''
+        | 'ReplyText'
+        | 'SelectMessages' = ''
     transferInfo: ChatMessageTransferInfo | undefined = undefined
     groupMessageReaders: number[] | undefined
     replyMessageId: number | undefined
     sendReplyMessageHandler: any
+    selectMessageChat: Chat | undefined
+    selectMessageList: ChatMessage[] | undefined
+
+    get showSelectSender() {
+        return this.selectMessageChat?.chatType !== ChatType.Private
+    }
+
+    get selectUserIds() {
+        if (!this.showSelectSender) {
+            return []
+        }
+        const userIds: number[] = []
+        this.selectMessageList?.forEach((message, _) => {
+            if (userIds.indexOf(message.senderId) === -1 && message.senderId !== 0) {
+                userIds.push(message.senderId)
+            }
+        })
+        return userIds
+    }
+
+    get selectUserOption() {
+        return this.selectUserIds.map((userId) => {
+            return {
+                value: userId,
+                label: userStore.getUser(userId).showName
+            }
+        })
+    }
 
     handleCancel() {
         this.isOpen = false
@@ -49,6 +79,8 @@ export class ModalStore {
         this.transferInfo = undefined
         this.groupMessageReaders = undefined
         this.replyMessageId = undefined
+        this.selectMessageChat = undefined
+        this.selectMessageList = undefined
     }
 
     constructor() {

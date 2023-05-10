@@ -1,13 +1,22 @@
 import { observer } from 'mobx-react-lite'
 import { ChatMessage } from '../../stores/chatStore'
 import { Virtuoso } from 'react-virtuoso'
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { action, makeAutoObservable } from 'mobx'
 import { ChatMessageItem } from '../ChatView/ChatMessageItem'
 import { ChatMessageBoxItem } from './MessageBoxItem'
+import { useImmer } from 'use-immer'
 
-export const MessageBox = observer(({ msgs, userId }: { msgs: ChatMessage[], userId: number }) => {
+export const MessageBox = observer(({ msgs, userId }: { msgs: ChatMessage[]; userId: number }) => {
     const virtuosoRef: any = useRef(null)
+    const [messages, setMessages] = useImmer<ChatMessage[]>(msgs.slice())
+
+    useEffect(
+        action(() => {
+            setMessages(msgs.slice())
+        }),
+        [msgs]
+    )
 
     const itemContent = useCallback(
         action((_: number, message: ChatMessage) => {
@@ -16,13 +25,15 @@ export const MessageBox = observer(({ msgs, userId }: { msgs: ChatMessage[], use
         []
     )
 
-    return (
+    return messages.length === 0 ? (
+        <div>没有!</div>
+    ) : (
         <Virtuoso
-            style={{height: '400px'}}
+            style={{ height: '400px' }}
             className="container-xxl list-unstyled py-4"
             ref={virtuosoRef}
-            firstItemIndex={msgs.length}
-            data={msgs}
+            firstItemIndex={messages.length}
+            data={messages}
             itemContent={itemContent}
         />
     )

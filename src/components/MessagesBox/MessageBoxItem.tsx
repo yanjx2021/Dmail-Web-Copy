@@ -8,6 +8,8 @@ import {
     ChatMessageFileInfo,
     ChatMessageTransferInfo,
     ChatMessageType,
+    ReplyTextContent,
+    chatStore,
 } from '../../stores/chatStore'
 import { authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
@@ -22,6 +24,7 @@ import { modalStore } from '../../stores/modalStore'
 import { FileItem, LoadingFileItem } from '../ChatView/FileItem'
 import { LoadingPhotoItem, PhotoItem } from '../ChatView/PhotoItem'
 import '../../styles/MessageBoxItem.css'
+import { renderFormatUrl } from '../../utils/urlToLink'
 
 export const ChatMessageBoxItemContent = observer(
     ({ msg, userId }: { msg: ChatMessage; userId: number }) => {
@@ -30,7 +33,7 @@ export const ChatMessageBoxItemContent = observer(
         if (msg.type === ChatMessageType.Text && typeof msg.content === 'string') {
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                    {msg.content as string}
+                    {renderFormatUrl(msg.content as string)}
                 </div>
             )
         } else if (msg.type === ChatMessageType.Image && typeof msg.content === 'string') {
@@ -91,8 +94,20 @@ export const ChatMessageBoxItemContent = observer(
                     </div>
                 </div>
             )
+        } else if (msg.type === ChatMessageType.Revoked) {
+            return (
+                <div className={'message-content p-3' + (isRight ? ' border' : '')}>{'消息已撤回'}</div>
+            )
+        } else if (msg.type === ChatMessageType.ReplyText) {
+            const content: ReplyTextContent = msg.content as ReplyTextContent
+            const repliedMessage = chatStore.getChat(msg.chatId)
+            return <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                回复消息{content.inChatId}:
+                <p>-------------------</p>
+                {renderFormatUrl(content.text)}
+            </div>
         }
-        return <div></div>
+        return <div className={'message-content p-3' + (isRight ? ' border' : '')}>当前版本不支持该消息类型，请升级至最新版本</div>
     }
 )
 

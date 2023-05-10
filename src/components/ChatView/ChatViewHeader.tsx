@@ -6,6 +6,7 @@ import { createGroupFromAllFriendsSelectStore } from '../MessagesBox/Selector'
 import { rtcStore } from '../../stores/rtcStore'
 import { Image } from 'antd'
 import { binaryStore } from '../../stores/binaryStore'
+import { modalStore } from '../../stores/modalStore'
 
 export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
     return (
@@ -46,7 +47,13 @@ export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
 
                     <div className="col-6 col-xl-8 text-end">
                         <ul className="nav justify-content-end">
-                            <li className="nav-item list-inline-item d-none d-md-block me-3">
+                            <li className="nav-item list-inline-item d-none d-md-block me-3"
+                            onClick={action(() => {
+                                modalStore.selectMessageChat = chat
+                                modalStore.selectMessageList = chat.messagesList()
+                                modalStore.modalType = 'SelectMessages'
+                                modalStore.isOpen = true
+                            })}>
                                 <a
                                     href="#"
                                     className="nav-link text-muted px-3"

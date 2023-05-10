@@ -45,6 +45,12 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         [chat, messages, setMessages]
     )
 
+    useEffect(action(() => {
+        if (chat.chatType !== ChatType.Private && (!chat.userIds || chat.userIds?.length === 0)) {
+            MessageServer.Instance().send<Send.GetGroupUsers>(Send.GetGroupUsers, chat.chatId)
+        }
+    }), [chat])
+
     const sendReplyMessageHandler = useCallback((replyId: number, text: string) => {
         const msg = chat.sendReplyMessage(text, replyId)
         setMessages([...messages, msg])

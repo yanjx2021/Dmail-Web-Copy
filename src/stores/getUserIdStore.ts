@@ -13,8 +13,8 @@ export class GetUserIdStore {
     }
 
     reset() {
-        this.userIds = []
-        this.users = []
+        this.userIds = undefined
+        this.users = undefined
     }
 
     findUser(userName: string) {
@@ -22,12 +22,20 @@ export class GetUserIdStore {
     }
 
     getUserIDResponseHandler(response: ReceiveGetUserIDResponseData) {
-        if (response.state !== 'Success') {
-            console.error(response)
-            return
+        switch (response.state) {
+            case 'Success':
+                this.userIds = response.userIds
+                this.users = this.userIds.map((userId) => userStore.getUser(userId))
+                break
+            case 'NotFound':
+                this.userIds = []
+                this.users = []
+                break
+            default:
+                console.log(response.state)
+                
         }
-        this.userIds = response.userIds
-        this.users = this.userIds.map((userId) => userStore.getUser(userId))
+        
     }
 }
 

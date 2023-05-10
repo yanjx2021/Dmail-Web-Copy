@@ -26,6 +26,8 @@ import { FileItem, LoadingFileItem } from './FileItem'
 import { LoadingPhotoItem, PhotoItem } from './PhotoItem'
 import { Image } from 'antd'
 import { renderFormatUrl } from '../../utils/urlToLink'
+import { min } from 'rxjs'
+import { ReceiveChatMessage } from '../../utils/message'
 
 export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) => {
     const isRight = msg.senderId === authStore.userId
@@ -72,7 +74,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             const cachedUrl = binaryStore.getBinaryUrl(msg.content)
 
             return (
-                <div className='audio-div'>
+                <div className="audio-div">
                     <audio src={cachedUrl.url} controls />
                     {msg.translatedText && (
                         <div className={'message-content p-3' + (isRight ? ' border' : '')}>
@@ -102,6 +104,21 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             )
         }
     } else if (msg.type === ChatMessageType.Transfer) {
+        const content = msg.content as ChatMessageTransferInfo
+        const count = content.messages.length
+        const messageSlice: ChatMessage[] = content.messages
+            .slice(0, content.messages.length > 3 ? 3 : content.messages.length)
+            .map((value, _) =>
+                ChatMessage.createFromReciveMessage(JSON.parse(value) as ReceiveChatMessage)
+            )
+
+        const shortMessage = (message: ChatMessage) => (
+            <p key={message.inChatId}>{`${userStore.getUser(message.senderId).showName}: ${message.asShort.slice(
+                0,
+                message.asShort.length > 10 ? 10 : message.asShort.length
+            )}`}</p>
+        )
+
         return (
             <div className={'message-content p-3 text-record' + (isRight ? ' border' : '')}>
                 <div
@@ -111,14 +128,13 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                         modalStore.isOpen = true
                     })}>
                     {/* TODO: 标题私聊时变成**与我的聊天记录，群聊时变为群聊的聊天记录 */}
-                    <h5>{'[a和b的聊天记录]'}</h5>
+
+                    <h5>{`[聊天记录]`}</h5>
                     {/* TODO:获取最多三条聊天记录即可（超过的会看不见），不行的话就一条 */}
-                    <div className='text-record-container'>
-                    <p>a:1zzzzzz23123</p>
-                    <p>c:12312zzzzzzzzzzzzzzzzz3</p>
-                    <p>c:123123zzzzzzzzzzzzzzzzz</p>
+                    <div className="text-record-container">
+                        {messageSlice.map((message) => shortMessage(message))}
                     </div>
-                    <div className='record-counter'>查看n条转发消息</div>
+                    <div className="record-counter">{`查看${count}条消息`}</div>
                 </div>
             </div>
         )
@@ -129,13 +145,18 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
     } else if (msg.type === ChatMessageType.ReplyText) {
         const content: ReplyTextContent = msg.content as ReplyTextContent
         const repliedMessage = chatStore.getChat(msg.chatId)
-        return <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-            回复消息{content.inChatId}:
-            <p>-------------------</p>
-            {content.text}
-        </div>
+        return (
+            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                回复消息{content.inChatId}:<p>-------------------</p>
+                {renderFormatUrl(content.text)}
+            </div>
+        )
     }
-    return <div className={'message-content p-3' + (isRight ? ' border' : '')}>当前版本不支持该消息类型，请升级至最新版本</div>
+    return (
+        <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+            当前版本不支持该消息类型，请升级至最新版本
+        </div>
+    )
 })
 
 export const ChatMessageItem = observer(
