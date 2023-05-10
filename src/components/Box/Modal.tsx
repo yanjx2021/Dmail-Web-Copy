@@ -514,6 +514,7 @@ export const ReplyMessageModalView = observer(({ title }: { title: string }) => 
             <ModalInput
                 type="text"
                 label="回复消息"
+                placeholder='请输入消息...'
                 value={reply}
                 setValue={action((e: any) => {
                     setReply(e.target.value)
