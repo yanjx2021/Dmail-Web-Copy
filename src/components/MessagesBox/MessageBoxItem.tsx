@@ -45,7 +45,22 @@ export const ChatMessageBoxItemContent = observer(
 
                 return <PhotoItem cachedUrl={cachedUrl} />
             }
-        } else if (msg.type === ChatMessageType.File) {
+        } else if (msg.type === ChatMessageType.Voice && typeof msg.content === 'string') {
+          if (msg.bindUploading) {
+              return (
+                  <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                      <LoadingPhotoItem bindUploading={msg.bindUploading} />
+                  </div>
+              )
+          } else {
+              const cachedUrl = binaryStore.getBinaryUrl(msg.content)
+              return (
+                  <div className='audio-div'>
+                      <audio src={cachedUrl.url} controls />
+                  </div>
+              )
+          }
+      } else if (msg.type === ChatMessageType.File) {
             if (msg.bindUploading) {
                 // 正在上传
                 return (
