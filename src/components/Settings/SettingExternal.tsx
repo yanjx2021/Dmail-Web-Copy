@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { useState, useCallback, useEffect } from 'react'
 import { ExternalApiStore, externalStore } from '../../stores/externalStore'
 import { action } from 'mobx'
+import { InfInputer } from './SettingGeneral'
 
 export const SettingExternal = observer(() => {
     useEffect(() => {
@@ -11,32 +12,76 @@ export const SettingExternal = observer(() => {
 
     return (
         <div className="tab-pane fade" id="setting-external" role="tabpanel">
-            <h2>您的秘钥不会被上传</h2>
-            <h3>翻译服务</h3>
-            <div>
-                <p>百度ID</p>
-                <input
-                    onChange={action((e) => {
-                        externalStore.baiduTranslateId = e.target.value
-                    })}
-                    value={externalStore.baiduTranslateId}></input>
+            <ExternalHead />
+            <div className="row">
+                <div className="col-12">
+                    <div className="card mb-4">
+                        <div className="card-header">
+                            <h6 className="card-title mb-0">翻译服务</h6>
+                        </div>
+                        <div className="card-body">
+                            <form className="row g-3">
+                                <div>
+                                    <div className="form-group mb-3">
+                                        <label>百度ID</label>
+                                        <input
+                                            className="form-control text-footerform"
+                                            onChange={action((e) => {
+                                                externalStore.baiduTranslateId = e.target.value
+                                            })}
+                                            value={externalStore.baiduTranslateId}></input>
+                                    </div>
+                                    <div className="form-group mb-3">
+                                        <label>百度KEY</label>
+                                        <input
+                                            className="form-control text-footerform"
+                                            onChange={action(
+                                                (e) =>
+                                                    (externalStore.baiduTransalteKey =
+                                                        e.target.value)
+                                            )}
+                                            value={externalStore.baiduTransalteKey}></input>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div className="card-header">
+                            <h6 className="card-title mb-0">语音识别</h6>
+                        </div>
+                        <div className="card-body">
+                            <form className="row g-3">
+                                <div>
+                                    <div className="form-group mb-3">
+                                        <label>百度AI开放平台 Access Token</label>
+                                        <input
+                                            className="form-control text-footerform"
+                                            onChange={action((e) => {
+                                                externalStore.baiduAiToken = e.target.value
+                                            })}
+                                            value={externalStore.baiduAiToken}></input>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={externalStore.save}>
+                                        保存
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div>
-                <p>百度KEY</p>
-                <input
-                    onChange={action((e) => (externalStore.baiduTransalteKey = e.target.value))}
-                    value={externalStore.baiduTransalteKey}></input>
-            </div>
-            <h3>语音识别</h3>
-            <div>
-                <p>百度AI开放平台 Access Token</p>
-                <input
-                    onChange={action((e) => {
-                        externalStore.baiduAiToken = e.target.value
-                    })}
-                    value={externalStore.baiduAiToken}></input>
-            </div>
-            <button onClick={externalStore.save}>保存</button>
         </div>
     )
 })
+const ExternalHead = () => {
+    return (
+        <div className="row justify-content-between mb-4">
+            <div className="col-12 col-md-6">
+                <h5>外部拓展服务</h5>
+                <p className="text-muted mb-md-0">请放心，您的秘钥不会被上传。</p>
+            </div>
+        </div>
+    )
+}

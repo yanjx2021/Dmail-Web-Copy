@@ -54,9 +54,9 @@ export const SettingSecurity = observer(() => {
 })
 const InfInputer = observer(({ text }: { text: string }) => {
     return (
-      <div className="form-group mb-3">
+      <div className="form-group mb-3 ">
       <label>{text}</label>
-      <input type="email" className="form-control" />
+      <input type="email" className="form-control text-footerform" />
   </div>
     )
 })
