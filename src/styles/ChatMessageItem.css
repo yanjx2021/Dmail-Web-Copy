@@ -72,3 +72,8 @@
 {
   padding: 0.2rem 0.45rem;
 }
+
+.audio-div .message-content
+{
+  max-width: 400px!important;
+}

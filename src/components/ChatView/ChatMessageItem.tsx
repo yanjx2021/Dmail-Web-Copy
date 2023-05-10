@@ -71,12 +71,12 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             const cachedUrl = binaryStore.getBinaryUrl(msg.content)
 
             return (
-                <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                <div className='audio-div'>
                     <audio src={cachedUrl.url} controls />
                     {msg.translatedText && (
-                        <div>
-                            <p>------转换结果------</p>
-                            <p>{msg.translatedText}</p>
+                        <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                            <p>-----转换结果-----</p>
+                            <p>111111111111111111111111111111111111111111111111</p>
                         </div>
                     )}
                 </div>
