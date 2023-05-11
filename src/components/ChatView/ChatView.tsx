@@ -46,7 +46,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
     )
 
     useEffect(action(() => {
-        if (chat.chatType !== ChatType.Private && (!chat.userIds || chat.userIds?.length === 0)) {
+        if (chat.chatType !== ChatType.Private) {
             MessageServer.Instance().send<Send.GetGroupUsers>(Send.GetGroupUsers, chat.chatId)
         }
     }), [chat])
