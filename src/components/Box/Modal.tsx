@@ -612,6 +612,7 @@ export const SelectMessageModalView = observer(({ title }: { title: string }) =>
         <Modal
             footer={[]}
             onCancel={action(() => {
+                setFiltedMessages([])
                 modalStore.handleCancel()
             })}
             title={title}

@@ -36,6 +36,13 @@ export const ChatMessageBoxItemContent = observer(
                     {renderFormatUrl(msg.content as string)}
                 </div>
             )
+        } else if (msg.type === ChatMessageType.MentionText) {
+            const content: any = msg.content
+            return (
+                <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                    {renderFormatUrl(content.text)}
+                </div>
+            )
         } else if (msg.type === ChatMessageType.Image && typeof msg.content === 'string') {
             if (msg.bindUploading) {
                 return (
@@ -49,21 +56,21 @@ export const ChatMessageBoxItemContent = observer(
                 return <PhotoItem cachedUrl={cachedUrl} />
             }
         } else if (msg.type === ChatMessageType.Voice && typeof msg.content === 'string') {
-          if (msg.bindUploading) {
-              return (
-                  <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                      <LoadingPhotoItem bindUploading={msg.bindUploading} />
-                  </div>
-              )
-          } else {
-              const cachedUrl = binaryStore.getBinaryUrl(msg.content)
-              return (
-                  <div className='audio-div'>
-                      <audio src={cachedUrl.url} controls />
-                  </div>
-              )
-          }
-      } else if (msg.type === ChatMessageType.File) {
+            if (msg.bindUploading) {
+                return (
+                    <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                        <LoadingPhotoItem bindUploading={msg.bindUploading} />
+                    </div>
+                )
+            } else {
+                const cachedUrl = binaryStore.getBinaryUrl(msg.content)
+                return (
+                    <div className="audio-div">
+                        <audio src={cachedUrl.url} controls />
+                    </div>
+                )
+            }
+        } else if (msg.type === ChatMessageType.File) {
             if (msg.bindUploading) {
                 // 正在上传
                 return (
@@ -96,18 +103,25 @@ export const ChatMessageBoxItemContent = observer(
             )
         } else if (msg.type === ChatMessageType.Revoked) {
             return (
-                <div className={'message-content p-3' + (isRight ? ' border' : '')}>{'消息已撤回'}</div>
+                <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                    {'消息已撤回'}
+                </div>
             )
         } else if (msg.type === ChatMessageType.ReplyText) {
             const content: ReplyTextContent = msg.content as ReplyTextContent
             const repliedMessage = chatStore.getChat(msg.chatId)
-            return <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                回复消息{content.inChatId}:
-                <p>-------------------</p>
-                {renderFormatUrl(content.text)}
-            </div>
+            return (
+                <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                    回复消息{content.inChatId}:<p>-------------------</p>
+                    {renderFormatUrl(content.text)}
+                </div>
+            )
         }
-        return <div className={'message-content p-3' + (isRight ? ' border' : '')}>当前版本不支持该消息类型，请升级至最新版本</div>
+        return (
+            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+                当前版本不支持该消息类型，请升级至最新版本
+            </div>
+        )
     }
 )
 
