@@ -20,9 +20,6 @@ export const RegisterError = () => {
                     content: authStore.errors,
                     duration: duration,
                     onClose: action(() => {
-                        if (authStore.errors === '网络环境异常，请重新登录') {
-                            authStore.logout()
-                        }
                         authStore.errors = ''
                     }),
                 })

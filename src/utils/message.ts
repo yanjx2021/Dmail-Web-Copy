@@ -364,6 +364,12 @@ export interface ReceiveLogOffResponseData {
     state: 'Success' | 'EmailCodeError' |'UserNotFound' | 'DatabaseError' | 'ServerError'
 }
 
+export interface ReceiveApplyForTokenResponesData {
+    state: 'Success' | 'DatabaseError' | 'ServerError'
+    token?: string
+    timestamp?: number
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -420,7 +426,8 @@ export enum Receive {
     GroupNoticeResponse = 'GroupNoticeResponse',
     PullGroupNoticeResponse = 'PullGroupNoticeResponse',
     GetUserIDResponse = 'GetUserIDResponse',
-    LogOffResponse = 'LogOffResponse'
+    LogOffResponse = 'LogOffResponse',
+    ApplyForTokenResponse = 'ApplyForTokenResponse'
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -435,6 +442,7 @@ export interface SendLoginData {
     email: string
     password?: string
     emailCode?: number
+    token?: string
 }
 export interface SendSendMessageData {
     type: ChatMessageType
@@ -612,7 +620,8 @@ export enum Send {
     GetUserReadInPrivate = 'GetUserReadInPrivate',
     PullGroupNotice = 'PullGroupNotice',
     GetUserID = 'GetUserID',
-    LogOff = 'LogOff'
+    LogOff = 'LogOff',
+    ApplyForToken = 'ApplyForToken'
 }
 
 // COMMAND和DATA类型捆绑
@@ -671,6 +680,7 @@ export interface MessageReceiveData {
     [Receive.PullGroupNoticeResponse]: ReceivePullGroupNoticeResponseData
     [Receive.GetUserIDResponse]: ReceiveGetUserIDResponseData
     [Receive.LogOffResponse]: ReceiveLogOffResponseData
+    [Receive.ApplyForTokenResponse]: ReceiveApplyForTokenResponesData
 }
 
 export interface MessageSendData {
@@ -715,6 +725,7 @@ export interface MessageSendData {
     [Send.PullGroupNotice]: SendPullGroupNoticeData
     [Send.GetUserID]: string
     [Send.LogOff]: number
+    [Send.ApplyForToken]: never
 }
 
 // 封装消息包

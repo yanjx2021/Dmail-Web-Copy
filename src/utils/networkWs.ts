@@ -3,6 +3,7 @@ import Crypto from './cipher'
 import { AuthMethod, AuthState, authStore } from '../stores/authStore'
 import { requestStore } from '../stores/requestStore'
 import { action, runInAction } from 'mobx'
+import { SHA256 } from 'crypto-js'
 
 export const GetServerAddress = () => {
     // const protocol = document.location.protocol
@@ -15,7 +16,6 @@ export const GetServerAddress = () => {
     // }
     return 'wss://dmail.r1ntaro.com:8080/ws'
     // return 'ws://127.0.0.1:8080/ws'
-
 }
 
 // 43.143.134.180
@@ -56,19 +56,63 @@ export class MessageServer {
     private cipher: Crypto
     private timer: any
     private timeout: number = 5000
-
+    private reconnectInterval: number = 3000
+    private reconnectMaxCount: number = 7
+    private reconnectCount: number = 0
     constructor() {
         this.websocket = this.createWebsocket()
         this.cipher = new Crypto()
     }
 
+    reconnect() {
+        setTimeout(
+            action(() => {
+                if (authStore.state === AuthState.Logged) {
+                    return
+                }
+                if (this.reconnectCount >= this.reconnectMaxCount) {
+                    authStore.errors = '重连失败，请检查网络环境'
+                    this.reconnectCount = 0
+                    authStore.logout()
+                    return
+                }
+                if (authStore.email) {
+                    this.reconnectCount++
+                    authStore.errors = `第${this.reconnectCount}次尝试重新连接`
+                    if (authStore.token) {
+                        MessageServer.destroyInstance()
+                        MessageServer.Instance().send<Send.Login>(Send.Login, {
+                            email: authStore.email,
+                            token: authStore.token,
+                        })
+                        this.reconnect()
+                    } else if (authStore.method === AuthMethod.Email) {
+                        authStore.errors = '验证码登录，无法重连'
+                        authStore.logout()
+                    } else if (authStore.password !== '') {
+                        MessageServer.destroyInstance()
+                        MessageServer.Instance().send<Send.Login>(Send.Login, {
+                            email: authStore.email,
+                            password: SHA256(authStore.password + 'dmail' + authStore.email).toString(),
+                        })
+                        this.reconnect()
+                    } else {
+                        console.log('异常的一批')
+                    }
+                }
+            }),
+            this.reconnectInterval
+        )
+    }
+
     temporaryShutDownHandler = action((ev: any) => {
-        console.log(ev)
         this.clearHeartBeat()
-        if (authStore.state === AuthState.Logged) {
-            authStore.errors = '网络环境异常，请重新登录'
-        }
         MessageServer.destroyInstance()
+        if (authStore.state === AuthState.Logged) {
+            authStore.state = AuthState.Started
+            this.reconnect()
+            authStore.errors = '网络环境异常，正在重新连接'
+        }
     })
 
     setHeartBeat(timeout: number) {

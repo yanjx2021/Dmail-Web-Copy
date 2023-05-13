@@ -14,8 +14,16 @@ import { runInAction } from 'mobx'
 import { async } from 'q'
 import { noticeStore } from './noticeStore'
 import { ExternalApiStore, externalStore } from './externalStore'
+import { tokenStore } from './tokenStore'
+import { authStore } from './authStore'
 
 const userSettingIndex = 'userSetting'
+
+export interface TokenObject {
+    email: string
+    token: string
+    timestamp: number
+}
 
 export class LocalDatabase {
     private static database: LocalForage = localforage.createInstance({
@@ -42,12 +50,50 @@ export class LocalDatabase {
         return `blob:${hash}`
     }
 
+    static tokenIndex() {
+        return `token`
+    }
+
     static timestampIndex() {
         return `timestamp`
     }
 
+    static async saveTokenObject(tokenObject: TokenObject) {
+        localforage
+            .createInstance({
+                name: 'dMail',
+                storeName: 'public',
+            })
+            .setItem(this.tokenIndex(), JSON.stringify(tokenObject))
+    }
+
+    static async loadTokenObject() {
+        return localforage
+            .createInstance({
+                name: 'dMail',
+                storeName: 'public',
+            })
+            .getItem<string>(this.tokenIndex())
+            .then((serializedTokenObject) => {
+                if (serializedTokenObject) {
+                    const tokenObject: TokenObject = JSON.parse(serializedTokenObject)
+                    authStore.setTokenEmail(tokenObject.email)
+                    authStore.setToken(tokenObject.token)
+                }
+            })
+    }
+
+    static async removeTokenObject() {
+        localforage
+            .createInstance({
+                name: 'dMail',
+                storeName: 'public',
+            })
+            .removeItem(this.tokenIndex())
+            .catch((err) => console.error(err))
+    }
+
     static async saveTimeStamp(timestamp: number) {
-        console.log('保存本地时间')
         this.database.setItem(this.timestampIndex(), timestamp)
     }
 

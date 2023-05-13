@@ -3,6 +3,7 @@ import localforage from 'localforage'
 import {
     LoginResponseState,
     Receive,
+    ReceiveApplyForTokenResponesData,
     ReceiveLogOffResponseData,
     ReceiveLoginResponseData,
     ReceiveUpdateUserInfoResponseData,
@@ -27,6 +28,7 @@ import { groupChatManageStore } from './groupChatManageStore'
 import { notificationStore } from './notificationStore'
 import { updateGroupStore } from './updateGroupStore'
 import { userSettingStore } from './userSettingStore'
+import { tokenStore } from './tokenStore'
 
 export type UserId = number
 
@@ -50,17 +52,40 @@ export class AuthStore {
     userId: number = 0
     email: string = ''
     password: string = ''
-
     emailCode: string = ''
+    
+    tokenEmail: string | undefined = undefined
+    token: string | undefined = undefined 
 
     get userSelf() {
         return userStore.getUser(this.userId)
     }
 
+    setToken(t: string) {
+        this.token = t
+    }
+    setTokenEmail(e: string) {
+        this.tokenEmail = e
+    }
+    
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
         MessageServer.on(Receive.LoginResponse, this.loginResponseHandler)
         MessageServer.on(Receive.LogOffResponse, this.logoffResponseHandler)
+        MessageServer.on(Receive.ApplyForTokenResponse, this.applyForTokenResponseHandler)
+    }
+
+    applyForTokenResponseHandler(response: ReceiveApplyForTokenResponesData) {
+        if (response.state !== 'Success') {
+            this.errors = '签发令牌失败'
+            return 
+        }
+        this.token = response.token
+        LocalDatabase.saveTokenObject({
+            email: this.email,
+            token: response.token!,
+            timestamp: response.timestamp!
+        })
     }
 
     logoffResponseHandler(response: ReceiveLogOffResponseData) {
@@ -80,6 +105,8 @@ export class AuthStore {
         this.emailCode = ''
         this.password = ''
         this.errors = ''
+        this.token = undefined
+        this.tokenEmail = undefined
     }
 
     logout() {
@@ -87,6 +114,7 @@ export class AuthStore {
             console.error('尚未登录', this.state)
             return
         }
+        LocalDatabase.removeTokenObject()
         this.reset()
         chatStore.reset()
         requestStore.reset()
@@ -99,7 +127,7 @@ export class AuthStore {
         notificationStore.reset()
         updateGroupStore.reset()
         userSettingStore.reset()
-
+        tokenStore.reset()
         MessageServer.destroyInstance()
     }
 
@@ -135,7 +163,6 @@ export class AuthStore {
     private onLoginSuccess(userId: UserId) {
         this.state = AuthState.Logged
         this.userId = userId
-
         LocalDatabase.createUserInstance(userId)
         console.log('登录成功')
 
@@ -163,6 +190,7 @@ export class AuthStore {
             action(() => {
                 this.state = AuthState.Started
                 this.errors = '网络连接超时，请检查网络状况'
+                MessageServer.destroyInstance()
             }),
             this.timeout
         )
@@ -179,6 +207,26 @@ export class AuthStore {
             action(() => {
                 this.state = AuthState.Started
                 this.errors = '网络连接超时，请检查网络状况'
+                MessageServer.destroyInstance()
+            }),
+            this.timeout
+        )
+        this.state = AuthState.Logging
+    }
+
+    loginWithToken() {
+        if (this.tokenEmail && this.token) {
+            this.email = this.tokenEmail
+            MessageServer.Instance().send<Send.Login>(Send.Login, {
+                email: this.tokenEmail,
+                token: this.token,
+            })
+        }
+        this.timer = setTimeout(
+            action(() => {
+                this.state = AuthState.Started
+                this.errors = '网络连接超时，请检查网络状况'
+                MessageServer.destroyInstance()
             }),
             this.timeout
         )

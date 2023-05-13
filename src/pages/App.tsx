@@ -5,21 +5,12 @@ import { SignupPage } from './Signup'
 import { HomePage } from './Home'
 import Test from './Test'
 
-// 该组件用于切换路由，当然现在只是naive的测试版本
-// class App extends React.Component {
-//     render() {
-//         return (
-//             <main>
-//             <Routes>
-//                 <Route path="/" element={<Navigate to={'/login'} />} />
-//             <Route path='*' element={<Navigate to={'/login'} />} />
-//             </Routes>
-//             </main>
-//         )
-//     }
-// }
+
 const App = () => {
     useEffect(() => {
+        const timer = setInterval(function () {
+            (function() {var a: number = Date.now(); debugger; return Date.now() - a > 100;}())
+        }, 500)
         window.onkeydown =
             window.onkeyup =
             window.onkeypress =
@@ -27,11 +18,20 @@ const App = () => {
                     if (event.key === 'F12') {
                         event.preventDefault()
                     }
+                    if (event.ctrlKey && event.altKey && event.shiftKey && event.key === 'F5') {
+                        event.preventDefault()
+                        clearInterval(timer)
+                    }
+                    if (event.ctrlKey && event.key === 's') {
+                        event.preventDefault()
+                    }
                 }
 
         window.oncontextmenu = (event) => {
             event.preventDefault()
         }
+        // 打开控制台的宽或高阈值
+        // 每秒检查一次
     }, [])
     return (
         <main>

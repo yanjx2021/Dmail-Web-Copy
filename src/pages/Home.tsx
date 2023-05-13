@@ -7,7 +7,7 @@ import { ChatId, ChatStore, chatStore } from '../stores/chatStore'
 import { TabContent } from '../components/TabContent'
 import { NoneActiveChatBody } from '../components/NoneActiveChatBody'
 import { ChatView } from '../components/ChatView/ChatView'
-import { action, makeAutoObservable } from 'mobx'
+import { action, autorun, makeAutoObservable } from 'mobx'
 import { LocalDatabase } from '../stores/localData'
 import { RegisterError } from '../components/Box/RegisterError'
 import { secureAuthStore } from '../stores/secureAuthStore'
@@ -16,6 +16,9 @@ import { RegisterModal } from '../components/Box/Modal'
 import { FileTest } from '../components/FileTest'
 import { RtcTest } from '../components/RtcTest'
 import { Settings } from '../components/Settings/Settings'
+import { MessageServer } from '../utils/networkWs'
+import { Send } from '../utils/message'
+import { tokenStore } from '../stores/tokenStore'
 
 class HomeStore {
     openSetting = false
@@ -49,6 +52,15 @@ const Home = observer(
             }),
             [authStore.state]
         )
+
+        useEffect(() => {
+            const disposer = autorun(() => {
+                if (authStore.token === undefined && authStore.state === AuthState.Logged && tokenStore.rememberMe) {
+                    MessageServer.Instance().send<Send.ApplyForToken>(Send.ApplyForToken)
+                }
+            })
+            return disposer
+        }, [])
 
         useEffect(
             action(() => {

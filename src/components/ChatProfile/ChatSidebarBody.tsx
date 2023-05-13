@@ -271,9 +271,11 @@ export const UserCard = observer(
         return (
             <li>
                 {showHover && <MembersHoverOption user={user} chat={chat} />}
-                <a className="card" onClick={() => {
-                            chatSideStore.visitUsertoggle(user)
-                        }}>
+                <a
+                    className="card"
+                    onClick={() => {
+                        chatSideStore.visitUsertoggle(user)
+                    }}>
                     <div className="card-body">
                         <div className="media">
                             <div className="avatar me-3">
@@ -346,18 +348,18 @@ const MemberList = observer(({ chat }: { chat: Chat }) => {
                 chat.userIds.map((userId, _) => {
                     const user = userStore.getUser(userId)
                     return (
-                            <UserCard
-                                key={userId}
-                                user={user}
-                                showHover={
-                                    chat.ownerId !== userId &&
-                                    authStore.userId !== userId &&
-                                    (authStore.userId === chat.ownerId ||
-                                        (chat.adminIds !== null &&
-                                            chat.adminIds.indexOf(authStore.userId) > -1))
-                                }
-                                chat={chat}
-                            />
+                        <UserCard
+                            key={userId}
+                            user={user}
+                            showHover={
+                                chat.ownerId !== userId &&
+                                authStore.userId !== userId &&
+                                (authStore.userId === chat.ownerId ||
+                                    (chat.adminIds !== null &&
+                                        chat.adminIds.indexOf(authStore.userId) > -1))
+                            }
+                            chat={chat}
+                        />
                     )
                 })}
         </ul>
@@ -372,7 +374,7 @@ export const GroupMembers = ({ chat }: { chat: Chat }) => {
     )
 }
 
-export const GroupDetails = observer(({ chat }: { chat: Chat }) => {
+export const GroupDetails = ({ chat }: { chat: Chat }) => {
     return (
         <div className="tab-pane fade active show" id="GroupChat-Details" role="tabpanel">
             <ChatSidebarAvatar chat={chat} />
@@ -380,7 +382,7 @@ export const GroupDetails = observer(({ chat }: { chat: Chat }) => {
             <ChatList chat={chat} />
         </div>
     )
-})
+}
 
 export class ManageGroupNoticeStore {
     chat: Chat | undefined = undefined

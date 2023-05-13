@@ -26,7 +26,7 @@ export const ProfileHeader = () => {
     )
 }
 
-export const CardAvatar = observer(({ avaterHash }: { avaterHash: string }) => {
+export const CardAvatar = (({ avaterHash }: { avaterHash: string }) => {
     const handleChange = (event: any) => {
         event.target.files[0] &&
             fileStore.requestUpload(

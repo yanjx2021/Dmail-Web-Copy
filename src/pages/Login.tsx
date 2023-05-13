@@ -13,6 +13,8 @@ import axios from 'axios'
 import { VoiceMessageFooter } from '../components/ChatView/ChatViewFooter'
 import { AnyARecord } from 'dns'
 import { State } from 'spark-md5'
+import { LocalDatabase } from '../stores/localData'
+import { tokenStore } from '../stores/tokenStore'
 
 const EmailInput = observer(({ authStore }: { authStore: AuthStore }) => {
     return (
@@ -68,6 +70,16 @@ const LoginPasswordForm = observer(({ authStore }: { authStore: AuthStore }) => 
 })
 
 const LoginCard = observer(({ authStore }: { authStore: AuthStore }) => {
+    useEffect(() => {
+        LocalDatabase.loadTokenObject().then(
+            action(() => {
+                if (authStore.tokenEmail && authStore.token) {
+                    authStore.loginWithToken()
+                }
+            })
+        )
+    }, [])
+
     return (
         <div className="card-body">
             <h3 className="text-center">登录</h3>
@@ -86,7 +98,11 @@ const LoginCard = observer(({ authStore }: { authStore: AuthStore }) => {
 
                 <div className="form-group d-flex justify-content-between">
                     <label className="c_checkbox">
-                        <input type="checkbox" />
+                        <input
+                            type="checkbox"
+                            checked={tokenStore.rememberMe}
+                            onChange={tokenStore.toggleRememberMe}
+                        />
                         <span className="ms-2 todo_name">记住我</span>
                         <span className="checkmark"></span>
                     </label>
@@ -132,11 +148,12 @@ export const LoginPage = () => {
     }, [])
 
     useEffect(() => {
-        autorun(() => {
+        const disposer = autorun(() => {
             if (authStore.state === AuthState.Logged) {
                 navigate('/home')
             }
         })
+        return disposer
     }, [navigate])
     return (
         <div id="layout" className="theme-cyan">
