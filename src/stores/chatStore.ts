@@ -1103,6 +1103,11 @@ export class ChatStore {
                     chatArray.push(chat)
                 }
             })
+            this.topChats.sort((a, b) => {
+                if (!a.lastMessage || !b.lastMessage) return 1
+                return b.lastMessage!.timestamp - a.lastMessage!.timestamp
+            })
+            chatArray.sort((a, b) => b.lastMessage!.timestamp - a.lastMessage!.timestamp)
             return this.topChats.concat(chatArray)
         }
 

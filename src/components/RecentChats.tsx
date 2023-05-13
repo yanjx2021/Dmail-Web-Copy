@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import { Chat, ChatId, ChatStore } from '../stores/chatStore'
+import { Chat, ChatId, ChatStore, chatStore } from '../stores/chatStore'
 import { action, autorun } from 'mobx'
 import { ChatDropDown } from './DropDown/ChatDropDown'
 import { Badge } from 'antd'
@@ -41,6 +41,10 @@ const RecentChatItem = observer(
                 <a className="card" onClick={action(() => setActiveChatId(chat.chatId))}>
                     <div className="card-body">
                         <div className="media">
+                            {/* TODO: yjx 将这个显示置顶状态的图标变得好看一点，并且放到一个心仪的位置 */}
+                            {/* TopIcon Start */}
+                            {chatStore.isTopChat(chat.chatId) && <i className='zmdi zmdi-star'></i>}
+                            {/* TopIcon End */}
                             <div className="avatar me-3">
                                 <Badge count={chat.unreadCount}>
                                     <span className="rounded-circle"></span>
