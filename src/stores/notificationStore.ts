@@ -7,6 +7,13 @@ export class NotificationStore {
     show: boolean = false
     muteChats: number[] = []
 
+    reset() {
+        this.notification = null
+        this.slient = false
+        this.show = false
+        this.muteChats = []
+    }
+
     constructor() {
         makeAutoObservable(this, {}, { autoBind: true })
     }

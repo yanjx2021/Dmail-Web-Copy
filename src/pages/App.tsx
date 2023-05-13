@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { LoginPage, } from './Login'
+import { LoginPage } from './Login'
 import { SignupPage } from './Signup'
 import { HomePage } from './Home'
 import Test from './Test'
@@ -16,24 +16,52 @@ import Test from './Test'
 //             </Routes>
 //             </main>
 //         )
-//     } 
+//     }
 // }
+const App = () => {
+    useEffect(() => {
+        window.onkeydown =
+            window.onkeyup =
+            window.onkeypress =
+                (event) => {
+                    if (event.key === 'F12') {
+                        event.preventDefault()
+                    }
+                }
 
-class App extends React.Component {
-    render() {
-        return (
-            <main>
+        window.oncontextmenu = (event) => {
+            event.preventDefault()
+        }
+    }, [])
+    return (
+        <main>
             <Routes>
                 <Route path="/" element={<Navigate to={'/login'} />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
-                <Route path='/test' element={<Test />} />
+                <Route path="/test" element={<Test />} />
                 <Route path="/home" element={<HomePage />} />
-                <Route path='*' element={<Navigate to={'/login'} />} />
+                <Route path="*" element={<Navigate to={'/login'} />} />
             </Routes>
-            </main>
-        )
-    } 
+        </main>
+    )
 }
+
+// class App extends React.Component {
+//     render() {
+//         return (
+//             <main>
+//             <Routes>
+//                 <Route path="/" element={<Navigate to={'/login'} />} />
+//                 <Route path="/login" element={<LoginPage />} />
+//                 <Route path="/signup" element={<SignupPage />} />
+//                 <Route path='/test' element={<Test />} />
+//                 <Route path="/home" element={<HomePage />} />
+//                 <Route path='*' element={<Navigate to={'/login'} />} />
+//             </Routes>
+//             </main>
+//         )
+//     }
+// }
 
 export default App

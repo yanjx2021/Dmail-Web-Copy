@@ -69,7 +69,6 @@ export const VoiceMessageFooter = observer(
             backgroundColor: 'rgba(255, 255, 255, 1)',
             strokeColor: '#000000',
             height: 30,
-            // TODO-yjx: 自适应宽度
             width: window.innerWidth / 2 - 100,
         }
 

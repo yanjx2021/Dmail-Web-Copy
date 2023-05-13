@@ -96,7 +96,7 @@ export const ChatDropDown = observer(({ chat }: { chat: Chat }) => {
                     />
                 ) : (
                     <DropDownItem
-                        text="置顶群聊"
+                        text="置顶聊天"
                         handleClick={action(() => {
                             chatStore.addTopChat(chat.chatId)
                         })}

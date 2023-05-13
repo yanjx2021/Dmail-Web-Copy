@@ -24,6 +24,9 @@ import { noticeStore } from './noticeStore'
 import { fileStore } from './fileStore'
 import { getUserIdStore } from './getUserIdStore'
 import { groupChatManageStore } from './groupChatManageStore'
+import { notificationStore } from './notificationStore'
+import { updateGroupStore } from './updateGroupStore'
+import { userSettingStore } from './userSettingStore'
 
 export type UserId = number
 
@@ -93,6 +96,10 @@ export class AuthStore {
         modalStore.reset()
         chatSideStore.reset()
         getUserIdStore.reset()
+        notificationStore.reset()
+        updateGroupStore.reset()
+        userSettingStore.reset()
+
         MessageServer.destroyInstance()
     }
 
@@ -132,7 +139,6 @@ export class AuthStore {
         LocalDatabase.createUserInstance(userId)
         console.log('登录成功')
 
-        //TODO
         LocalDatabase.loadTimestamp().then(
             action(() => {
                 MessageServer.Instance().send(Send.Pull, {

@@ -127,10 +127,8 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                         modalStore.modalType = 'TransferChatBox'
                         modalStore.isOpen = true
                     })}>
-                    {/* TODO: 标题私聊时变成**与我的聊天记录，群聊时变为群聊的聊天记录 */}
 
                     <h5>{`[聊天记录]`}</h5>
-                    {/* TODO:获取最多三条聊天记录即可（超过的会看不见），不行的话就一条 */}
                     <div className="text-record-container">
                         {messageSlice.map((message) => shortMessage(message))}
                     </div>

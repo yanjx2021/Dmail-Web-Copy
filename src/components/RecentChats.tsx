@@ -41,9 +41,10 @@ const RecentChatItem = observer(
                 <a className="card" onClick={action(() => setActiveChatId(chat.chatId))}>
                     <div className="card-body">
                         <div className="media">
-                            {/* TODO: yjx 将这个显示置顶状态的图标变得好看一点，并且放到一个心仪的位置 */}
+                            {/* TODO: yjx 将显示置顶状态的图标和免打扰的图标变得好看一点，并且放到一个心仪的位置 */}
                             {/* TopIcon Start */}
                             {chatStore.isTopChat(chat.chatId) && <i className='zmdi zmdi-star'></i>}
+                            {notificationStore.hasMuted(chat.chatId) && <i className='zmdi zmdi-eye'></i>}
                             {/* TopIcon End */}
                             <div className="avatar me-3">
                                 <Badge count={chat.unreadCount}>
@@ -72,7 +73,6 @@ const RecentChatItem = observer(
                                 <div className="text-truncate">
                                     {chat.lastMessage !== undefined ? chat.lastMessage.asShort : ''}
                                 </div>
-                                {/* TODO: yjx有人at时，出现红色字提示 */}
                                 {chat.atYou ? <p className="text-danger">有人@你</p> : <></>}
                                 {rtcStore.remoteUserId === chat.bindUser?.userId &&
                                     rtcStore.type === 'Voice' && (
@@ -134,14 +134,14 @@ export const RecentChats = observer(
                         className="header d-flex justify-content-between ps-3 pe-3 mb-1">
                         <span>最近的对话</span>
                     </li>
-                    {chatStore.recentChatsView.map((chat) => (
+                    {chatStore.recentChatsView.map(action((chat) => (
                         <RecentChatItem
                             chat={chat}
                             activeChatId={activeChatId}
                             setActiveChatId={setActiveChatId}
                             key={chat.chatId}
                         />
-                    ))}
+                    )))}
                 </ul>
             </div>
         )

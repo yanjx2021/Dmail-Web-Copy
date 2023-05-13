@@ -17,6 +17,8 @@ import { CachedBinary, binaryStore } from '../../stores/binaryStore'
 import { Image } from 'antd'
 import { UploadingFile, fileStore } from '../../stores/fileStore'
 import { secureAuthStore } from '../../stores/secureAuthStore'
+import { DropDownItem } from '../DropDown/ChatDropDown'
+import { chatSideStore } from '../../stores/chatSideStore'
 
 const ChatSidebarUserAvatar = observer(({ user }: { user: User }) => {
     return (
@@ -269,7 +271,9 @@ export const UserCard = observer(
         return (
             <li>
                 {showHover && <MembersHoverOption user={user} chat={chat} />}
-                <a className="card">
+                <a className="card" onClick={() => {
+                            chatSideStore.visitUsertoggle(user)
+                        }}>
                     <div className="card-body">
                         <div className="media">
                             <div className="avatar me-3">
@@ -342,18 +346,18 @@ const MemberList = observer(({ chat }: { chat: Chat }) => {
                 chat.userIds.map((userId, _) => {
                     const user = userStore.getUser(userId)
                     return (
-                        <UserCard
-                            key={userId}
-                            user={user}
-                            showHover={
-                                chat.ownerId !== userId &&
-                                authStore.userId !== userId &&
-                                (authStore.userId === chat.ownerId ||
-                                    (chat.adminIds !== null &&
-                                        chat.adminIds.indexOf(authStore.userId) > -1))
-                            }
-                            chat={chat}
-                        />
+                            <UserCard
+                                key={userId}
+                                user={user}
+                                showHover={
+                                    chat.ownerId !== userId &&
+                                    authStore.userId !== userId &&
+                                    (authStore.userId === chat.ownerId ||
+                                        (chat.adminIds !== null &&
+                                            chat.adminIds.indexOf(authStore.userId) > -1))
+                                }
+                                chat={chat}
+                            />
                     )
                 })}
         </ul>
@@ -399,17 +403,19 @@ export const GroupNotices = observer(({ chat }: { chat: Chat }) => {
                     <h5>群公告</h5>
                     <p className="text-muted mb-md-0">只有群主和群管理员可以参与编辑。</p>
                 </div>
-                {chat.isAdmin(authStore.userId) && <div className="col-auto">
-                    <button
-                        className="btn btn-warning"
-                        onClick={action(() => {
-                            modalStore.modalType = 'SendGroupNotice'
-                            modalStore.isOpen = true
-                            manageGroupNoticeStore.chat = chat
-                        })}>
-                        发送群公告
-                    </button>
-                </div>}
+                {chat.isAdmin(authStore.userId) && (
+                    <div className="col-auto">
+                        <button
+                            className="btn btn-warning"
+                            onClick={action(() => {
+                                modalStore.modalType = 'SendGroupNotice'
+                                modalStore.isOpen = true
+                                manageGroupNoticeStore.chat = chat
+                            })}>
+                            发送群公告
+                        </button>
+                    </div>
+                )}
             </div>
             <div className="col-lg-12 col-md-12">
                 <div className="card bg-light border">
@@ -466,7 +472,6 @@ export const HeaderTab = () => {
 
 export const ChatSidebarBody = observer(
     ({ chat, visitUser }: { chat: Chat; visitUser: User | null }) => {
-        // TODO-后续群聊和用户可以复用
         if (visitUser) {
             // 群聊用户
             return (

@@ -22,7 +22,6 @@ export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
                                 <div
                                     // 添加颜色
                                     className={'avatar rounded-circle no-image ' + 'timber'}>
-                                    {/* TODO-昵称缩写 */}
                                     <img
                                         className="avatar rounded-circle"
                                         src={
@@ -36,7 +35,6 @@ export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
                             </div>
                             <div className="media-body overflow-hidden">
                                 <div className="d-flex align-items-center mb-1">
-                                    {/* TODO-昵称缩写 */}
                                     <h6 className="text-truncate mb-0 me-auto">{chat.name}</h6>
                                 </div>
                                 {/* TODO-登录状态 */}

@@ -400,7 +400,7 @@ export enum Receive {
     ReadCursors = 'ReadCursors',
     SetAlreadyReadResponse = 'SetAlreadyReadResponse',
     Notice = 'Notice',
-    Notices = 'Noitces',
+    Notices = 'Notices',
     GetGroupUsersResponse = 'GetGroupUsersResponse',
     QuitGroupChatResponse = 'QuitGroupChatResponse',
     GetGroupOwnerResponse = 'GetGroupOwnerResponse',

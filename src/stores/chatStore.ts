@@ -994,6 +994,7 @@ export class ChatStore {
         this.setViewMessages = undefined
         this.setActiveChatId = undefined
         this.activeChatId = undefined
+        this.topChatIds = []
         this.errors = ''
     }
 
@@ -1083,9 +1084,9 @@ export class ChatStore {
 
     get topChats() {
         const topChats: Chat[] = []
-        this.topChatIds.forEach((chatId, _) => {
+        this.topChatIds.forEach(action((chatId, _) => {
             topChats.push(this.getChat(chatId))
-        })
+        }))
         return topChats
     }
 
@@ -1096,7 +1097,6 @@ export class ChatStore {
         // TODO : listView使用二叉树维护
         // O(nlogn + rank) => O(rank+logn)
         if (this.topChats.length !== 0) {
-            console.log(this.topChatIds)
             const chatArray: Chat[] = []
             this.chats.forEach((chat) => {
                 if (chat.lastMessage !== undefined && this.topChatIds.indexOf(chat.chatId) === -1) {
@@ -1195,7 +1195,6 @@ export class ChatStore {
                 }
                 return
             case 'DatabaseError':
-                console.log(111)
                 this.errors = '数据库异常'
                 return
             case 'NoPermission':
@@ -1251,7 +1250,6 @@ export class ChatStore {
         response.groupNotice!.forEach((serializedNotice, _) => {
             const notice: ReceiveNotice = JSON.parse(serializedNotice)
             chatStore.getChat(notice.chatId).setNotice(GroupChatNotice.createFromReceiveNotice(notice))
-            console.log(chatStore.getChat(notice.chatId).noticeList)
         })
     }
 
