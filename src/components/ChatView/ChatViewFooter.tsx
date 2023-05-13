@@ -3,7 +3,7 @@ import '../../styles/ChatViewFooter.css'
 import { messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
 import { action } from 'mobx'
-import { Mentions } from 'antd'
+import { Mentions, Popover } from 'antd'
 import { Chat } from '../../stores/chatStore'
 import { useImmer } from 'use-immer'
 import { observer } from 'mobx-react-lite'
@@ -14,6 +14,7 @@ import { VoiceRecorderState, voiceMessageStore } from '../../stores/voiceMessage
 import AudioAnalyser from '../AudioAnalyser'
 import ReactDOM from 'react-dom'
 import { authStore } from '../../stores/authStore'
+import { click } from '@testing-library/user-event/dist/click'
 
 //针对输入框数值的一些常数
 const lineHeight = 15,
@@ -151,13 +152,46 @@ export const VoiceMessageFooter = observer(
     }
 )
 
+const EmojiSelectorTitle = (title: string) => <span>{title}</span>
+
+const start = 0x01f600
+const end = 0x01f61a
+
+const EmojiContent = ({text, setText, handleClick} : {text: string, setText: any, handleClick: any}) => {
+    const [emojis, setEmojis] = useImmer<string[]>([])
+
+    useEffect(() => {
+        setEmojis([])
+        for (let i = start; i < end; i++) {
+            setEmojis((draft) => {
+                draft.push(String.fromCodePoint(i))
+            })
+        }
+    }, [])
+    // TODO: yjx 调整选择表情的样式
+    return (
+        <div style={{display: 'inline-flex'}}>
+            {emojis.map((emoji) => (
+                <div key={emoji} onClick={() => {
+                    setText(text + emoji)
+                    handleClick()
+                }}>
+                    <button>{emoji}</button>
+                </div>
+            ))}
+        </div>
+    )
+}
+
 export const ChatViewFooter = observer(
     (props: { handleSendText: Function; chat: Chat; handleSendMention: Function }) => {
         // 消息发送在父组件处理
         // 接受ChatId
-        const [text, setText] = useState<string>('')
-        const inputRef: any = useRef<HTMLTextAreaElement>(null)
+        const [text, setText] = useImmer<string>('')
+        const [showEmoji, setShowEmoji] = useImmer<boolean>(false)
 
+        const inputRef: any = useRef<HTMLTextAreaElement>(null)
+        console.log('111')
         const handleSend = () => {
             const userIds = getUserIds(text)
             if (userIds.length === 0) {
@@ -183,6 +217,7 @@ export const ChatViewFooter = observer(
             if (reg.test(text) || text.length > 500) return true
             return false
         }
+
         useEffect(() => {
             window.addEventListener('keydown', onKeyDown)
             return () => {
@@ -229,13 +264,20 @@ export const ChatViewFooter = observer(
 
                                 <div className="input-group-append">
                                     <span className="input-group-text border-0">
-                                        <button
-                                            className="btn btn-sm btn-link text-muted"
-                                            data-toggle="tooltip"
-                                            title="表情"
-                                            type="button">
-                                            <i className="zmdi zmdi-mood font-22"></i>
-                                        </button>
+                                        <Popover
+                                            trigger="click"
+                                            title={EmojiSelectorTitle('表情')}
+                                            content={<EmojiContent text={text} setText={setText} handleClick={() => setShowEmoji(false)}/>}
+                                            open={showEmoji}
+                                            onOpenChange={(open) => setShowEmoji(open)}>
+                                            <button
+                                                className="btn btn-sm btn-link text-muted"
+                                                data-toggle="tooltip"
+                                                title="表情"
+                                                type="button">
+                                                <i className="zmdi zmdi-mood font-22"></i>
+                                            </button>
+                                        </Popover>
                                     </span>
                                 </div>
                                 <div className="input-group-append">

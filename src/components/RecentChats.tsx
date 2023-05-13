@@ -47,7 +47,7 @@ const RecentChatItem = observer(
                             {notificationStore.hasMuted(chat.chatId) && <i className='zmdi zmdi-eye'></i>}
                             {/* TopIcon End */}
                             <div className="avatar me-3">
-                                <Badge count={chat.unreadCount}>
+                                <Badge count={chat.unreadCount} color={notificationStore.hasMuted(chat.chatId) ? 'gray' : 'red'}>
                                     <span className="rounded-circle"></span>
                                     <div className="avatar rounded-circle no-image timber">
                                         <img
