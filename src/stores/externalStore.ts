@@ -7,6 +7,7 @@ import { ChatMessage, chatStore } from './chatStore'
 import { authStore } from './authStore'
 import crypto from 'crypto'
 import { getHash, sha256 } from '../utils/cipher'
+import { message } from 'antd'
 
 const baiduTranslateUrl = '/baiduTranslate'
 const baiduVoiceTranslateUrl = '/baiduVoice'
@@ -41,6 +42,11 @@ export class ExternalApiStore {
     }
 
     translateByBaidu(msg: ChatMessage, text: string, to = 'zh') {
+        if (this.baiduTransalteKey === '' || this.baiduTranslateId === '') {
+            message.error('未配置百度翻译外部服务')
+            return
+        }
+
         const salt = Date.now().toString()
         const sign = SparkMD5.hash(this.baiduTranslateId + text + salt + this.baiduTransalteKey)
         const params = {
@@ -99,6 +105,11 @@ export class ExternalApiStore {
     }
 
     audioTranslateByTencent(msg: ChatMessage, base64: string, size: number) {
+        if (this.tencentCloudId === '' || this.tencentCloudKey === '') {
+            message.error('未配置腾讯云语音转换外部服务')
+            return
+        }
+
         const params = {
             EngSerViceType: '16k_zh',
             SourceType: 1,
