@@ -94,6 +94,7 @@ export const VoiceMessageFooter = observer(
                                         <i className="zmdi zmdi-comment-text font-22"></i>
                                     </button>
                                     <div style={{ width: '15px' }}></div>
+
                                     <AudioAnalyser {...audioProps} />
 
                                     <div style={{ width: '25px' }}></div>
@@ -157,7 +158,15 @@ const EmojiSelectorTitle = (title: string) => <span>{title}</span>
 const start = 0x01f600
 const end = 0x01f61a
 
-const EmojiContent = ({text, setText, handleClick} : {text: string, setText: any, handleClick: any}) => {
+const EmojiContent = ({
+    text,
+    setText,
+    handleClick,
+}: {
+    text: string
+    setText: any
+    handleClick: any
+}) => {
     const [emojis, setEmojis] = useImmer<string[]>([])
 
     useEffect(() => {
@@ -170,12 +179,14 @@ const EmojiContent = ({text, setText, handleClick} : {text: string, setText: any
     }, [])
     // TODO: yjx 调整选择表情的样式
     return (
-        <div style={{display: 'inline-flex'}}>
+        <div style={{ display: 'inline-flex' }}>
             {emojis.map((emoji) => (
-                <div key={emoji} onClick={() => {
-                    setText(text + emoji)
-                    handleClick()
-                }}>
+                <div
+                    key={emoji}
+                    onClick={() => {
+                        setText(text + emoji)
+                        handleClick()
+                    }}>
                     <button>{emoji}</button>
                 </div>
             ))}
@@ -267,7 +278,13 @@ export const ChatViewFooter = observer(
                                         <Popover
                                             trigger="click"
                                             title={EmojiSelectorTitle('表情')}
-                                            content={<EmojiContent text={text} setText={setText} handleClick={() => setShowEmoji(false)}/>}
+                                            content={
+                                                <EmojiContent
+                                                    text={text}
+                                                    setText={setText}
+                                                    handleClick={() => setShowEmoji(false)}
+                                                />
+                                            }
                                             open={showEmoji}
                                             onOpenChange={(open) => setShowEmoji(open)}>
                                             <button

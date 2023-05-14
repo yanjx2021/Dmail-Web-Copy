@@ -19,6 +19,7 @@ import { Settings } from '../components/Settings/Settings'
 import { MessageServer } from '../utils/networkWs'
 import { Send } from '../utils/message'
 import { tokenStore } from '../stores/tokenStore'
+import { externalStore } from '../stores/externalStore'
 
 class HomeStore {
     openSetting = false
@@ -55,7 +56,11 @@ const Home = observer(
 
         useEffect(() => {
             const disposer = autorun(() => {
-                if (authStore.token === undefined && authStore.state === AuthState.Logged && tokenStore.rememberMe) {
+                if (
+                    authStore.token === undefined &&
+                    authStore.state === AuthState.Logged &&
+                    tokenStore.rememberMe
+                ) {
                     MessageServer.Instance().send<Send.ApplyForToken>(Send.ApplyForToken)
                 }
             })
@@ -65,6 +70,7 @@ const Home = observer(
         useEffect(
             action(() => {
                 LocalDatabase.loadUserSetting()
+                externalStore.load()
             }),
             []
         )

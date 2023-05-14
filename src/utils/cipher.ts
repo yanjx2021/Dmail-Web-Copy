@@ -3,6 +3,24 @@ import { Buffer } from 'buffer'
 import crypto from 'crypto'
 const keypair = require('keypair')
 
+export function sha256(message: any, secret = '', encoding: any) {
+    const hmac = crypto.createHmac('sha256', secret)
+    return hmac.update(message).digest(encoding)
+}
+
+export function getHash(message: any, encoding: any) {
+    const hash = crypto.createHash('sha256')
+    return hash.update(message).digest(encoding)
+}
+
+export function getDate(timestamp: any) {
+    const date = new Date(timestamp * 1000)
+    const year = date.getUTCFullYear()
+    const month = ('0' + (date.getUTCMonth() + 1)).slice(-2)
+    const day = ('0' + date.getUTCDate()).slice(-2)
+    return `${year}-${month}-${day}`
+}
+
 export default class Crypto {
     key: any
     pubKey: any
@@ -16,7 +34,6 @@ export default class Crypto {
         this.pubKey = this.key.public
         this.priKey = this.key.private
         this.sendKey = this.pubKey.slice(31, -30).replace(/[\r\n]/g, '')
-        
     }
     encryptRSA(data: any) {
         const encrypt = new JSEncrypt()
@@ -36,7 +53,7 @@ export default class Crypto {
         }
         this.secretKey = Buffer.from(this.decryptRSA(key), 'base64')
         this.hasAES = true
-        console.log("成功设置AES密钥")
+        console.log('成功设置AES密钥')
     }
     encryptAES(word: any) {
         if (typeof word !== 'string') {

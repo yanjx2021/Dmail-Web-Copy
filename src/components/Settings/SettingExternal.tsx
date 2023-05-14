@@ -6,10 +6,6 @@ import { action } from 'mobx'
 import { InfInputer } from './SettingGeneral'
 
 export const SettingExternal = observer(() => {
-    useEffect(() => {
-        externalStore.load()
-    }, [])
-
     return (
         <div className="tab-pane fade" id="setting-external" role="tabpanel">
             <ExternalHead />
@@ -52,14 +48,25 @@ export const SettingExternal = observer(() => {
                             <form className="row g-3">
                                 <div>
                                     <div className="form-group mb-3">
-                                        <label>百度AI开放平台 Access Token</label>
+                                        <label>腾讯云 Id</label>
                                         <input
                                             className="form-control text-footerform"
                                             onChange={action((e) => {
-                                                externalStore.baiduAiToken = e.target.value
+                                                externalStore.tencentCloudId = e.target.value
                                             })}
-                                            value={externalStore.baiduAiToken}></input>
+                                            value={externalStore.tencentCloudId}></input>
                                     </div>
+
+                                    <div className="form-group mb-3">
+                                        <label>腾讯云 Key</label>
+                                        <input
+                                            className="form-control text-footerform"
+                                            onChange={action((e) => {
+                                                externalStore.tencentCloudKey = e.target.value
+                                            })}
+                                            value={externalStore.tencentCloudKey}></input>
+                                    </div>
+
                                     <button
                                         type="button"
                                         className="btn btn-primary"

@@ -83,7 +83,7 @@ export const MessageDropDown = observer(
                             handleClick={action(() => {
                                 const cachedUrl = binaryStore.getBinaryUrl(msg.content as string)
                                 blobToBase64(cachedUrl.url).then((base64: any) =>
-                                    externalStore.audioTranslateByBaidu(
+                                    externalStore.audioTranslateByTencent(
                                         msg,
                                         base64.split(',')[1],
                                         cachedUrl.size
