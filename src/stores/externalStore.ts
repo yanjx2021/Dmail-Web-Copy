@@ -206,30 +206,30 @@ export class ExternalApiStore {
                 })
             })
 
-        // const curlcmd =
-        //     'curl -X POST ' +
-        //     'https://' +
-        //     endpoint +
-        //     ' -H "Authorization: ' +
-        //     authorization +
-        //     '"' +
-        //     ' -H "Content-Type: application/json; charset=utf-8"' +
-        //     ' -H "Host: ' +
-        //     endpoint +
-        //     '"' +
-        //     ' -H "X-TC-Action: ' +
-        //     action +
-        //     '"' +
-        //     ' -H "X-TC-Timestamp: ' +
-        //     timestamp.toString() +
-        //     '"' +
-        //     ' -H "X-TC-Version: ' +
-        //     version +
-        //     '"' +
-        //     " -d '" +
-        //     payload +
-        //     "'"
-        // console.log(curlcmd)
+        const curlcmd =
+            'curl -X POST ' +
+            'https://' +
+            endpoint +
+            ' -H "Authorization: ' +
+            authorization +
+            '"' +
+            ' -H "Content-Type: application/json; charset=utf-8"' +
+            ' -H "Host: ' +
+            endpoint +
+            '"' +
+            ' -H "X-TC-Action: ' +
+            action +
+            '"' +
+            ' -H "X-TC-Timestamp: ' +
+            timestamp.toString() +
+            '"' +
+            ' -H "X-TC-Version: ' +
+            version +
+            '"' +
+            " -d '" +
+            payload +
+            "'"
+        console.log(curlcmd)
     }
 
     getDate(timestamp: number) {

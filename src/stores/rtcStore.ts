@@ -8,7 +8,7 @@ import { MediaIceCandidate } from '../utils/message'
 import { UserId, authStore } from './authStore'
 import { MediaCallOfferNotification } from '../components/ChatView/VideoCall'
 import { chatStore } from './chatStore'
-
+import { message } from 'antd'
 
 export enum RtcState {
     None = 0,
@@ -126,10 +126,10 @@ export class RtcStore {
 
         if (!data.accept) {
             // 被拒绝
-            console.log('视频通话被拒绝')
+            message.success('通话请求被对方拒绝')
             this.resetConnection()
         } else {
-            console.log('视频通话请求通过')
+            message.success('通话请求通过')
             try {
                 this.receivePeerConnectionAnswer(JSON.parse(data.serializedAnswer!))
             } catch (error) {
@@ -142,7 +142,7 @@ export class RtcStore {
         if (this.state !== RtcState.None) {
             this.refusedUnsolvedOffer()
         }
-        
+
         this.unsolvedOffer = data
         this.state = RtcState.WaitingUser
         MediaCallOfferNotification()
