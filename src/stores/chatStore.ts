@@ -48,6 +48,7 @@ import {
 } from '../components/MessagesBox/Selector'
 import { binaryStore } from './binaryStore'
 import { modalStore } from './modalStore'
+import { notificationStore } from './notificationStore'
 
 export type ChatId = number
 
@@ -1166,6 +1167,7 @@ export class ChatStore {
         LocalDatabase.removeChatInfo(chat.chatId)
         this.chats.delete(chat.chatId)
     }
+    
     private DeleteChatHandler(chatId: number) {
         if (!this.chats.has(chatId)) {
             this.errors = `清除聊天失败，聊天${chatId}不存在`
@@ -1175,6 +1177,8 @@ export class ChatStore {
         if (chat.chatType === ChatType.Private) {
             // 删除私聊
             LocalDatabase.removeUserInfo(chat.bindUser!.userId).catch((err) => console.log(err)) // 清除用户
+            chatStore.removeTopChat(chat.chatId)
+            notificationStore.unMuteChat(chat.chatId)
         }
         this.removeChatInfo(chat)
     }
@@ -1222,7 +1226,8 @@ export class ChatStore {
                 // 清理缓存
                 const chat = this.chats.get(response.chatId!)!
                 LocalDatabase.removeUserInfo(chat.bindUser!.userId).catch((err) => console.log(err)) // 清除用户
-
+                notificationStore.unMuteChat(chat.chatId)
+                chatStore.removeTopChat(chat.chatId)
                 this.removeChatInfo(chat)
                 console.log('成功删除好友')
                 break
