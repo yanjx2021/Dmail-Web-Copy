@@ -361,7 +361,7 @@ export interface ReceiveGetUserIDResponseData {
 }
 
 export interface ReceiveLogOffResponseData {
-    state: 'Success' | 'EmailCodeError' |'UserNotFound' | 'DatabaseError' | 'ServerError'
+    state: 'Success' | 'EmailCodeError' | 'UserNotFound' | 'DatabaseError' | 'ServerError'
 }
 
 export interface ReceiveApplyForTokenResponesData {
@@ -416,6 +416,7 @@ export enum Receive {
     MediaCallOffer = 'MediaCallOffer',
     MediaCallAnswer = 'MediaCallAnswer',
     MediaIceCandidate = 'MediaIceCandidate',
+    MediaCallStop = 'MediaCallStop',
     RevokeMessageResponse = 'RevokeMessageResponse',
     RemoveGroupMemberResponse = 'RemoveGroupMemberResponse',
     GroupOwnerTransferResponse = 'GroupOwnerTransferResponse',
@@ -427,7 +428,7 @@ export enum Receive {
     PullGroupNoticeResponse = 'PullGroupNoticeResponse',
     GetUserIDResponse = 'GetUserIDResponse',
     LogOffResponse = 'LogOffResponse',
-    ApplyForTokenResponse = 'ApplyForTokenResponse'
+    ApplyForTokenResponse = 'ApplyForTokenResponse',
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -537,6 +538,13 @@ export interface MediaIceCandidate {
     serializedCandidate: string
 }
 
+export type MediaCallStopReason = 'Network' | 'User'
+
+export interface MediaCallStop {
+    friendId: number
+    reason: MediaCallStopReason
+}
+
 export interface SendRemoveGroupMemberData {
     chatId: number
     userId: number
@@ -574,7 +582,7 @@ export interface SendGetUserReadInGroup {
 }
 
 export interface SendPullGroupNoticeData {
-    chatId: number,
+    chatId: number
     lastNoticeId?: number
 }
 
@@ -612,6 +620,7 @@ export enum Send {
     MediaCall = 'MediaCall',
     MediaCallAnswer = 'MediaCallAnswer',
     MediaIceCandidate = 'MediaIceCandidate',
+    MediaCallStop = 'MediaCallStop',
     RemoveGroupMember = 'RemoveGroupMember',
     GroupOwnerTransfer = 'GroupOwnerTransfer',
     SendGroupNotice = 'SendGroupNotice',
@@ -621,7 +630,7 @@ export enum Send {
     PullGroupNotice = 'PullGroupNotice',
     GetUserID = 'GetUserID',
     LogOff = 'LogOff',
-    ApplyForToken = 'ApplyForToken'
+    ApplyForToken = 'ApplyForToken',
 }
 
 // COMMAND和DATA类型捆绑
@@ -669,6 +678,7 @@ export interface MessageReceiveData {
     [Receive.MediaCallOffer]: MediaCallData
     [Receive.MediaCallAnswer]: MediaCallAnswerData
     [Receive.MediaIceCandidate]: MediaIceCandidate
+    [Receive.MediaCallStop]: MediaCallStop
     [Receive.RevokeMessageResponse]: ReceiveRevokeMessageResponseData
     [Receive.RemoveGroupMemberResponse]: ReceiveRemoveGroupMemberResponseData
     [Receive.GroupOwnerTransferResponse]: ReceiveGroupOwnerTransferResponseData
@@ -726,6 +736,7 @@ export interface MessageSendData {
     [Send.GetUserID]: string
     [Send.LogOff]: number
     [Send.ApplyForToken]: never
+    [Send.MediaCallStop]: MediaCallStop
 }
 
 // 封装消息包

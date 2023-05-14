@@ -1,7 +1,7 @@
 import { action, makeAutoObservable, runInAction } from 'mobx'
 import { off, traceDeprecation } from 'process'
 import { MessageServer } from '../utils/networkWs'
-import { MediaCallType, Receive, Send } from '../utils/message'
+import { MediaCallStop, MediaCallType, Receive, Send } from '../utils/message'
 import { MediaCallAnswerData } from '../utils/message'
 import { MediaCallData } from '../utils/message'
 import { MediaIceCandidate } from '../utils/message'
@@ -40,6 +40,7 @@ export class RtcStore {
         MessageServer.on(Receive.MediaCallAnswer, this.onReceiveMediaCallAnswer)
         MessageServer.on(Receive.MediaCallOffer, this.onReceiveMediaCallOffer)
         MessageServer.on(Receive.MediaIceCandidate, this.onReceiveMediaCandidate)
+        MessageServer.on(Receive.MediaCallStop, this.onPeerCloseMediaCall)
 
         this.stashedCandidates = []
         this.localStream = null
@@ -104,6 +105,12 @@ export class RtcStore {
     }
 
     closeMediaCall() {
+        if (this.remoteUserId) {
+            MessageServer.Instance().send(Send.MediaCallStop, {
+                friendId: this.remoteUserId,
+                reason: 'User',
+            })
+        }
         this.resetConnection()
     }
 
@@ -117,6 +124,16 @@ export class RtcStore {
         } catch (error) {
             console.log(error)
         }
+    }
+
+    private onPeerCloseMediaCall(data: MediaCallStop) {
+        if (data.friendId !== this.remoteUserId) {
+            return
+        }
+
+        message.info('对方挂断了通话')
+
+        this.resetConnection()
     }
 
     private onReceiveMediaCallAnswer(data: MediaCallAnswerData) {
@@ -184,12 +201,12 @@ export class RtcStore {
 
     private onConnected() {
         this.state = RtcState.Connected
-        console.log('连接成功')
+        message.success('通话连接成功')
     }
 
     private onConnecting() {
         this.state = RtcState.Connecting
-        console.log('正在连接')
+        message.loading('通话正在连接')
     }
 
     private resetConnection() {
