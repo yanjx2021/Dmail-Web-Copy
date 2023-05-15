@@ -456,6 +456,7 @@ export class Chat {
     }
 
     get mentionUserList() {
+        
         if (this.chatType === ChatType.Private) return []
         if (!this.userIds) return []
         const mentionOptionList = this.userIds.map((userId) => {
@@ -465,6 +466,8 @@ export class Chat {
                 key: userId.toString(),
             }
         })
+
+        console.log(mentionOptionList, this.userIds)
         return mentionOptionList
     }
 
@@ -590,7 +593,8 @@ export class Chat {
             this.groupName = info.name
             this.groupAvaterPath = info.avaterHash
             this.chatType = ChatType.Group
-            this.userIds = []
+            // Maybe some bugs
+            // this.userIds = []
         } else {
             // 私聊
             const users: [number, number] = info.users

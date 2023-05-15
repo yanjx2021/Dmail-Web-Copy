@@ -15,6 +15,7 @@ import { useFetcher } from 'react-router-dom'
 import { AnyARecord } from 'dns'
 import { authStore } from '../../stores/authStore'
 import { NoneActiveChatBody } from '../NoneActiveChatBody'
+import { modalStore } from '../../stores/modalStore'
 
 export const ChatMessageContent = observer(
     ({
@@ -50,6 +51,7 @@ export const ChatMessageContent = observer(
                 })
             )
         }, [chat, messages, setMessages])
+
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const itemContent = useCallback(

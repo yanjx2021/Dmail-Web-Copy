@@ -96,6 +96,7 @@ const ChatSidebarName = observer(({ chat, visitUser }: { chat: Chat; visitUser: 
             <div className="text-center mt-3 mb-5">
                 <h4>{visitUser.showName}</h4>
                 <span className="text-muted">
+                    <p>{`[用户ID]: ${visitUser.userId}`}</p>
                     {visitUser.nickname === '' ? <></> : <p>{`[用户名]: ${visitUser.name}`}</p>}
                     <a
                         className="__cf_email__"
@@ -112,6 +113,7 @@ const ChatSidebarName = observer(({ chat, visitUser }: { chat: Chat; visitUser: 
             <h4>{chat.name}</h4>
             {chat.chatType === ChatType.Private ? (
                 <span className="text-muted">
+                    <p>{`[用户ID]: ${chat.bindUser!.userId}`}</p>
                     {chat.bindUser!.nickname === '' ? (
                         <></>
                     ) : (

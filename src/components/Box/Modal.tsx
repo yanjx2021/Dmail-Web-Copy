@@ -25,10 +25,11 @@ import { MessageBox } from '../MessagesBox/MessageBox'
 import { useEffect } from 'react'
 import '../../styles/Modal.css'
 import { updateGroupStore } from '../../stores/updateGroupStore'
-import { userStore } from '../../stores/userStore'
+import { User, userStore } from '../../stores/userStore'
 import { getUserIdStore } from '../../stores/getUserIdStore'
-import { manageGroupNoticeStore } from '../ChatProfile/ChatSidebarBody'
+import { AddFriendModal, manageGroupNoticeStore } from '../ChatProfile/ChatSidebarBody'
 import { type } from 'os'
+import { chatSideStore } from '../../stores/chatSideStore'
 
 export const ModalInput = ({
     label,
@@ -426,6 +427,52 @@ export const GroupMessageReadersModalView = observer(({ title }: { title: string
     )
 })
 
+const FindUserCard = observer(({ user, handleClick }: { user: User; handleClick: any }) => {
+    const [isOpen, setIsOpen] = useImmer<boolean>(false)
+    return (
+        <li>
+            {' '}
+            <a className="card">
+                <div className="card-body">
+                    <div className="media">
+                        <div className="avatar me-3">
+                            <span className="rounded-circle"></span>
+                            <div className="avatar rounded-circle no-image timber">
+                                <img
+                                    className="avatar rounded-circle"
+                                    src={user.getAvaterUrl}
+                                    alt="avatar"
+                                />
+                            </div>
+                        </div>
+                        <div className="media-body overflow-hidden">
+                            <div className="d-flex align-items-center mb-1">
+                                <h6 className="text-truncate mb-0 me-auto">{`${user.name}(ID: ${user.userId})`}</h6>
+                            </div>
+                        </div>
+                        {!chatStore.friendMap.has(user.userId) &&
+                            user.userId !== authStore.userId && (
+                                <button
+                                    className="ant-btn css-dev-only-do-not-override-1mqg3i0 ant-btn-default"
+                                    onClick={() => {
+                                        setIsOpen(true)
+                                    }}>
+                                    添加好友
+                                </button>
+                            )}
+                    </div>
+                </div>
+            </a>
+            <AddFriendModal
+                userId={user.userId}
+                userName={user.name}
+                setIsOpen={setIsOpen}
+                isOpen={isOpen}
+            />
+        </li>
+    )
+})
+
 export const GetUserIdModalView = observer(({ title }: { title: string }) => {
     const [userName, setUserName] = useImmer<string>('')
 
@@ -458,12 +505,20 @@ export const GetUserIdModalView = observer(({ title }: { title: string }) => {
                 placeholder="请输入查找用户名..."
             />
             <h5>搜索结果</h5>
-            <ul>
+            <ul className="chat-list">
                 {getUserIdStore.userIds?.length === 0 ? (
                     <li key={0}>未找到该用户</li>
                 ) : (
                     getUserIdStore.users?.map((user) => (
-                        <li key={user.userId}> {`用户名: ${user.name} ID: ${user.userId}`} </li>
+                        <FindUserCard
+                            user={user}
+                            key={user.userId}
+                            handleClick={action(() => {
+                                modalStore.handleCancel()
+                                getUserIdStore.reset()
+                                setUserName('')
+                            })}
+                        />
                     ))
                 )}
             </ul>
@@ -577,6 +632,7 @@ export const SelectMessageModalView = observer(({ title }: { title: string }) =>
     const [userIdSelect, setUserIdSelect] = useImmer<number>(-1)
 
     const [typeSelect, setTypeSelect] = useImmer<TypeSelect>('none')
+
     const handleTypeChange = (value: TypeSelect) => {
         setTypeSelect(value)
         console.log(`Selected ${value}`)
@@ -648,6 +704,21 @@ export const SelectMessageModalView = observer(({ title }: { title: string }) =>
                     setFiltedMessages(filtedMessages)
                 })}>
                 筛选
+            </button>
+            <button
+                className="ant-btn css-dev-only-do-not-override-1mqg3i0 ant-btn-default"
+                onClick={action(() => {
+                    const firstIndex = modalStore.selectMessageList![0].inChatId!
+                    const count = 20
+                    if (firstIndex === 1) {
+                        message.info('已经到头了哦~~~')
+                        return
+                    }
+                    modalStore.selectMessageChat?.getMessages(firstIndex - 1, 20).then(() => {
+                        modalStore.selectMessageList = modalStore.selectMessageChat?.messagesList()
+                    })
+                })}>
+                拉取更多
             </button>
             {modalStore.selectMessageList && (
                 <>

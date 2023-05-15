@@ -225,6 +225,7 @@ export const ChatViewFooter = observer(
             }
         })
 
+
         return (
             <div className="chat-footer border-top py-xl-4 py-lg-2 py-2">
                 <div className="container-xxl">
@@ -261,6 +262,7 @@ export const ChatViewFooter = observer(
                                     defaultValue=""
                                     options={props.chat.mentionUserList}
                                 />
+
 
                                 <div className="input-group-append">
                                     <span className="input-group-text border-0">

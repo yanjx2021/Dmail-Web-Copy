@@ -25,6 +25,12 @@ export class GetUserIdStore {
         switch (response.state) {
             case 'Success':
                 this.userIds = response.userIds
+                this.userIds.forEach((userId, _) => {
+                    MessageServer.Instance().send<Send.GetUserInfo>(
+                        Send.GetUserInfo,
+                        userId
+                    )
+                })
                 this.users = this.userIds.map((userId) => userStore.getUser(userId))
                 break
             case 'NotFound':
@@ -33,9 +39,7 @@ export class GetUserIdStore {
                 break
             default:
                 console.log(response.state)
-                
         }
-        
     }
 }
 

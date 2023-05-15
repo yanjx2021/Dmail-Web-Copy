@@ -30,6 +30,7 @@ export class ModalStore {
     selectMessageChat: Chat | undefined
     selectMessageList: ChatMessage[] | undefined
 
+
     get showSelectSender() {
         return this.selectMessageChat?.chatType !== ChatType.Private
     }

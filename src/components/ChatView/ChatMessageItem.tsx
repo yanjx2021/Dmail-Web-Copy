@@ -8,10 +8,11 @@ import {
     ChatMessageFileInfo,
     ChatMessageTransferInfo,
     ChatMessageType,
+    MentionTextContent,
     ReplyTextContent,
     chatStore,
 } from '../../stores/chatStore'
-import { authStore } from '../../stores/authStore'
+import { UserId, authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
 import { userStore } from '../../stores/userStore'
 import { fileStore } from '../../stores/fileStore'
@@ -24,13 +25,36 @@ import { modalStore } from '../../stores/modalStore'
 import { chatSideStore } from '../../stores/chatSideStore'
 import { FileItem, LoadingFileItem } from './FileItem'
 import { LoadingPhotoItem, PhotoItem } from './PhotoItem'
-import { Image } from 'antd'
-import { renderFormatUrl } from '../../utils/urlToLink'
-import { min } from 'rxjs'
+import { Image, message } from 'antd'
+import { renderFormatMention, renderFormatUrl } from '../../utils/urlToLink'
+import { min, timestamp } from 'rxjs'
 import { ReceiveChatMessage } from '../../utils/message'
+
 
 export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) => {
     const isRight = msg.senderId === authStore.userId
+
+    useEffect(action(() => {
+        if (msg.type !== ChatMessageType.MentionText) return
+        
+        const content: MentionTextContent = msg.content as MentionTextContent       
+        const clickCallbackList : any[] = []
+
+        content.userIds.forEach((id, index) => {
+            console.log(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)
+            const clickHandler = () => {
+                chatSideStore.visitUsertoggle(userStore.getUser(id))
+            }
+            clickCallbackList.push(clickHandler)
+            document.getElementById(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)?.addEventListener('click', clickHandler)
+        })
+        return () => {
+            // content.userIds.forEach((id, index) => {
+            //     console.log(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)
+            //     document.getElementById(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)?.addEventListener('click', clickCallbackList[index]
+            // )})
+        }
+    }), [])
 
     if (msg.type === ChatMessageType.Text && typeof msg.content === 'string') {
         return (
@@ -45,10 +69,13 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             </div>
         )
     } else if (msg.type === ChatMessageType.MentionText) {
-        const content: any = msg.content
+        const content: MentionTextContent = msg.content as MentionTextContent
+
+        const foo = renderFormatMention(content.text, content.userIds, msg.chatId, msg.timestamp)
+        
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                {renderFormatUrl(content.text)}
+                {foo}
             </div>
         )
     } else if (msg.type === ChatMessageType.Image && typeof msg.content === 'string') {
