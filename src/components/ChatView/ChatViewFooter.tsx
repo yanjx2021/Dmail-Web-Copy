@@ -3,7 +3,7 @@ import '../../styles/ChatViewFooter.css'
 import { messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
 import { action } from 'mobx'
-import { Mentions, Popover } from 'antd'
+import { Button, Mentions, Popover } from 'antd'
 import { Chat } from '../../stores/chatStore'
 import { useImmer } from 'use-immer'
 import { observer } from 'mobx-react-lite'
@@ -179,7 +179,7 @@ const EmojiContent = ({
     }, [])
     // TODO: yjx 调整选择表情的样式
     return (
-        <div style={{ display: 'inline-flex' }}>
+        <div className="emoji-container">
             {emojis.map((emoji) => (
                 <div
                     key={emoji}
@@ -187,7 +187,7 @@ const EmojiContent = ({
                         setText(text + emoji)
                         handleClick()
                     }}>
-                    <button>{emoji}</button>
+                    <Button className='emoji-item'>{emoji}</Button>
                 </div>
             ))}
         </div>
