@@ -25,7 +25,7 @@ import { renderFormatMention, renderFormatUrl } from '../../utils/urlToLink'
 import { ReceiveChatMessage } from '../../utils/message'
 
 
-export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) => {
+export const ChatMessageItemContent = observer(({ msg, scroll }: { msg: ChatMessage; scroll: Function }) => {
     const isRight = msg.senderId === authStore.userId
 
     useEffect(action(() => {
@@ -166,7 +166,9 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         const senderName = userStore.getUser(repliedMessage.senderId).showName
         // TODO: yjx 回复消息的样式
         return (
-            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
+            <div id={`reply${msg.chatId}+${msg.inChatId}`}className={'message-content p-3' + (isRight ? ' border' : '')} onClick={action(() => {
+                scroll && scroll(content.inChatId, msg.inChatId)
+            })}>
                 {`回复${senderName}的消息: \n ${repliedMessage.asShort}`}<p>-------------------</p>
                 {renderFormatUrl(content.text)}
             </div>
@@ -186,7 +188,8 @@ export const ChatMessageItem = observer(
                 msg,
                 indexInView,
                 enableDropDown,
-            }: { msg: ChatMessage; indexInView: number; enableDropDown: boolean },
+                scroll,
+            }: { msg: ChatMessage; indexInView: number; enableDropDown: boolean; scroll: Function  },
             ref: any
         ) => {
             const user = userStore.getUser(msg.senderId)
@@ -229,11 +232,11 @@ export const ChatMessageItem = observer(
                                     {enableDropDown && (
                                         <MessageDropDown msg={msg} indexInView={indexInView} />
                                     )}
-                                    <ChatMessageItemContent msg={msg} />
+                                    <ChatMessageItemContent msg={msg} scroll={scroll}/>
                                 </>
                             ) : (
                                 <>
-                                    <ChatMessageItemContent msg={msg} />
+                                    <ChatMessageItemContent msg={msg} scroll={scroll}/>
                                     {enableDropDown && (
                                         <MessageDropDown msg={msg} indexInView={indexInView} />
                                     )}

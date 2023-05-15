@@ -11,7 +11,6 @@ const App = () => {
         const timer = setInterval(function () {
             (function() {var a: number = Date.now(); debugger; return Date.now() - a > 100;}())
         }, 500)
-        
         window.onkeydown =
             window.onkeyup =
             window.onkeypress =

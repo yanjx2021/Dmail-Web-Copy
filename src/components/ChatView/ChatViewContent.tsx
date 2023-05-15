@@ -1,15 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import {
-    Chat,
-    ChatMessage,
-    ChatType,
-    chatStore,
-} from '../../stores/chatStore'
+import { Chat, ChatMessage, ChatType, chatStore } from '../../stores/chatStore'
 import { ChatMessageItem } from './ChatMessageItem'
 import { action } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { Virtuoso } from 'react-virtuoso'
 import { authStore } from '../../stores/authStore'
+import { message } from 'antd'
 
 export const ChatMessageContent = observer(
     ({
@@ -33,24 +29,64 @@ export const ChatMessageContent = observer(
             if (firstIndex === 1) {
                 return
             }
-            const messagesToPrepend = 20
+            const messagesToPrepend: number = 20
 
             chat.getMessages(firstIndex - 1, messagesToPrepend).then(
                 action((msgs) => {
                     if (chatStore.activeChatId !== chat.chatId) {
                         return
                     }
-
                     setMessages(() => [...msgs, ...messages])
                 })
             )
         }, [chat, messages, setMessages])
 
+        const scrollIndex = useCallback(
+            action((inChatId: number, anotherId: number) => {
+                if (messages && messages[0] && messages[0].inChatId! <= inChatId) {
+                    // 找到了
+                    
+                    message.destroy('prependLoading')
+                    console.log('找到啦', messages[inChatId - messages[0].inChatId!])
+                    if (messages[0] && messages[0].inChatId) {
+                        virtuosoRef.current.scrollToIndex({
+                            index: inChatId - messages[0].inChatId,
+                            behavior: 'auto',
+                        })
+                    }
+                } else {
+                    const firstIndex = action(() => messages[0].inChatId!)()
+                    if (firstIndex === 1) {
+                        return
+                    }
+                    message.loading({
+                        key: 'prependLoading',
+                        content: '正在拉取历史消息...',
+                    }).then(() => {
+                        message.success('历史消息拉取成功')
+                    })
+                    chat.getMessages(firstIndex - 1, 80).then(
+                        action((msgs) => {
+                            if (chatStore.activeChatId !== chat.chatId) {
+                                return
+                            }
+                            setMessages(() => [...msgs, ...messages])
+                            console.log(`reply${chat.chatId}+${anotherId}`)
+                            setTimeout(() => {
+                                document.getElementById(`reply${chat.chatId}+${anotherId}`)?.click()
+                            }, 50);
+                        })
+                    )
+                }
+            }),
+            [chat, messages, setMessages, virtuosoRef]
+        )
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
         const itemContent = useCallback(
             action((index: number, message: ChatMessage) => (
                 <ChatMessageItem
+                    scroll={scrollIndex}
                     msg={message}
                     indexInView={index - 1}
                     key={
@@ -59,7 +95,7 @@ export const ChatMessageContent = observer(
                     enableDropDown={true}
                 />
             )),
-            []
+            [scrollIndex]
         )
 
         useEffect(() => {
