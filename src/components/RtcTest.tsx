@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { rtcStore } from '../stores/rtcStore'
-import { RefObject, useEffect, useRef, useState } from 'react'
-import { off } from 'process'
+import { useEffect, useRef, useState } from 'react'
 import { action } from 'mobx'
 
 export enum StreamVideoPlayerState {

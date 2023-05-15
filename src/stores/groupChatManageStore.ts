@@ -49,7 +49,7 @@ export class GroupChatManageStore {
     GroupOwnerTransferResponseHandler(response: ReceiveGroupOwnerTransferResponseData) {
         switch (response.state) {
             case "Success":
-                chatStore.getChat(response.chatId!).ownerId = response.userId!
+                chatStore.getChat(response.chatId).ownerId = response.userId
                 break
             case 'UserNotInChat':
                 this.errors = '用户不在群聊中'
@@ -124,7 +124,7 @@ export class GroupChatManageStore {
     private GetGroupAdminResponseHandler(response: ReceiveGetGroupAdminResponseData) {
         switch (response.state) {
             case 'Success':
-                chatStore.getChat(response.chatId!).setGroupChatAdminIds(response.userIds!)
+                chatStore.getChat(response.chatId).setGroupChatAdminIds(response.userIds)
                 break
             case 'UserNotInChat':
                 this.errors = '无权拉取管理员信息'
@@ -156,7 +156,7 @@ export class GroupChatManageStore {
     private getGroupOwnerResponseHandler(response: ReceiveGetGroupOwnerResponseData) {
         switch (response.state) {
             case 'Success':
-                chatStore.getChat(response.chatId!).setGroupChatOwnerId(response.userId!)
+                chatStore.getChat(response.chatId).setGroupChatOwnerId(response.userId)
                 break
             case 'UserNotInChat':
                 this.errors = '无权拉取群主信息'

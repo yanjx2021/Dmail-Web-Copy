@@ -1,8 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { RtcState, rtcStore } from '../../stores/rtcStore'
-import { RefObject, useEffect, useRef, useState } from 'react'
-import { off } from 'process'
-import { action } from 'mobx'
+import { useEffect, useRef, useState } from 'react'
 import '../../styles/VideoCall.css'
 import { useImmer } from 'use-immer'
 import { Button, Space, notification } from 'antd'
@@ -35,7 +33,6 @@ export const StreamVideoPlayer = ({
 }
 
 export const VideoCall = observer(() => {
-    const [friendId, setFriendId] = useImmer<string>('')
     const [viewSwap, setViewSwap] = useState(false)
 
     return (

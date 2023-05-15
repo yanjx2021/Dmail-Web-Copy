@@ -2,7 +2,7 @@ import { makeAutoObservable } from "mobx"
 import { LocalDatabase } from "./localData"
 import { MessageServer } from "../utils/networkWs"
 import { Receive } from "../utils/message"
-import { ChatMessage, ChatMessageType, chatStore } from "./chatStore"
+import { ChatMessageType, chatStore } from "./chatStore"
 
 export type serializedNotice = string
 

@@ -104,3 +104,20 @@
   padding-top:5px;
   font-size: 12px;
 }
+
+.at_item
+{
+  display: inline-block;
+}
+.at_item:hover{
+  color: #0162f4;
+}
+
+.quote-container
+{
+  border-top: 1px solid #dee2e6 !important;
+  margin-top: 5px;
+  padding-top:5px;
+  font-size: 14px;
+  color:var(--text-muted);  
+}

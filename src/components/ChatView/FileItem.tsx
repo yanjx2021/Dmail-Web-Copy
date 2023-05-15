@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { action } from 'mobx'
 import { fileStore, UploadingFile } from '../../stores/fileStore'
 
-import { ChatMessage, ChatMessageFileInfo } from '../../stores/chatStore'
+import { ChatMessageFileInfo } from '../../stores/chatStore'
 import { createDownload } from '../../utils/file'
 import {  Progress  } from 'antd'
 

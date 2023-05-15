@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import '../../styles/ChatViewFooter.css'
 import { messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
 import { action } from 'mobx'
-import { Mentions, Popover } from 'antd'
+import { Button, Mentions, Popover } from 'antd'
 import { Chat } from '../../stores/chatStore'
 import { useImmer } from 'use-immer'
 import { observer } from 'mobx-react-lite'
@@ -11,16 +11,11 @@ import { MentionsOptionProps } from 'antd/es/mentions'
 import { getUserIds } from '../../utils/mentionPattern'
 import { isImage } from '../../utils/file'
 import AudioAnalyser from '../AudioAnalyser'
-import ReactDOM from 'react-dom'
 import { authStore } from '../../stores/authStore'
 import { click } from '@testing-library/user-event/dist/click'
 import { VoiceRecorderState, recorderStore } from '../../stores/recorderStore'
 import { rtcStore } from '../../stores/rtcStore'
 
-//针对输入框数值的一些常数
-const lineHeight = 15,
-    borderTop = 1,
-    borderBottom = 1
 
 export const MessageSelectedFooter = () => {
     return (
@@ -164,9 +159,9 @@ const EmojiContent = ({
             })
         }
     }, [])
-    // TODO: yjx 调整选择表情的样式
+
     return (
-        <div style={{ display: 'inline-flex' }}>
+        <div className="emoji-container">
             {emojis.map((emoji) => (
                 <div
                     key={emoji}
@@ -174,7 +169,7 @@ const EmojiContent = ({
                         setText(text + emoji)
                         handleClick()
                     }}>
-                    <button>{emoji}</button>
+                    <Button className='emoji-item'>{emoji}</Button>
                 </div>
             ))}
         </div>
@@ -250,7 +245,7 @@ export const ChatViewFooter = observer(
                     <div className="row">
                         <div className="col-12">
                             <div className="input-group align-items-center">
-                                <div className="input-group-append d-none d-sm-block">
+                                <div className="input-group-append">
                                     <span className="input-group-text border-0">
                                         <button
                                             className="btn btn-sm btn-link text-muted"
@@ -267,6 +262,7 @@ export const ChatViewFooter = observer(
 
                                 <Mentions
                                     className="form-control border-0 pl-0 text-footerform"
+                                    placeholder='请输入聊天内容...'
                                     ref={inputRef}
                                     value={text}
                                     id="textinputer"

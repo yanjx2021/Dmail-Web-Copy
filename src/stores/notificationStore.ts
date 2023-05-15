@@ -54,9 +54,7 @@ export class NotificationStore {
                 body,
                 silent: this.slient,
             })
-            this.notification.onclick = () => {
-                this.notification?.close()
-            }
+            this.notification.onclick = () => this.notification?.close()
         }
     }
 }

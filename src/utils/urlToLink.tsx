@@ -1,5 +1,4 @@
 import DOMPurify from "dompurify"
-import { UserId } from "../stores/authStore"
 
 export const renderFormatMention = (content: string, userIds: number[], chatId: number, timestamp : number) => {
     if (!content) {
@@ -20,8 +19,8 @@ export const renderFormatMention = (content: string, userIds: number[], chatId: 
 
     preContent = preContent.replace(atPattern, function (match: string) {
         i = i + 1;
-        //TODO: yjx 这个地方是提及类型消息的@部分，让这个@变色，并且摆放在一行内
-        return `<p id=AtUser${chatId}${userIds[i]}${timestamp}${i}>` + match + '</p>'
+
+        return `<p class="at_item" id=AtUser${chatId}${userIds[i]}${timestamp}${i}>` + match + '</p>'
     })
     
     return (

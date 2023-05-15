@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { Chat, ChatType, chatStore } from '../../stores/chatStore'
-import { message, Button, Popconfirm, Modal } from 'antd'
+import { Button, Popconfirm, Modal } from 'antd'
 import { MessageServer } from '../../utils/networkWs'
 import { Send } from '../../utils/message'
 import { User, userStore } from '../../stores/userStore'
@@ -8,16 +8,13 @@ import { useImmer } from 'use-immer'
 import { requestStore } from '../../stores/requestStore'
 import { ModalInput } from '../Box/Modal'
 import { action, makeAutoObservable } from 'mobx'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { SidebarUserDropDown } from '../DropDown/SidebarUserDropDown'
 import { authStore } from '../../stores/authStore'
 import { modalStore } from '../../stores/modalStore'
 import { updateGroupStore } from '../../stores/updateGroupStore'
-import { CachedBinary, binaryStore } from '../../stores/binaryStore'
 import { Image } from 'antd'
 import { UploadingFile, fileStore } from '../../stores/fileStore'
-import { secureAuthStore } from '../../stores/secureAuthStore'
-import { DropDownItem } from '../DropDown/ChatDropDown'
 import { chatSideStore } from '../../stores/chatSideStore'
 
 const ChatSidebarUserAvatar = observer(({ user }: { user: User }) => {
@@ -173,10 +170,17 @@ export const AddFriendModal = observer(
         setIsOpen: any
         isOpen: boolean
     }) => {
+        useEffect(() => {
+            let $box: any = document.querySelectorAll('.ant-modal-root')
+            let $this: any = document.querySelector('.choose-skin li.active')
+            for (let i = 0; i < $box.length; i++) {
+                $box[i]?.parentNode?.classList.add('theme-' + $this.getAttribute('data-theme'))
+            }
+        })
         const handleCancel = () => {
             setIsOpen(false)
         }
-        //TODO: yjx 这个发送请求就没了
+
         return (
             <Modal
                 footer={[
@@ -193,7 +197,7 @@ export const AddFriendModal = observer(
                 title={`正在添加${userName}为好友`}
                 open={isOpen}>
                 <ModalInput
-                    type="text"
+                    inputType="text"
                     label="验证消息"
                     value={requestStore.message}
                     setValue={action((e: any) => (requestStore.message = e.target.value))}

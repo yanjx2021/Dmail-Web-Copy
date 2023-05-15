@@ -1,7 +1,6 @@
 import { observer } from 'mobx-react-lite'
 
-import { action } from 'mobx'
-import { fileStore, UploadingFile } from '../../stores/fileStore'
+import { UploadingFile } from '../../stores/fileStore'
 
 import { CachedBinary } from '../../stores/binaryStore'
 import { Progress, Image } from 'antd'

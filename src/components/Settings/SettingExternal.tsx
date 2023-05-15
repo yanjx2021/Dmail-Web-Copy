@@ -1,9 +1,6 @@
-import { Button } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { useState, useCallback, useEffect } from 'react'
-import { ExternalApiStore, externalStore } from '../../stores/externalStore'
+import { externalStore } from '../../stores/externalStore'
 import { action } from 'mobx'
-import { InfInputer } from './SettingGeneral'
 
 export const SettingExternal = observer(() => {
     return (

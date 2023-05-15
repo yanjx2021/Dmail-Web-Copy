@@ -1,11 +1,4 @@
-import { action } from 'mobx'
-import { authStore } from '../../stores/authStore'
-import { User, userStore } from '../../stores/userStore'
 import { observer } from 'mobx-react-lite'
-import { updateUserStore } from '../../stores/updateUserStore'
-import { useImmer } from 'use-immer'
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { modalStore } from '../../stores/modalStore'
 
 export const SettingSecurity = observer(() => {
     return (

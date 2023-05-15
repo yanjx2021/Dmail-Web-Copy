@@ -4,7 +4,6 @@ import { chatSideStore } from '../../stores/chatSideStore'
 import { action } from 'mobx'
 import { createGroupFromAllFriendsSelectStore } from '../MessagesBox/Selector'
 import { rtcStore } from '../../stores/rtcStore'
-import { Image } from 'antd'
 import { binaryStore } from '../../stores/binaryStore'
 import { modalStore } from '../../stores/modalStore'
 

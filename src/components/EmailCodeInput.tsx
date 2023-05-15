@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react'
 import axios from 'axios'
-import { useImmer } from 'use-immer'
 import { emailTester } from '../constants/passwordFormat'
 
 const emailCodeCoolDown = 60
@@ -34,7 +33,7 @@ export const EmailCodeInput = (props: {
         }
         setCurCoolDown(emailCodeCoolDown)
         const timer = setInterval(() => {
-            setCurCoolDown((curCoolDown) => curCoolDown - 1)
+            setCurCoolDown((draftCurCoolDown) => draftCurCoolDown - 1)
         }, 1000)
         const timeouter = setTimeout(() => {
             setCurCoolDown(0)

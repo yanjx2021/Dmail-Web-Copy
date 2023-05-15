@@ -2,16 +2,11 @@ import { action, makeAutoObservable } from 'mobx'
 import {
     Chat,
     ChatMessage,
-    ChatMessageState,
-    ChatMessageType,
     chatStore,
 } from '../../stores/chatStore'
 import { observer } from 'mobx-react-lite'
 import { modalStore } from '../../stores/modalStore'
-import { Send, SendSendMessageData } from '../../utils/message'
-import { authStore } from '../../stores/authStore'
 import { User } from '../../stores/userStore'
-import { MessageServer } from '../../utils/networkWs'
 import { requestStore } from '../../stores/requestStore'
 
 export class MessageSelectStore {

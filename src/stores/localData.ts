@@ -8,13 +8,9 @@ import { UserSetting, userSettingStore } from './userSettingStore'
 import { fileStore } from './fileStore'
 import axios from 'axios'
 import { binaryStore } from './binaryStore'
-import { serialize } from 'v8'
-import { lchown } from 'fs'
 import { runInAction } from 'mobx'
-import { async } from 'q'
 import { noticeStore } from './noticeStore'
 import { ExternalApiStore, externalStore } from './externalStore'
-import { tokenStore } from './tokenStore'
 import { authStore } from './authStore'
 import { message } from 'antd'
 
@@ -137,8 +133,7 @@ export class LocalDatabase {
                 fileStore.getFileUrl(hash, (getUrl) => {
                     axios.get(getUrl, { responseType: 'blob' }).then((response) => {
                         this.saveBlob(hash, response.data)
-                        const localUrl = URL.createObjectURL(response.data)
-                        binaryStore.setBinaryUrl(hash, localUrl, response.data.size)
+                        binaryStore.setBinaryUrl(hash, URL.createObjectURL(response.data), response.data.size)
                     })
                 })
                 return

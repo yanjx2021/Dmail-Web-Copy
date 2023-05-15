@@ -11,25 +11,19 @@ import { ChatViewHeader } from './ChatViewHeader'
 import { ChatMessageContent } from './ChatViewContent'
 import { useState, useCallback, useEffect, LegacyRef } from 'react'
 import { ChatViewFooter, MessageSelectedFooter, VoiceMessageFooter } from './ChatViewFooter'
-import { authStore } from '../../stores/authStore'
 import { useImmer } from 'use-immer'
-import { action, autorun, runInAction } from 'mobx'
+import { action } from 'mobx'
 import { ChatSidebar } from '../ChatProfile/ChatSidebar'
 import { UserSidebar } from '../ChatProfile/UserSidebar'
 import { chatSideStore } from '../../stores/chatSideStore'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 import React from 'react'
-import { UploadingFile, fileStore } from '../../stores/fileStore'
 import { isImage } from '../../utils/file'
 import { messageSelectStore, userSelectStore } from '../MessagesBox/Selector'
 import { MessageServer } from '../../utils/networkWs'
 import { Send } from '../../utils/message'
-import { groupChatManageStore } from '../../stores/groupChatManageStore'
 import { VideoCall } from './VideoCall'
-import { RtcState, rtcStore } from '../../stores/rtcStore'
-import { Button, Space, notification } from 'antd'
-import { userStore } from '../../stores/userStore'
-import { key } from 'localforage'
+import { rtcStore } from '../../stores/rtcStore'
 import { AudioCall } from './AudioCall'
 import { modalStore } from '../../stores/modalStore'
 import { recorderStore } from '../../stores/recorderStore'
@@ -75,8 +69,8 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
     )
 
     const sendFileMessageHandler = useCallback(
-        (file: File) => {
-            const msg = chat.sendFileMessage(ChatMessageType.File, file, (hash, file) => {
+        (operateFile: File) => {
+            const msg = chat.sendFileMessage(ChatMessageType.File, operateFile, (hash, file) => {
                 const content: ChatMessageFileInfo = {
                     name: file.name,
                     hash: hash,
@@ -90,8 +84,8 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
     )
 
     const sendImageMessageHandler = useCallback(
-        (file: File) => {
-            const msg = chat.sendFileMessage(ChatMessageType.Image, file, (hash, file) => {
+        (operateFile: File) => {
+            const msg = chat.sendFileMessage(ChatMessageType.Image, operateFile, (hash, file) => {
                 return hash
             })
             setMessages([...messages, msg])
@@ -100,8 +94,8 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
     )
 
     const sendVoiceMessageHandler = useCallback(
-        (file: File) => {
-            const msg = chat.sendFileMessage(ChatMessageType.Voice, file, (hash, file) => {
+        (operateFile: File) => {
+            const msg = chat.sendFileMessage(ChatMessageType.Voice, operateFile, (hash, file) => {
                 return hash
             })
             setMessages([...messages, msg])
@@ -125,7 +119,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         action(() => {
             chat.getMessages(chat.lastMessage!.inChatId!, 20).then(
                 action((msgs) => {
-                    if (chatStore.activeChatId !== chat.chatId!) {
+                    if (chatStore.activeChatId !== chat.chatId) {
                         return
                     }
                     setMessages(msgs)
@@ -146,9 +140,6 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         [chat]
     )
 
-    const [drag, setDrag] = useState(false)
-    const [filename, setFilename] = useState('')
-
     // 创建组件引用
     const dropRef: LegacyRef<HTMLDivElement> | undefined = React.createRef()
     let dragCounter = 0
@@ -163,7 +154,6 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
             e.preventDefault()
             e.stopPropagation()
             dragCounter++
-            if (e.dataTransfer.items && e.dataTransfer.items.length > 0) setDrag(true)
         },
         [dragCounter]
     )
@@ -173,7 +163,6 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
             e.preventDefault()
             e.stopPropagation()
             dragCounter--
-            if (dragCounter === 0) setDrag(false)
         },
         [dragCounter]
     )
@@ -182,7 +171,6 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         (e: any) => {
             e.preventDefault()
             e.stopPropagation()
-            setDrag(false)
             if (e.dataTransfer.files && e.dataTransfer.files.length === 1) {
                 const file = e.dataTransfer.files[0]
                 if (isImage(file)) {
@@ -199,7 +187,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
     )
 
     React.useEffect(() => {
-        let div = dropRef!.current!
+        let div = dropRef.current!
         div.addEventListener('dragenter', handleDragIn)
         div.addEventListener('dragleave', handleDragOut)
         div.addEventListener('dragover', handleDrag)

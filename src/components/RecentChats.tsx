@@ -1,13 +1,9 @@
 import { observer } from 'mobx-react-lite'
 import { Chat, ChatId, ChatStore, chatStore } from '../stores/chatStore'
-import { action, autorun } from 'mobx'
-import { ChatDropDown } from './DropDown/ChatDropDown'
+import { action } from 'mobx'
 import { Badge } from 'antd'
 import { HoverOption } from './AllChats'
-import { ChatSelector, messageSelectStore } from './MessagesBox/Selector'
-import { secureAuthStore } from '../stores/secureAuthStore'
-import { useEffect, useState } from 'react'
-import { useImmer } from 'use-immer'
+import { useEffect } from 'react'
 import { notificationStore } from '../stores/notificationStore'
 import { rtcStore } from '../stores/rtcStore'
 
@@ -38,16 +34,21 @@ const RecentChatItem = observer(
             <li className={activeChatId === chat.chatId ? 'online active' : ''}>
                 <HoverOption chat={chat} />
 
-                <a className="card" onClick={action(() => setActiveChatId(chat.chatId))}>
+                <a
+                    className={'card '+(chatStore.isTopChat(chat.chatId)?'topchat':'')}
+                    onClick={action(() => setActiveChatId(chat.chatId))}>
                     <div className="card-body">
                         <div className="media">
                             {/* TODO: yjx 将显示置顶状态的图标和免打扰的图标变得好看一点，并且放到一个心仪的位置 */}
                             {/* TopIcon Start */}
-                            {chatStore.isTopChat(chat.chatId) && <i className='zmdi zmdi-star'></i>}
-                            {notificationStore.hasMuted(chat.chatId) && <i className='zmdi zmdi-eye'></i>}
+                            
                             {/* TopIcon End */}
                             <div className="avatar me-3">
-                                <Badge count={chat.unreadCount} color={notificationStore.hasMuted(chat.chatId) ? 'gray' : 'red'}>
+                                <Badge
+                                    count={chat.unreadCount}
+                                    color={
+                                        notificationStore.hasMuted(chat.chatId) ? 'gray' : 'red'
+                                    }>
                                     <span className="rounded-circle"></span>
                                     <div className="avatar rounded-circle no-image timber">
                                         <img
@@ -70,8 +71,13 @@ const RecentChatItem = observer(
                                         )}
                                     </p>
                                 </div>
-                                <div className="text-truncate">
+                                <div className="d-flex align-items-center mb-1">
+                                <div className="text-truncate mb-0 me-auto">
                                     {chat.lastMessage !== undefined ? chat.lastMessage.asShort : ''}
+                                </div>
+                                {notificationStore.hasMuted(chat.chatId) && (
+                               <div className='small text-muted text-nowrap ms-4 mb-0'> <i className="zmdi zmdi-notifications-off"></i></div>
+                            )}
                                 </div>
                                 {chat.atYou ? <p className="text-danger">有人@你</p> : <></>}
                                 {rtcStore.remoteUserId === chat.bindUser?.userId &&
@@ -107,11 +113,9 @@ const RecentChatItem = observer(
 
 export const RecentChats = observer(
     ({
-        chatStore,
         activeChatId,
         setActiveChatId,
     }: {
-        chatStore: ChatStore
         activeChatId: ChatId | null
         setActiveChatId: (chatId: ChatId) => any
     }) => {
@@ -134,14 +138,16 @@ export const RecentChats = observer(
                         className="header d-flex justify-content-between ps-3 pe-3 mb-1">
                         <span>最近的对话</span>
                     </li>
-                    {chatStore.recentChatsView.map(action((chat) => (
-                        <RecentChatItem
-                            chat={chat}
-                            activeChatId={activeChatId}
-                            setActiveChatId={setActiveChatId}
-                            key={chat.chatId}
-                        />
-                    )))}
+                    {chatStore.recentChatsView.map(
+                        action((chat) => (
+                            <RecentChatItem
+                                chat={chat}
+                                activeChatId={activeChatId}
+                                setActiveChatId={setActiveChatId}
+                                key={chat.chatId}
+                            />
+                        ))
+                    )}
                 </ul>
             </div>
         )

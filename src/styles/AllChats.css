@@ -11,3 +11,47 @@
 {
   margin-bottom:0px;
 }
+
+.topchat
+{
+  background-color: var(--topchat-color);
+  border: 1px solid var(--topborder-color)!important ;
+}
+.chat-list li:hover a.topchat {
+  border-color: var(--primary-color)!important;
+  text-decoration: none
+}
+.chat-list li.active a {
+  border-color: var(--primary-color)!important;
+}
+
+.media .c_checkbox
+{
+  top: 12px;
+  margin-left: 8px;
+  margin-right: 12px;
+}
+.media .c_checkbox .checkmark
+{
+  height:20px;
+  width:20px;
+  border-radius: 30rem;
+}
+.media .c_checkbox .checkmark::after
+{
+  left:6.5px;
+  top:3px;
+}
+.systeminf-head
+{
+  font-size: 16px;
+  font-weight: bold;
+  white-space: pre-wrap;
+}
+
+.systeminf-container
+{
+  border-top: 1px solid #dee2e6 !important;
+  margin-top: 8px;
+  padding-top:16px;
+}

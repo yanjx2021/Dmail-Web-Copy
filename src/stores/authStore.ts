@@ -1,12 +1,10 @@
 import { action, makeAutoObservable } from 'mobx'
-import localforage from 'localforage'
 import {
     LoginResponseState,
     Receive,
     ReceiveApplyForTokenResponesData,
     ReceiveLogOffResponseData,
     ReceiveLoginResponseData,
-    ReceiveUpdateUserInfoResponseData,
     Send,
 } from '../utils/message'
 import { MessageServer } from '../utils/networkWs'
@@ -22,9 +20,7 @@ import { secureAuthStore } from './secureAuthStore'
 import { modalStore } from './modalStore'
 import { chatSideStore } from './chatSideStore'
 import { noticeStore } from './noticeStore'
-import { fileStore } from './fileStore'
 import { getUserIdStore } from './getUserIdStore'
-import { groupChatManageStore } from './groupChatManageStore'
 import { notificationStore } from './notificationStore'
 import { updateGroupStore } from './updateGroupStore'
 import { userSettingStore } from './userSettingStore'

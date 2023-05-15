@@ -1,14 +1,9 @@
-import { action, makeAutoObservable } from 'mobx'
-import localforage from 'localforage'
+import { makeAutoObservable } from 'mobx'
 import {
-    LoginResponseState,
     Receive,
-    ReceiveLoginResponseData,
     ReceiveRequestStateUpdateData,
     ReceiveSolveRequestResponseData,
-    RequestError,
     Send,
-    SendUserSendRequestData,
 } from '../utils/message'
 import { MessageServer } from '../utils/networkWs'
 import { ReceiveSendRequestResponseData } from '../utils/message'
@@ -17,7 +12,6 @@ import { authStore } from './authStore'
 import { User, userStore } from './userStore'
 import { LocalDatabase } from './localData'
 import { Chat, chatStore } from './chatStore'
-import { binaryStore } from './binaryStore'
 
 export enum RequestContentType {
     MakeFriend = 'MakeFriend',
@@ -88,39 +82,26 @@ export class Request {
     }
 
     get getAvaterUrl() {
-        switch (this.content.type) {
-            case RequestContentType.MakeFriend:
-                if (this.isSender) {
-                    if (this.receiveUser) {
-                        return this.receiveUser.getAvaterUrl
-                    } else {
-                        return 'assets/images/user.png'
-                    }
+        if (this.content.type === RequestContentType.MakeFriend || this.content.type === RequestContentType.GroupInvitation) {
+            if (this.isSender) {
+                if (this.receiveUser) {
+                    return this.receiveUser.getAvaterUrl
                 } else {
-                    if (this.sendUser) {
-                        return this.sendUser.getAvaterUrl
-                    } else {
-                        return 'assets/images/user.png'
-                    }
+                    return 'assets/images/user.png'
                 }
+            } else {
+                if (this.sendUser) {
+                    return this.sendUser.getAvaterUrl
+                } else {
+                    return 'assets/images/user.png'
+                }
+            }
+        }
+        switch (this.content.type) {
             case RequestContentType.JoinGroup:
                 if (this.isSender) {
                     if (this.chat) {
                         return this.chat.getAvaterUrl
-                    } else {
-                        return 'assets/images/user.png'
-                    }
-                } else {
-                    if (this.sendUser) {
-                        return this.sendUser.getAvaterUrl
-                    } else {
-                        return 'assets/images/user.png'
-                    }
-                }
-            case RequestContentType.GroupInvitation:
-                if (this.isSender) {
-                    if (this.receiveUser) {
-                        return this.receiveUser.getAvaterUrl
                     } else {
                         return 'assets/images/user.png'
                     }
@@ -326,14 +307,14 @@ export class RequestStore {
 
     sendRequestResponseHandler(data: ReceiveSendRequestResponseData) {
         if (data.state === SendRequestResponseState.Success) {
-            if (!this.requsetStash.has(data.clientId!)) {
+            if (!this.requsetStash.has(data.clientId)) {
                 this.errors = '找不到这条请求：' + data.reqId
                 return
             }
-            let req = this.requsetStash.get(data.clientId!)
+            let req = this.requsetStash.get(data.clientId)
             req!.reqId = data.reqId!
             this.setRequest(req!)
-            this.requsetStash.delete(data.clientId!)
+            this.requsetStash.delete(data.clientId)
         } else if (data.state === SendRequestResponseState.DatabaseError) {
             this.errors = '服务器数据异常'
         } else {
@@ -384,7 +365,7 @@ export class RequestStore {
                 message: this.message,
                 content: {
                     type: RequestContentType.MakeFriend,
-                    receiverId: receiverId!,
+                    receiverId: receiverId,
                 },
             })
         )
@@ -393,7 +374,7 @@ export class RequestStore {
             message: this.message,
             content: {
                 type: RequestContentType.MakeFriend,
-                receiverId: receiverId!,
+                receiverId: receiverId,
             },
         })
         this.message = ''
