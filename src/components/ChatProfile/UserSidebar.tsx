@@ -1,10 +1,8 @@
 import { observer } from 'mobx-react-lite'
 import { Chat, ChatType, chatStore } from '../../stores/chatStore'
 import { action } from 'mobx'
-import { chatSideStore } from '../../stores/chatSideStore'
 import { GroupedVirtuoso } from 'react-virtuoso'
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { useImmer } from 'use-immer'
+import { useCallback } from 'react'
 import '../../styles/AllChats.css'
 import { ChatSidebarHeader } from './ChatSidebarHeader'
 import {

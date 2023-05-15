@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import { ModalStore, modalStore } from '../../stores/modalStore'
+import { modalStore } from '../../stores/modalStore'
 import { Button, Checkbox, Modal, Select, Space, message } from 'antd'
 import { useImmer } from 'use-immer'
 import { requestStore } from '../../stores/requestStore'
@@ -12,13 +12,11 @@ import { authStore } from '../../stores/authStore'
 import { userSettingStore } from '../../stores/userSettingStore'
 import { secureAuthStore } from '../../stores/secureAuthStore'
 import { secondaryCodeHash } from '../../constants/passwordHash'
-import { ChatSelector, messageSelectStore } from '../MessagesBox/Selector'
+import { messageSelectStore } from '../MessagesBox/Selector'
 import {
     Chat,
     ChatMessage,
     ChatMessageType,
-    ChatType,
-    ReplyTextContent,
     chatStore,
 } from '../../stores/chatStore'
 import { MessageBox } from '../MessagesBox/MessageBox'
@@ -28,18 +26,16 @@ import { updateGroupStore } from '../../stores/updateGroupStore'
 import { User, userStore } from '../../stores/userStore'
 import { getUserIdStore } from '../../stores/getUserIdStore'
 import { AddFriendModal, manageGroupNoticeStore } from '../ChatProfile/ChatSidebarBody'
-import { type } from 'os'
-import { chatSideStore } from '../../stores/chatSideStore'
 
 export const ModalInput = ({
     label,
-    type,
+    inputType,
     value,
     setValue,
     placeholder,
 }: {
     label: string
-    type: 'text' | 'password'
+    inputType: 'text' | 'password'
     value: string
     setValue: any
     placeholder: string
@@ -48,7 +44,7 @@ export const ModalInput = ({
         <div className="form-group">
             <label>{label}</label>
             <input
-                type={type}
+                type={inputType}
                 className="form-control form-control-lg form-margin"
                 value={value}
                 onChange={setValue}
@@ -76,7 +72,7 @@ export const JoinGroupModalView = observer(({ title }: { title: string }) => {
             title={title}
             open={modalStore.isOpen}>
             <ModalInput
-                type="text"
+                inputType="text"
                 label="群聊ID"
                 value={reqId}
                 setValue={(e: any) => {
@@ -86,7 +82,7 @@ export const JoinGroupModalView = observer(({ title }: { title: string }) => {
                 placeholder="请输入群聊ID..."
             />
             <ModalInput
-                type="text"
+                inputType="text"
                 label="验证消息"
                 value={requestStore.message}
                 setValue={action((e: any) => (requestStore.message = e.target.value))}
@@ -114,7 +110,7 @@ export const AddFriendModalView = observer(({ title }: { title: string }) => {
             title={title}
             open={modalStore.isOpen}>
             <ModalInput
-                type="text"
+                inputType="text"
                 label="用户ID"
                 value={reqId}
                 setValue={(e: any) => {
@@ -124,7 +120,7 @@ export const AddFriendModalView = observer(({ title }: { title: string }) => {
                 placeholder="请输入用户ID..."
             />
             <ModalInput
-                type="text"
+                inputType="text"
                 label="验证消息"
                 value={requestStore.message}
                 setValue={action((e: any) => (requestStore.message = e.target.value))}
@@ -156,7 +152,7 @@ export const CreateGroupModalView = observer(({ title }: { title: string }) => {
             title={title}
             open={modalStore.isOpen}>
             <ModalInput
-                type="text"
+                inputType="text"
                 label="群聊名称"
                 value={groupName}
                 setValue={(e: any) => {
@@ -185,7 +181,7 @@ export const ChangePasswordModalView = observer(({ title }: { title: string }) =
             title={title}
             open={modalStore.isOpen}>
             <ModalInput
-                type="password"
+                inputType="password"
                 label="新密码"
                 value={updateUserStore.newPassword}
                 setValue={action((e: any) => {
@@ -246,7 +242,7 @@ export const SetSecureModalView = observer(({ title }: { title: string }) => {
             open={modalStore.isOpen}>
             {secureAuthStore.hasSetCode ? (
                 <ModalInput
-                    type="password"
+                inputType="password"
                     label="原密码"
                     value={oldCode}
                     setValue={action((e: any) => {
@@ -258,7 +254,7 @@ export const SetSecureModalView = observer(({ title }: { title: string }) => {
                 <></>
             )}
             <ModalInput
-                type="password"
+                inputType="password"
                 label={secureAuthStore.hasSetCode ? '新密码' : '设置密码'}
                 value={code}
                 setValue={action((e: any) => {
@@ -297,7 +293,7 @@ export const RemoveSecureModalView = observer(({ title }: { title: string }) => 
             title={title}
             open={modalStore.isOpen}>
             <ModalInput
-                type="password"
+                inputType="password"
                 label="原密码"
                 value={code}
                 setValue={action((e: any) => {
@@ -389,7 +385,7 @@ export const ChangeGroupNameModalView = observer(({ title }: { title: string }) 
             title={title}
             open={modalStore.isOpen}>
             <ModalInput
-                type="text"
+                inputType="text"
                 label="新的群名"
                 value={updateGroupStore.newGroupName}
                 setValue={action((e: any) => {
@@ -496,7 +492,7 @@ export const GetUserIdModalView = observer(({ title }: { title: string }) => {
             title={title}
             open={modalStore.isOpen}>
             <ModalInput
-                type="text"
+                inputType="text"
                 label="查找用户"
                 value={userName}
                 setValue={action((e: any) => {
@@ -548,7 +544,7 @@ export const SendGroupNoticeModalView = observer(({ title }: { title: string }) 
             title={title}
             open={modalStore.isOpen}>
             <ModalInput
-                type="text"
+                inputType="text"
                 label="群公告内容"
                 value={notice}
                 setValue={action((e: any) => {
@@ -585,7 +581,7 @@ export const ReplyMessageModalView = observer(({ title }: { title: string }) => 
             title={title}
             open={modalStore.isOpen}>
             <ModalInput
-                type="text"
+                inputType="text"
                 label="回复消息"
                 placeholder="请输入消息..."
                 value={reply}
@@ -642,24 +638,24 @@ export const SelectMessageModalView = observer(({ title }: { title: string }) =>
         setUserIdSelect(value)
     }
 
-    const filtMessage = (message: ChatMessage) => {
+    const filtMessage = (toFiltMessage: ChatMessage) => {
         let condition1: boolean = true
         switch (typeSelect) {
             case 'image':
-                condition1 = message.type === ChatMessageType.Image
+                condition1 = toFiltMessage.type === ChatMessageType.Image
                 break
             case 'file':
-                condition1 = message.type === ChatMessageType.File
+                condition1 = toFiltMessage.type === ChatMessageType.File
                 break
             case 'audio':
-                condition1 = message.type === ChatMessageType.Voice
+                condition1 = toFiltMessage.type === ChatMessageType.Voice
                 break
             case 'none':
                 break
         }
         let condition2 = true
         if (userIdSelect !== -1) {
-            condition2 = message.senderId === userIdSelect
+            condition2 = toFiltMessage.senderId === userIdSelect
         }
         return condition1 && condition2
     }
@@ -700,8 +696,8 @@ export const SelectMessageModalView = observer(({ title }: { title: string }) =>
                     const messages = modalStore.selectMessageList
                         ? modalStore.selectMessageList
                         : []
-                    const filtedMessages = messages.filter(filtMessage)
-                    setFiltedMessages(filtedMessages)
+                    const hasFiltedMessages = messages.filter(filtMessage)
+                    setFiltedMessages(hasFiltedMessages)
                 })}>
                 筛选
             </button>
@@ -709,7 +705,6 @@ export const SelectMessageModalView = observer(({ title }: { title: string }) =>
                 className="ant-btn css-dev-only-do-not-override-1mqg3i0 ant-btn-default"
                 onClick={action(() => {
                     const firstIndex = modalStore.selectMessageList![0].inChatId!
-                    const count = 20
                     if (firstIndex === 1) {
                         message.info('已经到头了哦~~~')
                         return

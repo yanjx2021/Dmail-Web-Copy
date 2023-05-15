@@ -1,8 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { RtcState, rtcStore } from '../../stores/rtcStore'
-import { RefObject, useEffect, useRef, useState } from 'react'
-import { off } from 'process'
-import { action } from 'mobx'
+import { useEffect, useRef, useState } from 'react'
 import '../../styles/VideoCall.css'
 import { useImmer } from 'use-immer'
 import { Button, Space, notification } from 'antd'
@@ -55,8 +53,7 @@ export const StreamVideoPlayer = ({
 }
 
 export const AudioCall = observer(() => {
-    const [friendId, setFriendId] = useImmer<string>('')
-    const [viewSwap, setViewSwap] = useState(false)
+    const [viewSwap, _] = useState(false)
 
     return (
         <div className="d-flex justify-content-center align-items-center h-100 text-center py-xl-4 py-md-3 py-2">

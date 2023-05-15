@@ -1,9 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { observer } from 'mobx-react-lite'
-import React, { useEffect, useRef, useState } from 'react'
-import { useImmer } from 'use-immer'
+import React, { useEffect } from 'react'
 import {
-    Chat,
     ChatMessage,
     ChatMessageFileInfo,
     ChatMessageTransferInfo,
@@ -12,12 +10,10 @@ import {
     ReplyTextContent,
     chatStore,
 } from '../../stores/chatStore'
-import { UserId, authStore } from '../../stores/authStore'
+import { authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
 import { userStore } from '../../stores/userStore'
-import { fileStore } from '../../stores/fileStore'
-import { blobToBase64, createDownload } from '../../utils/file'
-import { action, makeAutoObservable } from 'mobx'
+import { action } from 'mobx'
 import { binaryStore } from '../../stores/binaryStore'
 import { MessageDropDown } from '../DropDown/MessageDropDown'
 import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
@@ -25,9 +21,7 @@ import { modalStore } from '../../stores/modalStore'
 import { chatSideStore } from '../../stores/chatSideStore'
 import { FileItem, LoadingFileItem } from './FileItem'
 import { LoadingPhotoItem, PhotoItem } from './PhotoItem'
-import { Image, message } from 'antd'
 import { renderFormatMention, renderFormatUrl } from '../../utils/urlToLink'
-import { min, timestamp } from 'rxjs'
 import { ReceiveChatMessage } from '../../utils/message'
 
 
@@ -38,14 +32,12 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         if (msg.type !== ChatMessageType.MentionText) return
         
         const content: MentionTextContent = msg.content as MentionTextContent       
-        const clickCallbackList : any[] = []
 
         content.userIds.forEach((id, index) => {
             console.log(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)
             const clickHandler = () => {
                 chatSideStore.visitUsertoggle(userStore.getUser(id))
             }
-            clickCallbackList.push(clickHandler)
             document.getElementById(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)?.addEventListener('click', clickHandler)
         })
         return () => {
@@ -140,10 +132,10 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                 ChatMessage.createFromReciveMessage(JSON.parse(value) as ReceiveChatMessage)
             )
 
-        const shortMessage = (message: ChatMessage) => (
-            <p key={message.inChatId}>{`${userStore.getUser(message.senderId).showName}: ${message.asShort.slice(
+        const shortMessage = (operateMessage: ChatMessage) => (
+            <p key={operateMessage.inChatId}>{`${userStore.getUser(operateMessage.senderId).showName}: ${operateMessage.asShort.slice(
                 0,
-                message.asShort.length > 10 ? 10 : message.asShort.length
+                operateMessage.asShort.length > 10 ? 10 : operateMessage.asShort.length
             )}`}</p>
         )
 
@@ -158,7 +150,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
 
                     <h5>{`[聊天记录]`}</h5>
                     <div className="text-record-container">
-                        {messageSlice.map((message) => shortMessage(message))}
+                        {messageSlice.map((sliceMessage) => shortMessage(sliceMessage))}
                     </div>
                     <div className="record-counter">{`查看${count}条消息`}</div>
                 </div>
