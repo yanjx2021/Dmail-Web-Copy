@@ -191,10 +191,10 @@ export const ChatMessageItemContent = observer(
         )
     }
 )
-export const SystemMessageItem = observer(({ msg }: { msg: ChatMessage }) => {
+export const SystemMessageItem = observer(({ content }: { content: string }) => {
     return (
-        <li className="d-flex message divider mt-xl-5 mt-md-3 mb-xl-5 mb-md-3">
-            <small className="text-muted">{msg.content as string}</small>
+        <li className="d-flex message divider" style={{padding: '6px'}}>
+            <small className="text-muted">{content}</small>
         </li>
     )
 })
@@ -215,8 +215,8 @@ export const ChatMessageItem = observer(
             const isSystem: boolean = msg.senderId === 0
             return msg.type === ChatMessageType.Deleted ? (
                 <div style={{ height: '1px' }}></div>
-            ) : isSystem ? (
-                <SystemMessageItem msg={msg} />
+            ) : isSystem || msg.type === ChatMessageType.Revoked ? (
+                <SystemMessageItem content={isSystem ? msg.content as string : "消息已撤回"} />
             ) : (
                 /*注意系统消息和下面的li同级，需要将涉及系统的消息抽象出来*/
                 <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
