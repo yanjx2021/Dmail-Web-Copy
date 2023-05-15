@@ -197,6 +197,7 @@ export class ExternalApiStore {
                     'X-TC-Action': 'SentenceRecognition',
                     'X-TC-Timestamp': timestamp.toString(),
                     'X-TC-Version': '2019-06-14',
+                    Host: endpoint,
                 },
             })
             .then((res) => {
