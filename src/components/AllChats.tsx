@@ -57,13 +57,26 @@ export const AllChatsCard = observer(
         }, [editName, onKeyDown])
 
         return (
-            <a className="card" onClick={action(() => setActiveChatId(chat.chatId))}>
+            <a
+                className="card"
+                onClick={action(() => {
+                    if (!createGroupFromAllFriendsSelectStore.showSelector)
+                        setActiveChatId(chat.chatId)
+                })}>
                 <div className="card-body">
                     <div className="media">
+                        {chat.chatType === ChatType.Private &&
+                            createGroupFromAllFriendsSelectStore.showSelector && (
+                                <CreateGroupFromAllFriendSelector user={chat.bindUser!} />
+                            )}
                         <div className="avatar me-3">
                             <span className="rounded-circle"></span>
                             <div className="avatar rounded-circle no-image timber">
-                                <img className='avatar rounded-circle' src={chat.getAvaterUrl} alt='avatar'/>
+                                <img
+                                    className="avatar rounded-circle"
+                                    src={chat.getAvaterUrl}
+                                    alt="avatar"
+                                />
                             </div>
                         </div>
                         <div
@@ -85,11 +98,6 @@ export const AllChatsCard = observer(
                         </div>
                     </div>
                 </div>
-                {/* TODO: yjx 将这个选择框整的好看一点 */}
-                {chat.chatType === ChatType.Private &&
-                    createGroupFromAllFriendsSelectStore.showSelector && (
-                        <CreateGroupFromAllFriendSelector user={chat.bindUser!} />
-                    )}
             </a>
         )
     }
@@ -174,17 +182,17 @@ export const AllChatList = ({
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h3 className="mb-0 text-primary">通讯录</h3>
                     <div>
-                    <a
-                        className="btn btn-dark"
-                        type="button"
-                        onClick={action(() => {
-                            modalStore.modalType = 'GetUserIds'
-                            modalStore.isOpen = true
-                        })}>
-                        <i className="zmdi zmdi-account-add" />
-                        查找用户
-                    </a>
-                </div>
+                        <a
+                            className="btn btn-dark"
+                            type="button"
+                            onClick={action(() => {
+                                modalStore.modalType = 'GetUserIds'
+                                modalStore.isOpen = true
+                            })}>
+                            <i className="zmdi zmdi-account-add" />
+                            查找用户
+                        </a>
+                    </div>
                 </div>
                 <div className="form-group input-group-lg search mb-3">
                     <i className="zmdi zmdi-search"></i>
