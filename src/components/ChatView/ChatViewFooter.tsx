@@ -10,7 +10,7 @@ import { observer } from 'mobx-react-lite'
 import { MentionsOptionProps } from 'antd/es/mentions'
 import { getUserIds } from '../../utils/mentionPattern'
 import { VoiceRecorderState, voiceMessageStore } from '../../stores/voiceMessageStore'
-
+import {isImage} from '../../utils/file'
 import AudioAnalyser from '../AudioAnalyser'
 import ReactDOM from 'react-dom'
 import { authStore } from '../../stores/authStore'
@@ -157,7 +157,15 @@ const EmojiSelectorTitle = (title: string) => <span>{title}</span>
 const start = 0x01f600
 const end = 0x01f62a
 
-const EmojiContent = ({text, setText, handleClick} : {text: string, setText: any, handleClick: any}) => {
+const EmojiContent = ({
+    text,
+    setText,
+    handleClick,
+}: {
+    text: string
+    setText: any
+    handleClick: any
+}) => {
     const [emojis, setEmojis] = useImmer<string[]>([])
 
     useEffect(() => {
@@ -170,12 +178,14 @@ const EmojiContent = ({text, setText, handleClick} : {text: string, setText: any
     }, [])
     // TODO: yjx 调整选择表情的样式
     return (
-        <div style={{display: 'inline-flex'}}>
+        <div style={{ display: 'inline-flex' }}>
             {emojis.map((emoji) => (
-                <div key={emoji} onClick={() => {
-                    setText(text + emoji)
-                    handleClick()
-                }}>
+                <div
+                    key={emoji}
+                    onClick={() => {
+                        setText(text + emoji)
+                        handleClick()
+                    }}>
                     <button>{emoji}</button>
                 </div>
             ))}
@@ -184,14 +194,20 @@ const EmojiContent = ({text, setText, handleClick} : {text: string, setText: any
 }
 
 export const ChatViewFooter = observer(
-    (props: { handleSendText: Function; chat: Chat; handleSendMention: Function }) => {
+    (props: {
+        handleSendText: Function
+        chat: Chat
+        handleSendMention: Function
+        handleSendFile: Function
+        handleSendImage: Function
+    }) => {
         // 消息发送在父组件处理
         // 接受ChatId
         const [text, setText] = useImmer<string>('')
         const [showEmoji, setShowEmoji] = useImmer<boolean>(false)
 
         const inputRef: any = useRef<HTMLTextAreaElement>(null)
-        console.log('111')
+
         const handleSend = () => {
             const userIds = getUserIds(text)
             if (userIds.length === 0) {
@@ -200,6 +216,17 @@ export const ChatViewFooter = observer(
             } else {
                 props.handleSendMention(userIds, text)
                 setText('')
+            }
+        }
+
+        const handleFileChange = (event: any) => {
+            if (event.target.files[0]) {
+                const file = event.target.files[0]
+                if (isImage(file)) {
+                    props.handleSendImage(file)
+                } else {
+                    props.handleSendFile(file)
+                }
             }
         }
 
@@ -218,13 +245,16 @@ export const ChatViewFooter = observer(
             return false
         }
 
+        const handlefile = () => {
+            document.getElementById('footer_file_sender')?.click()
+        }
+
         useEffect(() => {
             window.addEventListener('keydown', onKeyDown)
             return () => {
                 window.removeEventListener('keydown', onKeyDown)
             }
         })
-
 
         return (
             <div className="chat-footer border-top py-xl-4 py-lg-2 py-2">
@@ -263,13 +293,18 @@ export const ChatViewFooter = observer(
                                     options={props.chat.mentionUserList}
                                 />
 
-
                                 <div className="input-group-append">
                                     <span className="input-group-text border-0">
                                         <Popover
                                             trigger="click"
                                             title={EmojiSelectorTitle('表情')}
-                                            content={<EmojiContent text={text} setText={setText} handleClick={() => setShowEmoji(false)}/>}
+                                            content={
+                                                <EmojiContent
+                                                    text={text}
+                                                    setText={setText}
+                                                    handleClick={() => setShowEmoji(false)}
+                                                />
+                                            }
                                             open={showEmoji}
                                             onOpenChange={(open) => setShowEmoji(open)}>
                                             <button
@@ -284,11 +319,17 @@ export const ChatViewFooter = observer(
                                 </div>
                                 <div className="input-group-append">
                                     <span className="input-group-text border-0">
+                                        <input
+                                            className="photoinputer"
+                                            id="footer_file_sender"
+                                            type="file"
+                                            onChange={handleFileChange}></input>
                                         <button
                                             className="btn btn-sm btn-link text-muted"
                                             data-toggle="tooltip"
                                             title="附件"
-                                            type="button">
+                                            type="button"
+                                            onClick={handlefile}>
                                             <i className="zmdi zmdi-file font-22"></i>
                                         </button>
                                     </span>

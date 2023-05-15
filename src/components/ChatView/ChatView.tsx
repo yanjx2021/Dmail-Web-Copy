@@ -236,6 +236,8 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
                         chat={chat}
                         handleSendText={sendTextMessageHanlder}
                         handleSendMention={sendMentionMessageHandler}
+                        handleSendFile={sendFileMessageHandler}
+                        handleSendImage={sendImageMessageHandler}
                     />
                 )}
             </div>
