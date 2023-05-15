@@ -11733,19 +11733,24 @@ fieldset:disabled .btn {
     --card-color: #ffffff;
     --body-color: #ffffff;
     --box-shadow: #c7c1c1;
-    --sidebar-bg: #F3F7FA
+    --sidebar-bg: #F3F7FA;
+    --topchat-color: #F3F7FA;
+    --topborder-color:#ffffff;
 }
 
 :root [class="theme-indigo"] {
-    --sidebar-bg: #f3f3f3
+    --sidebar-bg: #f3f3f3;
+    --topchat-color: #f3f3f3;
 }
 
 :root [class="theme-cyan"] {
-    --sidebar-bg: #f3f2ef
+    --sidebar-bg: #f3f2ef;
+    --topchat-color: #f3f2ef
 }
 
 :root [class="theme-blush"] {
     --sidebar-bg: #f7f7f7
+    --topchat-color: #f7f7f7
 }
 
 :root [class="theme-dark"] {
@@ -11764,7 +11769,9 @@ fieldset:disabled .btn {
     --card-color: #171717;
     --body-color: #171717;
     --box-shadow: #484c52;
-    --sidebar-bg: #1d1d1d
+    --sidebar-bg: #1d1d1d;
+    --topchat-color: #1d1d1d;
+    --topborder-color:#484c52;
 }
 
 [data-theme="dark"] [class="theme-indigo"] {
@@ -11773,11 +11780,13 @@ fieldset:disabled .btn {
     --border-color: #101013;
     --card-color: #0b0b0c;
     --body-color: #09090a;
-    --sidebar-bg: #09090a
+    --sidebar-bg: #09090a;
+    --topchat-color: #09090a;
 }
 
 [data-theme="dark"] [class="theme-cyan"] {
-    --sidebar-bg: #1d1d1d
+    --sidebar-bg: #1d1d1d;
+    --topchat-color: #1d1d1d;
 }
 
 [data-theme="dark"] [class="theme-blush"] {
@@ -11785,12 +11794,13 @@ fieldset:disabled .btn {
     --border-color: #19172b;
     --card-color: #131121;
     --body-color: #151323;
-    --sidebar-bg: #151323
+    --sidebar-bg: #151323;
+    --topchat-color: #151323;
 }
 
 [data-theme="dark"] [class="theme-dark"] {
     --font-555: #ffffff;
-    --primary-color: #ffffff
+    --primary-color: #ffffff;
 }
 
 [data-theme="dark"] [class="theme-dark"] a {
@@ -12148,7 +12158,7 @@ body.admin .main-body .body-page::-webkit-scrollbar-thumb {
     -ms-transition: all 0.2s ease-in-out;
     -o-transition: all 0.2s ease-in-out;
     transition: all 0.2s ease-in-out;
-    background: var(--card-color);
+    background: transparent;
     position: absolute;
     visibility: hidden;
     z-index: 99;

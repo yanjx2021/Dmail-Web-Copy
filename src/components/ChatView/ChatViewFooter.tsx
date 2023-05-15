@@ -243,7 +243,7 @@ export const ChatViewFooter = observer(
                     <div className="row">
                         <div className="col-12">
                             <div className="input-group align-items-center">
-                                <div className="input-group-append d-none d-sm-block">
+                                <div className="input-group-append">
                                     <span className="input-group-text border-0">
                                         <button
                                             className="btn btn-sm btn-link text-muted"

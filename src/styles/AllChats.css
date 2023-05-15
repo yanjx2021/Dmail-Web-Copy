@@ -11,3 +11,10 @@
 {
   margin-bottom:0px;
 }
+
+.topchat
+{
+  background-color: var(--topchat-color)!important;
+  border: 1px solid var(--topborder-color)!important ;
+
+}
