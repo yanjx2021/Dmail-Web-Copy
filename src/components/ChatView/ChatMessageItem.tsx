@@ -181,6 +181,13 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         </div>
     )
 })
+export const SystemMessageItem = observer(() => {
+    return (
+        <li className="d-flex message divider mt-xl-5 mt-md-3 mb-xl-5 mb-md-3">
+            <small className="text-muted">Today</small>
+        </li>
+    )
+})
 
 export const ChatMessageItem = observer(
     React.forwardRef(
@@ -197,6 +204,8 @@ export const ChatMessageItem = observer(
             return msg.type === ChatMessageType.Deleted ? (
                 <div style={{ height: '1px' }}></div>
             ) : (
+                /*注意系统消息和下面的li同级，需要将涉及系统的消息抽象出来*/
+                /*<SystemMessageItem />*/
                 <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
                     {enableDropDown && messageSelectStore.showSelector && (
                         <MessageSelector msg={msg} />
@@ -222,6 +231,7 @@ export const ChatMessageItem = observer(
                     )}
                     <div className="message-body">
                         <span className="date-time text-muted">{msg.getMessageTip}</span>
+
                         <div
                             className={
                                 'message-row d-flex align-items-center' +
