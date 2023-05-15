@@ -30,6 +30,7 @@ export class ModalStore {
     selectMessageChat: Chat | undefined
     selectMessageList: ChatMessage[] | undefined
 
+
     get showSelectSender() {
         return this.selectMessageChat?.chatType !== ChatType.Private
     }
@@ -51,7 +52,7 @@ export class ModalStore {
         return this.selectUserIds.map((userId) => {
             return {
                 value: userId,
-                label: userStore.getUser(userId).showName
+                label: `${userStore.getUser(userId).showName} (ID: ${userId})`
             }
         })
     }

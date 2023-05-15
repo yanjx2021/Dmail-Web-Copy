@@ -45,13 +45,14 @@ export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
 
                     <div className="col-6 col-xl-8 text-end">
                         <ul className="nav justify-content-end">
-                            <li className="nav-item list-inline-item d-none d-md-block me-3"
-                            onClick={action(() => {
-                                modalStore.selectMessageChat = chat
-                                modalStore.selectMessageList = chat.messagesList()
-                                modalStore.modalType = 'SelectMessages'
-                                modalStore.isOpen = true
-                            })}>
+                            <li
+                                className="nav-item list-inline-item d-none d-md-block me-3"
+                                onClick={action(() => {
+                                    modalStore.selectMessageChat = chat
+                                    modalStore.selectMessageList = chat.messagesList()
+                                    modalStore.modalType = 'SelectMessages'
+                                    modalStore.isOpen = true
+                                })}>
                                 <a
                                     href="#"
                                     className="nav-link text-muted px-3"
@@ -112,19 +113,55 @@ export const ChatViewHeader = observer(({ chat }: { chat: Chat }) => {
                                         <i className="zmdi zmdi-more-vert zmdi-hc-lg"></i>
                                     </a>
                                     <div className="dropdown-menu dropdown-menu-right">
-                                        <a className="dropdown-item" href="#">
+                                        <a
+                                            onClick={action(() => {
+                                                modalStore.selectMessageChat = chat
+                                                modalStore.selectMessageList = chat.messagesList()
+                                                modalStore.modalType = 'SelectMessages'
+                                                modalStore.isOpen = true
+                                            })}
+                                            className="dropdown-item"
+                                            href="#"
+                                            data-toggle="collapse"
+                                            data-target="#chat-search-div"
+                                            aria-expanded="true">
                                             搜索
                                         </a>
-                                        <a className="dropdown-item" href="#">
-                                            发送图像
-                                        </a>
-                                        <a className="dropdown-item" href="#">
-                                            视频通话
-                                        </a>
-                                        <a className="dropdown-item" href="#">
-                                            语音通话
-                                        </a>
-                                        <a className="dropdown-item" href="#">
+                                        {chat.chatType === ChatType.Private && (
+                                            <a
+                                                href="#"
+                                                className="dropdown-item"
+                                                onClick={() =>
+                                                    rtcStore.startMediaCall(
+                                                        chat.bindUser!.userId,
+                                                        'Voice'
+                                                    )
+                                                }
+                                                title="语音通话">
+                                                语音通话
+                                            </a>
+                                        )}
+                                        {chat.chatType === ChatType.Private && (
+                                            <a
+                                                href="#"
+                                                className="dropdown-item"
+                                                onClick={() =>
+                                                    rtcStore.startMediaCall(
+                                                        chat.bindUser!.userId,
+                                                        'Video'
+                                                    )
+                                                }
+                                                title="语音通话">
+                                                视频通话
+                                            </a>
+                                        )}
+                                        <a
+                                            className="dropdown-item"
+                                            href="#"
+                                            onClick={action(() => {
+                                                chatSideStore.UserSidebartoggle()
+                                                createGroupFromAllFriendsSelectStore.reset()
+                                            })}>
                                             新成员
                                         </a>
                                     </div>

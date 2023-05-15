@@ -156,7 +156,7 @@ export const VoiceMessageFooter = observer(
 const EmojiSelectorTitle = (title: string) => <span>{title}</span>
 
 const start = 0x01f600
-const end = 0x01f61a
+const end = 0x01f62a
 
 const EmojiContent = ({
     text,
@@ -236,6 +236,7 @@ export const ChatViewFooter = observer(
             }
         })
 
+
         return (
             <div className="chat-footer border-top py-xl-4 py-lg-2 py-2">
                 <div className="container-xxl">
@@ -272,6 +273,7 @@ export const ChatViewFooter = observer(
                                     defaultValue=""
                                     options={props.chat.mentionUserList}
                                 />
+
 
                                 <div className="input-group-append">
                                     <span className="input-group-text border-0">

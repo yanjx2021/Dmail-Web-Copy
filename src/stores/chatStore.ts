@@ -48,6 +48,7 @@ import {
 } from '../components/MessagesBox/Selector'
 import { binaryStore } from './binaryStore'
 import { modalStore } from './modalStore'
+import { notificationStore } from './notificationStore'
 
 export type ChatId = number
 
@@ -455,6 +456,7 @@ export class Chat {
     }
 
     get mentionUserList() {
+        
         if (this.chatType === ChatType.Private) return []
         if (!this.userIds) return []
         const mentionOptionList = this.userIds.map((userId) => {
@@ -464,6 +466,8 @@ export class Chat {
                 key: userId.toString(),
             }
         })
+
+        console.log(mentionOptionList, this.userIds)
         return mentionOptionList
     }
 
@@ -589,7 +593,8 @@ export class Chat {
             this.groupName = info.name
             this.groupAvaterPath = info.avaterHash
             this.chatType = ChatType.Group
-            this.userIds = []
+            // Maybe some bugs
+            // this.userIds = []
         } else {
             // 私聊
             const users: [number, number] = info.users
@@ -645,6 +650,26 @@ export class Chat {
 
     //     return msg
     // }
+
+    getMessge(inchatId: number) {
+        if (this.messages.has(inchatId)) {
+            return this.messages.get(inchatId)!
+        } else {
+            this.setMessage(ChatMessage.getLoadingMessage(inchatId, this.chatId))
+            LocalDatabase.loadMessageLocal(this.chatId, inchatId).then((messageLocal) => {
+                if (messageLocal) {
+                    this.setMessage(ChatMessage.createFromReciveMessage(messageLocal))
+                } else {
+                    MessageServer.Instance().send<Send.GetMessages>(Send.GetMessages, {
+                        startId: inchatId,
+                        endId: inchatId,
+                        chatId: this.chatId,
+                    })
+                }
+            })
+            return this.messages.get(inchatId)!
+        }
+    }
 
     async getMessages(endId: MessageId, count: number) {
         const startId = Math.max(endId - count + 1, 1)
@@ -1085,7 +1110,7 @@ export class ChatStore {
     get topChats() {
         const topChats: Chat[] = []
         this.topChatIds.forEach(action((chatId, _) => {
-            topChats.push(this.getChat(chatId))
+            this.chats.has(chatId) && topChats.push(this.getChat(chatId))
         }))
         return topChats
     }
@@ -1166,6 +1191,7 @@ export class ChatStore {
         LocalDatabase.removeChatInfo(chat.chatId)
         this.chats.delete(chat.chatId)
     }
+    
     private DeleteChatHandler(chatId: number) {
         if (!this.chats.has(chatId)) {
             this.errors = `清除聊天失败，聊天${chatId}不存在`
@@ -1175,6 +1201,8 @@ export class ChatStore {
         if (chat.chatType === ChatType.Private) {
             // 删除私聊
             LocalDatabase.removeUserInfo(chat.bindUser!.userId).catch((err) => console.log(err)) // 清除用户
+            chatStore.removeTopChat(chat.chatId)
+            notificationStore.unMuteChat(chat.chatId)
         }
         this.removeChatInfo(chat)
     }
@@ -1191,6 +1219,8 @@ export class ChatStore {
                         this.errors = `聊天属性异常：聊天${response.chatId}属性为私聊`
                         return
                     }
+                    this.removeTopChat(response.chatId!)
+                    notificationStore.unMuteChat(response.chatId!)
                     this.removeChatInfo(chat)
                 }
                 return
@@ -1222,7 +1252,8 @@ export class ChatStore {
                 // 清理缓存
                 const chat = this.chats.get(response.chatId!)!
                 LocalDatabase.removeUserInfo(chat.bindUser!.userId).catch((err) => console.log(err)) // 清除用户
-
+                notificationStore.unMuteChat(chat.chatId)
+                chatStore.removeTopChat(chat.chatId)
                 this.removeChatInfo(chat)
                 console.log('成功删除好友')
                 break
