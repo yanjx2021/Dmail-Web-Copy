@@ -52,7 +52,6 @@ const RequestItem = observer(({ request }: { request: Request }) => {
         <li>
             <a className="card">
                 <div className="card-body">
-                    {/* TODO: yjx 这个Request的标题实在是太丑陋辣 */}
                     <div className="systeminf-head">
                         <i className="zmdi zmdi-caret-right zmdi-hc-lg text-primary"></i>
                         {'  ' + request.title}

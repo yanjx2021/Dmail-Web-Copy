@@ -106,7 +106,6 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                     <audio src={cachedUrl.url} controls />
                     {msg.translatedText && (
                         <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                            <p>------转换结果------</p>
                             <p>{msg.translatedText}</p>
                         </div>
                     )}
