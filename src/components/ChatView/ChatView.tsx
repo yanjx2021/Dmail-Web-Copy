@@ -31,8 +31,8 @@ import { Button, Space, notification } from 'antd'
 import { userStore } from '../../stores/userStore'
 import { key } from 'localforage'
 import { AudioCall } from './AudioCall'
-import { voiceMessageStore } from '../../stores/voiceMessageStore'
 import { modalStore } from '../../stores/modalStore'
+import { recorderStore } from '../../stores/recorderStore'
 
 export const ChatView = observer(({ chat }: { chat: Chat }) => {
     const [messages, setMessages] = useImmer<ChatMessage[]>([])
@@ -45,16 +45,22 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         [chat, messages, setMessages]
     )
 
-    useEffect(action(() => {
-        if (chat.chatType !== ChatType.Private) {
-            MessageServer.Instance().send<Send.GetGroupUsers>(Send.GetGroupUsers, chat.chatId)
-        }
-    }), [chat])
+    useEffect(
+        action(() => {
+            if (chat.chatType !== ChatType.Private) {
+                MessageServer.Instance().send<Send.GetGroupUsers>(Send.GetGroupUsers, chat.chatId)
+            }
+        }),
+        [chat]
+    )
 
-    const sendReplyMessageHandler = useCallback((replyId: number, text: string) => {
-        const msg = chat.sendReplyMessage(text, replyId)
-        setMessages([...messages, msg])
-    }, [chat, messages, setMessages])
+    const sendReplyMessageHandler = useCallback(
+        (replyId: number, text: string) => {
+            const msg = chat.sendReplyMessage(text, replyId)
+            setMessages([...messages, msg])
+        },
+        [chat, messages, setMessages]
+    )
 
     useEffect(() => {
         modalStore.sendReplyMessageHandler = sendReplyMessageHandler
@@ -226,10 +232,10 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
                         )}
                     </>
                 )}
-                
+
                 {messageSelectStore.showSelector ? (
                     <MessageSelectedFooter />
-                ) : voiceMessageStore.showVoiceFooter ? (
+                ) : recorderStore.showVoiceFooter ? (
                     <VoiceMessageFooter sendVoiceMessageHandler={sendVoiceMessageHandler} />
                 ) : (
                     <ChatViewFooter

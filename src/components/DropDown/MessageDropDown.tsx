@@ -8,7 +8,7 @@ import { messageSelectStore } from '../MessagesBox/Selector'
 import { authStore } from '../../stores/authStore'
 import { externalStore } from '../../stores/externalStore'
 import { binaryStore } from '../../stores/binaryStore'
-import { blobToBase64 } from '../../utils/file'
+import { blobToBase64, urlToBlob } from '../../utils/file'
 
 export const MessageDropDown = observer(
     ({ msg, indexInView }: { msg: ChatMessage; indexInView: number }) => {
@@ -83,7 +83,7 @@ export const MessageDropDown = observer(
                             handleClick={action(() => {
                                 const cachedUrl = binaryStore.getBinaryUrl(msg.content as string)
                                 blobToBase64(cachedUrl.url).then((base64: any) =>
-                                    externalStore.audioTranslateByTencent(
+                                    externalStore.audioTranslateByBaidu(
                                         msg,
                                         base64.split(',')[1],
                                         cachedUrl.size

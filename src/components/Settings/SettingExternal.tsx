@@ -44,8 +44,21 @@ export const SettingExternal = observer(() => {
                         <div className="card-header">
                             <h6 className="card-title mb-0">语音识别</h6>
                         </div>
+
                         <div className="card-body">
                             <form className="row g-3">
+                                <div>
+                                    <div className="form-group mb-3">
+                                        <label>百度AI Token</label>
+                                        <input
+                                            className="form-control text-footerform"
+                                            onChange={action((e) => {
+                                                externalStore.baiduAiToken = e.target.value
+                                            })}
+                                            value={externalStore.baiduAiToken}></input>
+                                    </div>
+                                </div>
+
                                 <div>
                                     <div className="form-group mb-3">
                                         <label>腾讯云 Id</label>

@@ -76,6 +76,11 @@ export class ExternalApiStore {
     }
 
     audioTranslateByBaidu(msg: ChatMessage, base64: string, size: number) {
+        if (this.tencentCloudId === '') {
+            message.error('未配置腾讯云语音转换外部服务')
+            return
+        }
+
         const params = {
             format: 'wav',
             rate: 16000,
@@ -250,8 +255,6 @@ export class ExternalApiStore {
         const day = ('0' + date.getUTCDate()).slice(-2)
         return `${year}-${month}-${day}`
     }
-
-    sendTencentCloudRequest(params: any) {}
 }
 
 export const externalStore = new ExternalApiStore()

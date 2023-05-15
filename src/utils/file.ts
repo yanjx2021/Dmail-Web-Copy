@@ -87,3 +87,15 @@ export const blobToBase64 = (url: string) => {
         }
     })
 }
+
+export const urlToBlob = (url: string) => {
+    return new Promise(async (resolve, _) => {
+        // do a request to the blob uri
+        const response = await fetch(url)
+
+        // response has a method called .blob() to get the blob file
+        const blob = await response.blob()
+
+        return blob
+    })
+}

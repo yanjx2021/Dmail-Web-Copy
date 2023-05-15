@@ -9,12 +9,13 @@ import { useImmer } from 'use-immer'
 import { observer } from 'mobx-react-lite'
 import { MentionsOptionProps } from 'antd/es/mentions'
 import { getUserIds } from '../../utils/mentionPattern'
-import { VoiceRecorderState, voiceMessageStore } from '../../stores/voiceMessageStore'
-import {isImage} from '../../utils/file'
+import { isImage } from '../../utils/file'
 import AudioAnalyser from '../AudioAnalyser'
 import ReactDOM from 'react-dom'
 import { authStore } from '../../stores/authStore'
 import { click } from '@testing-library/user-event/dist/click'
+import { VoiceRecorderState, recorderStore } from '../../stores/recorderStore'
+import { rtcStore } from '../../stores/rtcStore'
 
 //针对输入框数值的一些常数
 const lineHeight = 15,
@@ -61,17 +62,9 @@ export const MessageSelectedFooter = () => {
 
 export const VoiceMessageFooter = observer(
     ({ sendVoiceMessageHandler }: { sendVoiceMessageHandler: (file: File) => void }) => {
-        const recorderRef: React.LegacyRef<AudioAnalyser> | null = useRef(null)
-
-        const audioProps = {
-            ref: recorderRef,
-            audioType: 'audio/wav',
-            // audioOptions: { sampleRate: 16000 },
-            backgroundColor: 'rgba(255, 255, 255, 1)',
-            strokeColor: '#000000',
-            height: 30,
-            width: window.innerWidth / 2 - 100,
-        }
+        useEffect(() => {
+            recorderStore.sendVoiceMessageHandler = sendVoiceMessageHandler
+        }, [sendVoiceMessageHandler])
 
         return (
             <div className="chat-footer border-top py-xl-4 py-lg-2 py-2">
@@ -88,58 +81,52 @@ export const VoiceMessageFooter = observer(
                                         title="发送语音"
                                         type="button"
                                         onClick={action(() => {
-                                            voiceMessageStore.showVoiceFooter = false
-                                            recorderRef.current?.stopAudio()
+                                            recorderStore.showVoiceFooter = false
                                         })}>
                                         <i className="zmdi zmdi-comment-text font-22"></i>
                                     </button>
                                     <div style={{ width: '15px' }}></div>
 
-                                    <AudioAnalyser {...audioProps} />
-
                                     <div style={{ width: '25px' }}></div>
-                                    {voiceMessageStore.state === VoiceRecorderState.Recording ? (
+                                    {recorderStore.state === VoiceRecorderState.Recording ? (
                                         <>
                                             <button
                                                 className="btn btn-primary"
-                                                onClick={action(() => {
-                                                    voiceMessageStore.state =
-                                                        VoiceRecorderState.Sending
-                                                    if (recorderRef.current) {
-                                                        recorderRef.current.blobReceiver = (
-                                                            blob
-                                                        ) => {
-                                                            const file = new File(
-                                                                [blob],
-                                                                'voice-' +
-                                                                    authStore.userId +
-                                                                    '-' +
-                                                                    Date.now().toString() +
-                                                                    '.wav',
-                                                                { type: 'audio/wav' }
-                                                            )
-                                                            sendVoiceMessageHandler(file)
-                                                            if (recorderRef.current) {
-                                                                recorderRef.current.blobReceiver = (
-                                                                    e
-                                                                ) => {}
-                                                            }
-                                                        }
+                                                // onClick={action(() => {
+                                                //     voiceMessageStore.state =
+                                                //         VoiceRecorderState.Sending
+                                                //     if (recorderRef.current) {
+                                                //         recorderRef.current.blobReceiver = (
+                                                //             blob
+                                                //         ) => {
+                                                //             const file = new File(
+                                                //                 [blob],
+                                                //                 'voice-' +
+                                                //                     authStore.userId +
+                                                //                     '-' +
+                                                //                     Date.now().toString() +
+                                                //                     '.wav',
+                                                //                 { type: 'audio/wav' }
+                                                //             )
+                                                //             sendVoiceMessageHandler(file)
+                                                //             if (recorderRef.current) {
+                                                //                 recorderRef.current.blobReceiver = (
+                                                //                     e
+                                                //                 ) => {}
+                                                //             }
+                                                //         }
 
-                                                        recorderRef.current.stopAudio()
-                                                    }
-                                                })}>
+                                                //         recorderRef.current.stopAudio()
+                                                //     }
+                                                // })}
+                                                onClick={recorderStore.stopAndSendRecord}>
                                                 结束并发送录音
                                             </button>
                                         </>
                                     ) : (
                                         <button
                                             className="btn btn-primary"
-                                            onClick={action(() => {
-                                                voiceMessageStore.state =
-                                                    VoiceRecorderState.Recording
-                                                recorderRef.current?.startAudio()
-                                            })}>
+                                            onClick={recorderStore.startRecord}>
                                             开始录音
                                         </button>
                                     )}
@@ -271,7 +258,7 @@ export const ChatViewFooter = observer(
                                             title="发送语音"
                                             type="button"
                                             onClick={action(() => {
-                                                voiceMessageStore.showVoiceFooter = true
+                                                recorderStore.showVoiceFooter = true
                                             })}>
                                             <i className="zmdi zmdi-mic font-22"></i>
                                         </button>
