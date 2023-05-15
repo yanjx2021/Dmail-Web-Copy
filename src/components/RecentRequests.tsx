@@ -1,10 +1,5 @@
 import { action } from 'mobx'
-import {
-    Request,
-    RequestState,
-    RequestStore,
-    requestStore,
-} from '../stores/requestStore'
+import { Request, RequestState, RequestStore, requestStore } from '../stores/requestStore'
 import { observer } from 'mobx-react-lite'
 import { authStore } from '../stores/authStore'
 import '../styles/RecentRequests.css'
@@ -58,12 +53,19 @@ const RequestItem = observer(({ request }: { request: Request }) => {
             <a className="card">
                 <div className="card-body">
                     {/* TODO: yjx 这个Request的标题实在是太丑陋辣 */}
-                    <h5>{request.title}</h5>
-                    <div className="media">
+                    <div className="systeminf-head">
+                        <i className="zmdi zmdi-caret-right zmdi-hc-lg text-primary"></i>
+                        {'  ' + request.title}
+                    </div>
+                    <div className="media systeminf-container">
                         <div className="avatar me-3">
                             <span className="rounded-circle"></span>
                             <div className="avatar rounded-circle no-image timber">
-                                <img className='avatar rounded-circle' src={request.getAvaterUrl} alt='avatar'/>
+                                <img
+                                    className="avatar rounded-circle"
+                                    src={request.getAvaterUrl}
+                                    alt="avatar"
+                                />
                             </div>
                         </div>
                         <div className="media-body overflow-hidden">
