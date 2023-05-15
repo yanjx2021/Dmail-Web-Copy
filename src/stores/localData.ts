@@ -16,6 +16,7 @@ import { noticeStore } from './noticeStore'
 import { ExternalApiStore, externalStore } from './externalStore'
 import { tokenStore } from './tokenStore'
 import { authStore } from './authStore'
+import { message } from 'antd'
 
 const userSettingIndex = 'userSetting'
 
@@ -259,7 +260,15 @@ export class LocalDatabase {
     }
 
     static async saveExternal() {
-        this.database.setItem('external', JSON.stringify(externalStore))
+        console.log('test')
+        this.database
+            .setItem('external', JSON.stringify(externalStore))
+            .then(() => {
+                message.info('保存成功')
+            })
+            .catch((err) => {
+                message.error('保存失败')
+            })
     }
 
     static async loadExternal() {
