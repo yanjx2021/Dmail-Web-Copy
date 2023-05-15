@@ -173,10 +173,17 @@ export const AddFriendModal = observer(
         setIsOpen: any
         isOpen: boolean
     }) => {
+        useEffect(() => {
+            let $box: any = document.querySelectorAll('.ant-modal-root')
+            let $this: any = document.querySelector('.choose-skin li.active')
+            for (let i = 0; i < $box.length; i++) {
+                $box[i]?.parentNode?.classList.add('theme-' + $this.getAttribute('data-theme'))
+            }
+        })
         const handleCancel = () => {
             setIsOpen(false)
         }
-        //TODO: yjx 这个发送请求就没了
+
         return (
             <Modal
                 footer={[

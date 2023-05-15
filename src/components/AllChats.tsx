@@ -98,7 +98,6 @@ export const AllChatsCard = observer(
                         </div>
                     </div>
                 </div>
-                {/* TODO: yjx 将这个选择框整的好看一点 */}
             </a>
         )
     }

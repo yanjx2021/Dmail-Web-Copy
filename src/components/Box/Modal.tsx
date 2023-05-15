@@ -750,9 +750,11 @@ export const SelectMessageModalView = observer(({ title }: { title: string }) =>
 
 export const RegisterModal = observer(() => {
     useEffect(() => {
-        let $box: any = document.querySelector('.ant-modal-root')
+        let $box: any = document.querySelectorAll('.ant-modal-root')
         let $this: any = document.querySelector('.choose-skin li.active')
-        $box?.parentNode.classList.add('theme-' + $this.getAttribute('data-theme'))
+        for (let i = 0; i < $box.length; i++) {
+          $box[i]?.parentNode?.classList.add('theme-' + $this.getAttribute('data-theme'))
+      }
     })
     switch (modalStore.modalType) {
         case 'AddFriend':
