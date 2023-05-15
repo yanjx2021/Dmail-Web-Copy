@@ -12814,7 +12814,7 @@ body.admin .main-body .body-page::-webkit-scrollbar-thumb {
     content: "";
     position: absolute;
     height: 1px;
-    width: 100%;
+    width: 0;
     top: 10px;
     z-index: 1
 }

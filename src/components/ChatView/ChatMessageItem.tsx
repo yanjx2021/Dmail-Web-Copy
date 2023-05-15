@@ -181,10 +181,10 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         </div>
     )
 })
-export const SystemMessageItem = observer(() => {
+export const SystemMessageItem = observer(({ msg }: { msg: ChatMessage }) => {
     return (
         <li className="d-flex message divider mt-xl-5 mt-md-3 mb-xl-5 mb-md-3">
-            <small className="text-muted">Today</small>
+            <small className="text-muted">{msg.content as string}</small>
         </li>
     )
 })
@@ -201,11 +201,13 @@ export const ChatMessageItem = observer(
         ) => {
             const user = userStore.getUser(msg.senderId)
             const isRight = msg.senderId === authStore.userId
+            const isSystem: boolean = msg.senderId === 0
             return msg.type === ChatMessageType.Deleted ? (
                 <div style={{ height: '1px' }}></div>
+            ) : isSystem ? (
+                <SystemMessageItem msg={msg}/>
             ) : (
                 /*注意系统消息和下面的li同级，需要将涉及系统的消息抽象出来*/
-                /*<SystemMessageItem />*/
                 <li className={'d-flex message' + (isRight ? ' right' : '')} ref={ref}>
                     {enableDropDown && messageSelectStore.showSelector && (
                         <MessageSelector msg={msg} />
