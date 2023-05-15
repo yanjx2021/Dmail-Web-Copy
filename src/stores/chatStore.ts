@@ -651,6 +651,26 @@ export class Chat {
     //     return msg
     // }
 
+    getMessge(inchatId: number) {
+        if (this.messages.has(inchatId)) {
+            return this.messages.get(inchatId)!
+        } else {
+            this.setMessage(ChatMessage.getLoadingMessage(inchatId, this.chatId))
+            LocalDatabase.loadMessageLocal(this.chatId, inchatId).then((messageLocal) => {
+                if (messageLocal) {
+                    this.setMessage(ChatMessage.createFromReciveMessage(messageLocal))
+                } else {
+                    MessageServer.Instance().send<Send.GetMessages>(Send.GetMessages, {
+                        startId: inchatId,
+                        endId: inchatId,
+                        chatId: this.chatId,
+                    })
+                }
+            })
+            return this.messages.get(inchatId)!
+        }
+    }
+
     async getMessages(endId: MessageId, count: number) {
         const startId = Math.max(endId - count + 1, 1)
         endId = this.lastMessage === undefined ? 0 : Math.min(endId, this.lastMessage.inChatId!)
@@ -1090,7 +1110,7 @@ export class ChatStore {
     get topChats() {
         const topChats: Chat[] = []
         this.topChatIds.forEach(action((chatId, _) => {
-            topChats.push(this.getChat(chatId))
+            this.chats.has(chatId) && topChats.push(this.getChat(chatId))
         }))
         return topChats
     }
@@ -1199,6 +1219,8 @@ export class ChatStore {
                         this.errors = `聊天属性异常：聊天${response.chatId}属性为私聊`
                         return
                     }
+                    this.removeTopChat(response.chatId!)
+                    notificationStore.unMuteChat(response.chatId!)
                     this.removeChatInfo(chat)
                 }
                 return

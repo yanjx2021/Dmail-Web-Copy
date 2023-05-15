@@ -155,7 +155,7 @@ export const VoiceMessageFooter = observer(
 const EmojiSelectorTitle = (title: string) => <span>{title}</span>
 
 const start = 0x01f600
-const end = 0x01f61a
+const end = 0x01f62a
 
 const EmojiContent = ({text, setText, handleClick} : {text: string, setText: any, handleClick: any}) => {
     const [emojis, setEmojis] = useImmer<string[]>([])

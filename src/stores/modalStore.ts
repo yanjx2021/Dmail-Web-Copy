@@ -52,7 +52,7 @@ export class ModalStore {
         return this.selectUserIds.map((userId) => {
             return {
                 value: userId,
-                label: userStore.getUser(userId).showName
+                label: `${userStore.getUser(userId).showName} (ID: ${userId})`
             }
         })
     }

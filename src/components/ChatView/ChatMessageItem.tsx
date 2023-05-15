@@ -57,6 +57,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
     }), [])
 
     if (msg.type === ChatMessageType.Text && typeof msg.content === 'string') {
+        // TODO: yjx 翻译的样式
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
                 {renderFormatUrl(msg.content)}
@@ -99,7 +100,7 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             )
         } else {
             const cachedUrl = binaryStore.getBinaryUrl(msg.content)
-
+            // TODO: yjx 翻译的样式
             return (
                 <div className="audio-div">
                     <audio src={cachedUrl.url} controls />
@@ -169,10 +170,12 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         )
     } else if (msg.type === ChatMessageType.ReplyText) {
         const content: ReplyTextContent = msg.content as ReplyTextContent
-        const repliedMessage = chatStore.getChat(msg.chatId)
+        const repliedMessage = chatStore.getChat(msg.chatId).getMessge(content.inChatId)
+        const senderName = userStore.getUser(repliedMessage.senderId).showName
+        // TODO: yjx 回复消息的样式
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                回复消息{content.inChatId}:<p>-------------------</p>
+                {`回复${senderName}的消息: \n ${repliedMessage.asShort}`}<p>-------------------</p>
                 {renderFormatUrl(content.text)}
             </div>
         )

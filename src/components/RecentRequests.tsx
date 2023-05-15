@@ -57,6 +57,7 @@ const RequestItem = observer(({ request }: { request: Request }) => {
         <li>
             <a className="card">
                 <div className="card-body">
+                    {/* TODO: yjx 这个Request的标题实在是太丑陋辣 */}
                     <h5>{request.title}</h5>
                     <div className="media">
                         <div className="avatar me-3">

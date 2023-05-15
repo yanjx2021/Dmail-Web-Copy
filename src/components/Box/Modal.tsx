@@ -679,7 +679,7 @@ export const SelectMessageModalView = observer(({ title }: { title: string }) =>
                     onChange={handleTypeChange}
                     defaultValue={'none'}
                     options={[
-                        { value: 'none', label: '无' },
+                        { value: 'none', label: '全部' },
                         { value: 'file', label: '文件' },
                         { value: 'image', label: '图片' },
                         { value: 'audio', label: '语音' },
@@ -690,7 +690,7 @@ export const SelectMessageModalView = observer(({ title }: { title: string }) =>
                         style={{ width: 120 }}
                         onChange={handleUserChange}
                         defaultValue={-1}
-                        options={[{ value: -1, label: '无' }, ...modalStore.selectUserOption]}
+                        options={[{ value: -1, label: '全部' }, ...modalStore.selectUserOption]}
                     />
                 )}
             </Space>
@@ -716,6 +716,13 @@ export const SelectMessageModalView = observer(({ title }: { title: string }) =>
                     }
                     modalStore.selectMessageChat?.getMessages(firstIndex - 1, 20).then(() => {
                         modalStore.selectMessageList = modalStore.selectMessageChat?.messagesList()
+                        if (typeSelect !== 'none' || userIdSelect !== -1) {
+                            const messages = modalStore.selectMessageList
+                                ? modalStore.selectMessageList
+                                : []
+                            const filtedMessages = messages.filter(filtMessage)
+                            setFiltedMessages(filtedMessages)
+                        }
                     })
                 })}>
                 拉取更多

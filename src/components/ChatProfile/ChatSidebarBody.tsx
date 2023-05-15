@@ -176,6 +176,7 @@ export const AddFriendModal = observer(
         const handleCancel = () => {
             setIsOpen(false)
         }
+        //TODO: yjx 这个发送请求就没了
         return (
             <Modal
                 footer={[
