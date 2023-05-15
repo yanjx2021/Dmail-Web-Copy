@@ -30,55 +30,50 @@ import { renderFormatMention, renderFormatUrl } from '../../utils/urlToLink'
 import { min, timestamp } from 'rxjs'
 import { ReceiveChatMessage } from '../../utils/message'
 
-
 export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) => {
     const isRight = msg.senderId === authStore.userId
 
-    useEffect(action(() => {
-        if (msg.type !== ChatMessageType.MentionText) return
-        
-        const content: MentionTextContent = msg.content as MentionTextContent       
-        const clickCallbackList : any[] = []
+    useEffect(
+        action(() => {
+            if (msg.type !== ChatMessageType.MentionText) return
 
-        content.userIds.forEach((id, index) => {
-            console.log(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)
-            const clickHandler = () => {
-                chatSideStore.visitUsertoggle(userStore.getUser(id))
+            const content: MentionTextContent = msg.content as MentionTextContent
+            const clickCallbackList: any[] = []
+
+            content.userIds.forEach((id, index) => {
+                console.log(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)
+                const clickHandler = () => {
+                    chatSideStore.visitUsertoggle(userStore.getUser(id))
+                }
+                clickCallbackList.push(clickHandler)
+                document
+                    .getElementById(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)
+                    ?.addEventListener('click', clickHandler)
+            })
+            return () => {
+                // content.userIds.forEach((id, index) => {
+                //     console.log(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)
+                //     document.getElementById(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)?.addEventListener('click', clickCallbackList[index]
+                // )})
             }
-            clickCallbackList.push(clickHandler)
-            document.getElementById(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)?.addEventListener('click', clickHandler)
-        })
-        return () => {
-            // content.userIds.forEach((id, index) => {
-            //     console.log(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)
-            //     document.getElementById(`AtUser${msg.chatId}${id}${msg.timestamp}${index}`)?.addEventListener('click', clickCallbackList[index]
-            // )})
-        }
-    }), [])
+        }),
+        []
+    )
 
     if (msg.type === ChatMessageType.Text && typeof msg.content === 'string') {
         // TODO: yjx 翻译的样式
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
                 {renderFormatUrl(msg.content)}
-                {msg.translatedText && (
-                    <div>
-                        <p>------翻译结果------</p>
-                        <p>{msg.translatedText}</p>
-                    </div>
-                )}
+                {msg.translatedText && <div className="quote-container">{msg.translatedText}</div>}
             </div>
         )
     } else if (msg.type === ChatMessageType.MentionText) {
         const content: MentionTextContent = msg.content as MentionTextContent
 
         const foo = renderFormatMention(content.text, content.userIds, msg.chatId, msg.timestamp)
-        
-        return (
-            <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                {foo}
-            </div>
-        )
+
+        return <div className={'message-content p-3' + (isRight ? ' border' : '')}>{foo}</div>
     } else if (msg.type === ChatMessageType.Image && typeof msg.content === 'string') {
         if (msg.bindUploading) {
             return (
@@ -140,7 +135,9 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
             )
 
         const shortMessage = (message: ChatMessage) => (
-            <p key={message.inChatId}>{`${userStore.getUser(message.senderId).showName}: ${message.asShort.slice(
+            <p key={message.inChatId}>{`${
+                userStore.getUser(message.senderId).showName
+            }: ${message.asShort.slice(
                 0,
                 message.asShort.length > 10 ? 10 : message.asShort.length
             )}`}</p>
@@ -154,7 +151,6 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
                         modalStore.modalType = 'TransferChatBox'
                         modalStore.isOpen = true
                     })}>
-
                     <h5>{`[聊天记录]`}</h5>
                     <div className="text-record-container">
                         {messageSlice.map((message) => shortMessage(message))}
@@ -174,8 +170,8 @@ export const ChatMessageItemContent = observer(({ msg }: { msg: ChatMessage }) =
         // TODO: yjx 回复消息的样式
         return (
             <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                {`回复${senderName}的消息: \n ${repliedMessage.asShort}`}<p>-------------------</p>
                 {renderFormatUrl(content.text)}
+                <div className="quote-container">{`回复${senderName}:  ${repliedMessage.asShort}`}</div>
             </div>
         )
     }

@@ -177,7 +177,7 @@ const EmojiContent = ({
             })
         }
     }, [])
-    // TODO: yjx 调整选择表情的样式
+
     return (
         <div className="emoji-container">
             {emojis.map((emoji) => (
@@ -260,6 +260,7 @@ export const ChatViewFooter = observer(
 
                                 <Mentions
                                     className="form-control border-0 pl-0 text-footerform"
+                                    placeholder='请输入聊天内容...'
                                     ref={inputRef}
                                     value={text}
                                     id="textinputer"
