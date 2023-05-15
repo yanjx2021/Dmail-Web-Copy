@@ -43,7 +43,7 @@ const RecentChatItem = observer(
                     onClick={action(() => setActiveChatId(chat.chatId))}>
                     <div className="card-body">
                         <div className="media">
-                            {/* TODO: yjx 将显示置顶状态的图标和免打扰的图标变得好看一点，并且放到一个心仪的位置 */}
+                           
                             <div className="avatar me-3">
                                 <Badge
                                     count={chat.unreadCount}
