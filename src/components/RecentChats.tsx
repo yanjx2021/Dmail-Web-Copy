@@ -39,11 +39,14 @@ const RecentChatItem = observer(
                 <HoverOption chat={chat} />
 
                 <a
-                    className={'card ' + (chatStore.isTopChat(chat.chatId) ? 'topchat' : '')}
+                    className={'card '+(chatStore.isTopChat(chat.chatId)?'topchat':'')}
                     onClick={action(() => setActiveChatId(chat.chatId))}>
                     <div className="card-body">
                         <div className="media">
-                           
+                            {/* TODO: yjx 将显示置顶状态的图标和免打扰的图标变得好看一点，并且放到一个心仪的位置 */}
+                            {/* TopIcon Start */}
+                            
+                            {/* TopIcon End */}
                             <div className="avatar me-3">
                                 <Badge
                                     count={chat.unreadCount}
@@ -73,17 +76,12 @@ const RecentChatItem = observer(
                                     </p>
                                 </div>
                                 <div className="d-flex align-items-center mb-1">
-                                    <div className="text-truncate mb-0 me-auto">
-                                        {chat.lastMessage !== undefined
-                                            ? chat.lastMessage.asShort
-                                            : ''}
-                                    </div>
-                                    {notificationStore.hasMuted(chat.chatId) && (
-                                        <div className="small text-muted text-nowrap ms-4 mb-0">
-                                            {' '}
-                                            <i className="zmdi zmdi-notifications-off"></i>
-                                        </div>
-                                    )}
+                                <div className="text-truncate mb-0 me-auto">
+                                    {chat.lastMessage !== undefined ? chat.lastMessage.asShort : ''}
+                                </div>
+                                {notificationStore.hasMuted(chat.chatId) && (
+                               <div className='small text-muted text-nowrap ms-4 mb-0'> <i className="zmdi zmdi-notifications-off"></i></div>
+                            )}
                                 </div>
                                 {chat.atYou ? <p className="text-danger">有人@你</p> : <></>}
                                 {rtcStore.remoteUserId === chat.bindUser?.userId &&

@@ -11770,7 +11770,7 @@ fieldset:disabled .btn {
     --body-color: #171717;
     --box-shadow: #484c52;
     --sidebar-bg: #1d1d1d;
-    --topchat-color: #1d1d1d;
+    --topchat-color: #262626;
     --topborder-color:#484c52;
 }
 
@@ -11781,12 +11781,14 @@ fieldset:disabled .btn {
     --card-color: #0b0b0c;
     --body-color: #09090a;
     --sidebar-bg: #09090a;
-    --topchat-color: #09090a;
+    --topchat-color: #262626;
+
 }
 
 [data-theme="dark"] [class="theme-cyan"] {
     --sidebar-bg: #1d1d1d;
-    --topchat-color: #1d1d1d;
+    --topchat-color: #262626;
+
 }
 
 [data-theme="dark"] [class="theme-blush"] {
@@ -11795,12 +11797,13 @@ fieldset:disabled .btn {
     --card-color: #131121;
     --body-color: #151323;
     --sidebar-bg: #151323;
-    --topchat-color: #151323;
+    --topchat-color: #262626;
 }
 
 [data-theme="dark"] [class="theme-dark"] {
     --font-555: #ffffff;
     --primary-color: #ffffff;
+    --topchat-color: #262626;
 }
 
 [data-theme="dark"] [class="theme-dark"] a {
