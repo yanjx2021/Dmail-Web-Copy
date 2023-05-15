@@ -5,7 +5,6 @@ import {
     Receive,
     ReceiveGetUserInfoResponseData,
     ReceiveGetUserInfoResponseState,
-    Send,
 } from '../utils/message'
 import { LocalDatabase } from './localData'
 import { binaryStore } from './binaryStore'
@@ -78,17 +77,15 @@ export class UserStore {
     }
 
     getUserInfoResponseHandler(data: ReceiveGetUserInfoResponseData) {
-        switch (data.state) {
-            case ReceiveGetUserInfoResponseState.Success:
-                console.log(`接受用户${data.userId}的信息`)
-                this.setUser(data.userId!, data.userName!, data.avaterHash!)
-                LocalDatabase.saveUserInfo(
-                    data.userId!,
-                    this.createUser(data.userId!, data.userName!, data.avaterHash!)
-                )
-                break
-            default:
-                this.errors = '服务器跑路了'
+        if (data.state !== ReceiveGetUserInfoResponseState.Success) {
+            this.errors = '服务器跑路了'
+        } else {
+            console.log(`接受用户${data.userId}的信息`)
+            this.setUser(data.userId!, data.userName!, data.avaterHash!)
+            LocalDatabase.saveUserInfo(
+                data.userId!,
+                this.createUser(data.userId!, data.userName!, data.avaterHash!)
+            )
         }
     }
 

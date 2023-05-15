@@ -1,5 +1,4 @@
-import { action, makeAutoObservable } from 'mobx'
-import { ChatType } from './chatStore'
+import { makeAutoObservable } from 'mobx'
 import { userSelectStore } from '../components/MessagesBox/Selector'
 import { User } from './userStore'
 

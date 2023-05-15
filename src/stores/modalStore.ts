@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx'
-import { Chat, ChatMessage, ChatMessageTransferInfo, ChatType, chatStore } from './chatStore'
+import { Chat, ChatMessage, ChatMessageTransferInfo, ChatType } from './chatStore'
 import { ReceiveChatMessage } from '../utils/message'
 import { userStore } from './userStore'
 
@@ -19,7 +19,7 @@ export class ModalStore {
         | 'ChangeGroupName'
         | 'GroupMessageReaders'
         | 'GetUserIds'
-        | 'SendGroupNotice' 
+        | 'SendGroupNotice'
         | 'LogOff'
         | 'ReplyText'
         | 'SelectMessages' = ''
@@ -29,7 +29,6 @@ export class ModalStore {
     sendReplyMessageHandler: any
     selectMessageChat: Chat | undefined
     selectMessageList: ChatMessage[] | undefined
-
 
     get showSelectSender() {
         return this.selectMessageChat?.chatType !== ChatType.Private
@@ -44,6 +43,7 @@ export class ModalStore {
             if (userIds.indexOf(message.senderId) === -1 && message.senderId !== 0) {
                 userIds.push(message.senderId)
             }
+            return
         })
         return userIds
     }
@@ -52,7 +52,7 @@ export class ModalStore {
         return this.selectUserIds.map((userId) => {
             return {
                 value: userId,
-                label: `${userStore.getUser(userId).showName} (ID: ${userId})`
+                label: `${userStore.getUser(userId).showName} (ID: ${userId})`,
             }
         })
     }
@@ -65,7 +65,7 @@ export class ModalStore {
         if (this.transferInfo) {
             const msgs = this.transferInfo.messages.map((value, _) =>
                 ChatMessage.createFromReciveMessage(JSON.parse(value) as ReceiveChatMessage)
-            ) as ChatMessage[]
+            )
             return {
                 userId: this.transferInfo.userId,
                 messages: msgs,

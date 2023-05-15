@@ -1,6 +1,6 @@
 import { action, makeAutoObservable } from "mobx";
 import { MessageServer } from "../utils/networkWs";
-import { Receive, ReceiveGetFileUrlResponse, ReceiveUpdateUserInfoResponseData, ReceiveUserFileUploadedResponse, ReceiveUserUploadFileRequestResponse, Send, UserUploadFileRequestData } from "../utils/message";
+import { Receive, ReceiveGetFileUrlResponse, ReceiveUserFileUploadedResponse, ReceiveUserUploadFileRequestResponse, Send, UserUploadFileRequestData } from "../utils/message";
 import { computeChecksumMd5, getFileExtension, uploadFileByAxios } from "../utils/file";
 
 export type UploadId = number;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import '../../styles/ChatViewFooter.css'
 import { messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
@@ -12,14 +12,8 @@ import { getUserIds } from '../../utils/mentionPattern'
 import { VoiceRecorderState, voiceMessageStore } from '../../stores/voiceMessageStore'
 import {isImage} from '../../utils/file'
 import AudioAnalyser from '../AudioAnalyser'
-import ReactDOM from 'react-dom'
 import { authStore } from '../../stores/authStore'
-import { click } from '@testing-library/user-event/dist/click'
 
-//针对输入框数值的一些常数
-const lineHeight = 15,
-    borderTop = 1,
-    borderBottom = 1
 
 export const MessageSelectedFooter = () => {
     return (

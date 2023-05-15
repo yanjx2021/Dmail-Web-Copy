@@ -4,12 +4,11 @@ import { User, userStore } from '../stores/userStore'
 import { observer } from 'mobx-react-lite'
 import { updateUserStore } from '../stores/updateUserStore'
 import { useImmer } from 'use-immer'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { modalStore } from '../stores/modalStore'
 import { UploadingFile, fileStore } from '../stores/fileStore'
 import { binaryStore } from '../stores/binaryStore'
-import { Progress, Image } from 'antd'
-import { PhotoItem } from './ChatView/PhotoItem'
+import { Image } from 'antd'
 import '../styles/UserProfile.css'
 import { notificationStore } from '../stores/notificationStore'
 
@@ -26,7 +25,7 @@ export const ProfileHeader = () => {
     )
 }
 
-export const CardAvatar = (({ avaterHash }: { avaterHash: string }) => {
+export const CardAvatar = ({ avaterHash }: { avaterHash: string }) => {
     const handleChange = (event: any) => {
         event.target.files[0] &&
             fileStore.requestUpload(
@@ -38,9 +37,8 @@ export const CardAvatar = (({ avaterHash }: { avaterHash: string }) => {
                 })
             )
     }
-    const handlefile = () => {
-        document.getElementById('userphoto')?.click()
-    }
+    const handlefile = () => document.getElementById('userphoto')?.click()
+
     return (
         <div className="card-user-avatar">
             <Image
@@ -65,7 +63,7 @@ export const CardAvatar = (({ avaterHash }: { avaterHash: string }) => {
             </button>
         </div>
     )
-})
+}
 
 export const UserNameInput = observer(({ handleOnBlur }: { handleOnBlur: any }) => {
     const inputRef: any = useRef(null)
@@ -172,14 +170,15 @@ export const ColorSelectDot = ({
         let existTheme: any = document
             .querySelector('.choose-skin li.active')
             ?.getAttribute('data-theme')
-        let theme: any = document.querySelectorAll('.choose-skin li')
-        for (let i = 0; i < theme.length; i++) {
-            theme[i].classList.remove('active')
+        let tempTheme: any = document.querySelectorAll('.choose-skin li')
+        for (let i = 0; i < tempTheme.length; i++) {
+            tempTheme[i].classList.remove('active')
         }
         $body.classList.remove('theme-' + existTheme)
         $this.classList.add('active')
         $body.classList.add('theme-' + $this.getAttribute('data-theme'))
         $box?.parentNode.setAttribute('class', 'theme-' + $this.getAttribute('data-theme'))
+        return
     }
     return (
         <li

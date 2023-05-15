@@ -1,9 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { observer } from 'mobx-react-lite'
-import React, { useEffect, useRef, useState } from 'react'
-import { useImmer } from 'use-immer'
+import React from 'react'
 import {
-    Chat,
     ChatMessage,
     ChatMessageFileInfo,
     ChatMessageTransferInfo,
@@ -11,15 +9,9 @@ import {
     ReplyTextContent,
     chatStore,
 } from '../../stores/chatStore'
-import { authStore } from '../../stores/authStore'
 import '../../styles/ChatMessageItem.css'
-import { userStore } from '../../stores/userStore'
-import { fileStore } from '../../stores/fileStore'
-import { createDownload } from '../../utils/file'
-import { action, makeAutoObservable } from 'mobx'
+import { action } from 'mobx'
 import { binaryStore } from '../../stores/binaryStore'
-import { MessageDropDown } from '../DropDown/MessageDropDown'
-import { MessageSelector, messageSelectStore } from '../MessagesBox/Selector'
 import { modalStore } from '../../stores/modalStore'
 import { FileItem, LoadingFileItem } from '../ChatView/FileItem'
 import { LoadingPhotoItem, PhotoItem } from '../ChatView/PhotoItem'
@@ -33,7 +25,7 @@ export const ChatMessageBoxItemContent = observer(
         if (msg.type === ChatMessageType.Text && typeof msg.content === 'string') {
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
-                    {renderFormatUrl(msg.content as string)}
+                    {renderFormatUrl(msg.content)}
                 </div>
             )
         } else if (msg.type === ChatMessageType.MentionText) {
@@ -109,7 +101,7 @@ export const ChatMessageBoxItemContent = observer(
             )
         } else if (msg.type === ChatMessageType.ReplyText) {
             const content: ReplyTextContent = msg.content as ReplyTextContent
-            const repliedMessage = chatStore.getChat(msg.chatId)
+            // const repliedMessage = chatStore.getChat(msg.chatId)
             return (
                 <div className={'message-content p-3' + (isRight ? ' border' : '')}>
                     回复消息{content.inChatId}:<p>-------------------</p>

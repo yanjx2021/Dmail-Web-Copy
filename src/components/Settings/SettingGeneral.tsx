@@ -1,16 +1,9 @@
 import { action } from 'mobx'
-import { authStore } from '../../stores/authStore'
-import { User, userStore } from '../../stores/userStore'
-import { observer } from 'mobx-react-lite'
-import { updateUserStore } from '../../stores/updateUserStore'
-import { useImmer } from 'use-immer'
-import { useEffect, useRef, useState, useCallback } from 'react'
 import { modalStore } from '../../stores/modalStore'
 
 export const SettingGeneral = () => {
-    const handlefile = () => {
-        document.getElementById('userphoto')?.click()
-    }
+    const handlefile = () => document.getElementById('userphoto')?.click()
+
     return (
         <div className="tab-pane fade show active" id="setting-general" role="tabpanel">
             <div className="row">

@@ -1,13 +1,9 @@
 import { makeAutoObservable } from 'mobx'
 import { MessageServer } from '../utils/networkWs'
-import { Receive, ReceiveUpdateGroupInfoResponseData, ReceiveUpdateUserInfoResponseData, Send } from '../utils/message'
-import { userStore } from './userStore'
-import { authStore } from './authStore'
+import { Receive, ReceiveUpdateGroupInfoResponseData, Send } from '../utils/message'
 import { LocalDatabase } from './localData'
-import { passwordTester } from '../constants/passwordFormat'
-import { SHA256 } from 'crypto-js'
 import { modalStore } from './modalStore'
-import { Chat, chatStore } from './chatStore'
+import { Chat } from './chatStore'
 
 export class UpdateGroupStore {
     updateType: 'GroupName' | 'Avater' = 'GroupName'

@@ -2,20 +2,14 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import {
     Chat,
     ChatMessage,
-    ChatMessageState,
     ChatType,
-    MessageId,
     chatStore,
 } from '../../stores/chatStore'
 import { ChatMessageItem } from './ChatMessageItem'
-import { action, autorun, observe, runInAction } from 'mobx'
+import { action } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { Virtuoso } from 'react-virtuoso'
-import { useFetcher } from 'react-router-dom'
-import { AnyARecord } from 'dns'
 import { authStore } from '../../stores/authStore'
-import { NoneActiveChatBody } from '../NoneActiveChatBody'
-import { modalStore } from '../../stores/modalStore'
 
 export const ChatMessageContent = observer(
     ({
@@ -102,7 +96,7 @@ export const ChatMessageContent = observer(
                     {showButton && (
                         <button
                             onClick={() =>
-                                virtuosoRef!.current.scrollToIndex({
+                                virtuosoRef.current.scrollToIndex({
                                     index: messages.length - 1,
                                     behavior: 'smooth',
                                 })

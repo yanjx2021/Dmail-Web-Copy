@@ -1,6 +1,4 @@
-import { changeConfirmLocale } from 'antd/es/modal/locale'
 import { makeAutoObservable } from 'mobx'
-import { isMainThread } from 'worker_threads'
 import { LocalDatabase } from './localData'
 
 export class CachedBinary {

@@ -1,13 +1,9 @@
 import { observer } from 'mobx-react-lite'
 import { Chat, ChatId, ChatStore, chatStore } from '../stores/chatStore'
-import { action, autorun } from 'mobx'
-import { ChatDropDown } from './DropDown/ChatDropDown'
+import { action } from 'mobx'
 import { Badge } from 'antd'
 import { HoverOption } from './AllChats'
-import { ChatSelector, messageSelectStore } from './MessagesBox/Selector'
-import { secureAuthStore } from '../stores/secureAuthStore'
-import { useEffect, useState } from 'react'
-import { useImmer } from 'use-immer'
+import { useEffect } from 'react'
 import { notificationStore } from '../stores/notificationStore'
 import { rtcStore } from '../stores/rtcStore'
 
@@ -107,11 +103,9 @@ const RecentChatItem = observer(
 
 export const RecentChats = observer(
     ({
-        chatStore,
         activeChatId,
         setActiveChatId,
     }: {
-        chatStore: ChatStore
         activeChatId: ChatId | null
         setActiveChatId: (chatId: ChatId) => any
     }) => {

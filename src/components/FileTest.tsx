@@ -1,6 +1,4 @@
-import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { computeChecksumMd5 } from "../utils/file";
 import { UploadingFile, fileStore } from "../stores/fileStore";
 
 

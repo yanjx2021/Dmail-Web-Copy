@@ -2,14 +2,12 @@ import { action } from 'mobx'
 import {
     Request,
     RequestState,
-    RequestStore,
     requestStore,
 } from '../stores/requestStore'
 import { observer } from 'mobx-react-lite'
 import { authStore } from '../stores/authStore'
 import '../styles/RecentRequests.css'
 import { modalStore } from '../stores/modalStore'
-import { userStore } from '../stores/userStore'
 
 const RequestItemStatus = observer(
     ({ senderId, state, reqId }: { senderId: number; state: RequestState; reqId: number }) => {
@@ -84,7 +82,7 @@ const RequestItem = observer(({ request }: { request: Request }) => {
     )
 })
 
-const RecentRequests = observer(({ requestStore }: { requestStore: RequestStore }) => {
+const RecentRequests = observer(() => {
     return (
         <div className="tab-pane fade" id="nav-tab-newfriends" role="tabpanel">
             <div className="d-flex justify-content-between align-items-center mb-4">

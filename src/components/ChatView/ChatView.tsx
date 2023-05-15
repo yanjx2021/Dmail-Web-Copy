@@ -134,9 +134,6 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         [chat]
     )
 
-    const [drag, setDrag] = useState(false)
-    const [filename, setFilename] = useState('')
-
     // 创建组件引用
     const dropRef: LegacyRef<HTMLDivElement> | undefined = React.createRef()
     let dragCounter = 0
@@ -151,7 +148,6 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
             e.preventDefault()
             e.stopPropagation()
             dragCounter++
-            if (e.dataTransfer.items && e.dataTransfer.items.length > 0) setDrag(true)
         },
         [dragCounter]
     )
@@ -161,7 +157,6 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
             e.preventDefault()
             e.stopPropagation()
             dragCounter--
-            if (dragCounter === 0) setDrag(false)
         },
         [dragCounter]
     )
@@ -170,7 +165,6 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
         (e: any) => {
             e.preventDefault()
             e.stopPropagation()
-            setDrag(false)
             if (e.dataTransfer.files && e.dataTransfer.files.length === 1) {
                 const file = e.dataTransfer.files[0]
                 if (isImage(file)) {
@@ -187,7 +181,7 @@ export const ChatView = observer(({ chat }: { chat: Chat }) => {
     )
 
     React.useEffect(() => {
-        let div = dropRef!.current!
+        let div = dropRef.current!
         div.addEventListener('dragenter', handleDragIn)
         div.addEventListener('dragleave', handleDragOut)
         div.addEventListener('dragover', handleDrag)

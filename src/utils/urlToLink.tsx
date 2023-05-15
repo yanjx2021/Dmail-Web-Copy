@@ -1,5 +1,4 @@
 import DOMPurify from "dompurify"
-import { UserId } from "../stores/authStore"
 
 export const renderFormatMention = (content: string, userIds: number[], chatId: number, timestamp : number) => {
     if (!content) {

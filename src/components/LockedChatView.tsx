@@ -1,5 +1,4 @@
 import { action } from 'mobx'
-import { observer } from 'mobx-react-lite'
 import { useImmer } from 'use-immer'
 import { secureAuthStore } from '../stores/secureAuthStore'
 import "../styles/LockedChatView.css"

@@ -1,6 +1,4 @@
-import { SHA256 } from 'crypto-js'
 import { makeAutoObservable } from 'mobx'
-import { Updater } from 'use-immer'
 import { userSettingStore } from './userSettingStore'
 import { secondaryCodeHash } from '../constants/passwordHash'
 

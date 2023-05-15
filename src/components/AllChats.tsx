@@ -1,9 +1,9 @@
 import { observer } from 'mobx-react-lite'
-import { Chat, ChatId, ChatStore, ChatType } from '../stores/chatStore'
+import { Chat, ChatId, ChatStore, ChatType, chatStore } from '../stores/chatStore'
 import { action } from 'mobx'
 import '../styles/RecentRequests.css'
-import { GroupedVirtuoso, Virtuoso } from 'react-virtuoso'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { GroupedVirtuoso } from 'react-virtuoso'
+import { useEffect, useRef, useCallback } from 'react'
 import { useImmer } from 'use-immer'
 import { userSettingStore } from '../stores/userSettingStore'
 import { ChatDropDown } from './DropDown/ChatDropDown'
@@ -97,7 +97,6 @@ export const AllChatsCard = observer(
 
 export const HoverOption = observer(({ chat }: { chat: Chat }) => {
     // 鼠标悬停，出现查看用户或群聊信息功能
-    const type = chat.chatType === ChatType.Private ? 'private' : 'group' // 用于导航到对应的infoBox
     return (
         <div className="hover_action">
             <ChatDropDown chat={chat} />
@@ -130,11 +129,9 @@ export const AllChatsItem = observer(
 
 export const AllChatContent = observer(
     ({
-        chatStore,
         activeChatId,
         setActiveChatId,
     }: {
-        chatStore: ChatStore
         activeChatId: ChatId | null
         setActiveChatId: (chatId: ChatId) => any
     }) => {
@@ -165,11 +162,9 @@ export const AllChatContent = observer(
 )
 
 export const AllChatList = ({
-    chatStore,
     activeChatId,
     setActiveChatId,
 }: {
-    chatStore: ChatStore
     activeChatId: ChatId | null
     setActiveChatId: (chatId: ChatId) => any
 }) => {
@@ -239,7 +234,6 @@ export const AllChatList = ({
                 </div>
 
                 <AllChatContent
-                    chatStore={chatStore}
                     activeChatId={activeChatId}
                     setActiveChatId={setActiveChatId}
                 />
