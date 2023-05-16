@@ -370,6 +370,11 @@ export interface ReceiveApplyForTokenResponesData {
     timestamp?: number
 }
 
+export interface ReceiveRequestMessageData {
+    reqId: number
+    type: 'UserLogOff' | 'UserAlreadyInChat'
+}
+
 /*--------------------Receive数据类型----------------------*/
 
 export enum Receive {
@@ -429,6 +434,7 @@ export enum Receive {
     GetUserIDResponse = 'GetUserIDResponse',
     LogOffResponse = 'LogOffResponse',
     ApplyForTokenResponse = 'ApplyForTokenResponse',
+    RequestMessage = 'RequestMessage'
 }
 
 /*--------------------Send数据类型----------------------*/
@@ -691,6 +697,7 @@ export interface MessageReceiveData {
     [Receive.GetUserIDResponse]: ReceiveGetUserIDResponseData
     [Receive.LogOffResponse]: ReceiveLogOffResponseData
     [Receive.ApplyForTokenResponse]: ReceiveApplyForTokenResponesData
+    [Receive.RequestMessage]: ReceiveRequestMessageData
 }
 
 export interface MessageSendData {

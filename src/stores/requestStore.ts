@@ -1,6 +1,7 @@
 import { makeAutoObservable } from 'mobx'
 import {
     Receive,
+    ReceiveRequestMessageData,
     ReceiveRequestStateUpdateData,
     ReceiveSolveRequestResponseData,
     Send,
@@ -12,6 +13,7 @@ import { authStore } from './authStore'
 import { User, userStore } from './userStore'
 import { LocalDatabase } from './localData'
 import { Chat, chatStore } from './chatStore'
+import { message } from 'antd'
 
 export enum RequestContentType {
     MakeFriend = 'MakeFriend',
@@ -277,6 +279,7 @@ export class RequestStore {
         MessageServer.on(Receive.SolveRequestResponse, this.solveRequestResponseHandler)
         MessageServer.on(Receive.RequestStateUpdate, this.requestStateUpdateHandler)
         MessageServer.on(Receive.Requests, this.receiveRequestsHandler)
+        MessageServer.on(Receive.RequestMessage, this.receiveRequestMessageHandler)
     }
     toggleClientId() {
         this.clientId++
@@ -303,6 +306,16 @@ export class RequestStore {
             }
         })
         return unsolvedRequests.concat(waitintSolvedRequests, solvedRequests)
+    }
+
+    receiveRequestMessageHandler(data: ReceiveRequestMessageData) {
+        if (data.reqId && data.type) {
+            if (data.type === 'UserLogOff') {
+                message.info('该用户已注销')
+            } else {
+                message.info('该用户已经加入群聊')
+            }
+        }
     }
 
     sendRequestResponseHandler(data: ReceiveSendRequestResponseData) {
